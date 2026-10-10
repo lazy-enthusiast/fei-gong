@@ -70,6 +70,11 @@
     <div class="chain-title">正 推</div>
     <div id="chainList"></div>
   </div>
+
+  <div class="chain-section" id="pangtongSection">
+    <div class="chain-title">旁 通</div>
+    <div id="pangtongList"></div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
@@ -80,6 +85,8 @@
   const LINE_NAMES = ['初', '二', '三', '四', '五', '上'];
   const OPTIONS = ['6', '7', '8', '9'];
   const CIRCLED_NUM = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+  // 圈起大寫英文字母（Unicode 圈字母）
+  const CIRCLED_ALPHA = ['', 'Ⓐ', 'Ⓑ', 'Ⓒ', 'Ⓓ', 'Ⓔ', 'Ⓕ', 'Ⓖ', 'Ⓗ'];
 
   const ZHI_LAYOUT = [
     { zhi: '巳', row: 1, col: 2 },
@@ -456,6 +463,7 @@
     document.getElementById('sixiangSection').style.display = 'none';
     document.getElementById('nineGridSection').style.display = 'none';
     document.getElementById('chainSection').style.display = 'none';
+    document.getElementById('pangtongSection').style.display = 'none';
   }
 
   document.querySelectorAll('#inputArea select').forEach(sel => {
@@ -472,6 +480,8 @@
   const baguaWrap = document.getElementById('baguaWrap');
   const chainSection = document.getElementById('chainSection');
   const chainList = document.getElementById('chainList');
+  const pangtongSection = document.getElementById('pangtongSection');
+  const pangtongList = document.getElementById('pangtongList');
 
   let currentPalaces = null;
 
@@ -497,7 +507,6 @@
         return;
       }
 
-      // 四象八情
       if (data.sixiang) {
         sixiangText.textContent = data.sixiang.text;
         sixiangSection.style.display = 'block';
@@ -511,6 +520,8 @@
 
       chainSection.style.display = 'none';
       chainList.innerHTML = '';
+      pangtongSection.style.display = 'none';
+      pangtongList.innerHTML = '';
     } catch (e) {
       errorMsg.textContent = '連線失敗：' + e.message;
     }
@@ -578,6 +589,7 @@
     });
   }
 
+  // 正推：數字圈（左下角）
   function markPalaceNumber(palaceName, number) {
     const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
@@ -595,28 +607,51 @@
     document.querySelectorAll('.palace-number').forEach(el => el.remove());
   }
 
+  // 旁通：字母圈（右下角）
+  function markPalaceLetter(palaceName, index) {
+    const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
+    if (!el) return;
+    const old = el.querySelector('.palace-letter');
+    if (old) old.remove();
+    if (index >= 0 && index < CIRCLED_ALPHA.length) {
+      const letterDiv = document.createElement('div');
+      letterDiv.className = 'palace-letter';
+      letterDiv.textContent = CIRCLED_ALPHA[index];
+      el.appendChild(letterDiv);
+    }
+  }
+
+  function clearPalaceLetters() {
+    document.querySelectorAll('.palace-letter').forEach(el => el.remove());
+  }
+
+  // 統一的飛宮鏈執行函數
+  async function runChain(startPalace, mode) {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'fly',
+        palaces: currentPalaces,
+        startPalace: startPalace,
+        mode: mode
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.chain;
+  }
+
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
     clearPalaceNumbers();
+    clearPalaceLetters();
 
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'fly',
-          palaces: currentPalaces,
-          startPalace: startPalace
-        })
-      });
-      const data = await res.json();
-      if (data.error) {
-        errorMsg.textContent = data.error;
-        return;
-      }
-
+      // 正推
+      const zhengtuiChain = await runChain(startPalace, 'zhengtui');
       chainList.innerHTML = '';
-      data.chain.forEach((item, idx) => {
+      zhengtuiChain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
         const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
@@ -628,8 +663,24 @@
         chainList.appendChild(div);
         markPalaceNumber(item.palace, idx + 1);
       });
-
       chainSection.style.display = 'block';
+
+      // 旁通
+      const pangtongChain = await runChain(startPalace, 'pangtong');
+      pangtongList.innerHTML = '';
+      pangtongChain.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'chain-item';
+        const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
+        const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
+        div.innerHTML = `
+          <div class="chain-item-name">${item.name}</div>
+          <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
+        `;
+        pangtongList.appendChild(div);
+        markPalaceLetter(item.palace, idx);
+      });
+      pangtongSection.style.display = 'block';
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
     }
