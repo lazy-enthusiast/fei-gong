@@ -11,13 +11,13 @@
       background: #faf8f3;
       font-family: 'Noto Serif TC', 'Times New Roman', 'Microsoft JhengHei', serif;
       min-height: 100vh;
-      padding: 0.4rem;
+      padding: 0.5rem;
       color: #2a2a2a;
       font-size: 14px;
     }
 
     .app {
-      max-width: 560px;
+      max-width: 480px;
       margin: 0 auto;
     }
 
@@ -28,49 +28,49 @@
       text-align: center;
       color: #2a2a2a;
       padding-bottom: 0.3rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
       border-bottom: 1px solid #d4cfc0;
     }
 
-    /* ===== 上層：輸入 + 本卦 + 變卦（自適應三欄） ===== */
+    /* ===== 上層：輸入 + 本卦 + 變卦 ===== */
     .top-section {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.6rem;
       align-items: flex-start;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
 
-    /* 輸入區（固定寬度，不縮不脹） */
+    /* 輸入區（固定寬度） */
     .input-area {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
       flex: 0 0 auto;
     }
 
     .input-row {
       display: flex;
       align-items: center;
-      gap: 2px;
-      height: 30px;
+      gap: 3px;
+      height: 32px;
     }
 
     .input-row label {
       width: 14px;
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #8a8578;
       text-align: center;
       flex-shrink: 0;
     }
 
     .input-row select {
-      width: 44px;
-      height: 28px;
+      width: 46px;
+      height: 30px;
       background: #fff;
       border: 1px solid #d4cfc0;
       border-radius: 3px;
       padding: 0;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-family: 'Menlo', 'Consolas', monospace;
       color: #2a2a2a;
       outline: none;
@@ -82,11 +82,11 @@
       border-color: #8a6d3b;
     }
 
-    /* 本卦 / 變卦（自適應，平分剩餘空間） */
+    /* 本卦 / 變卦 */
     .hex-result {
       display: flex;
       flex: 1;
-      gap: 0.4rem;
+      gap: 0.5rem;
       justify-content: space-around;
       min-width: 0;
     }
@@ -95,13 +95,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.2rem;
+      gap: 0.3rem;
       flex: 1;
       min-width: 0;
     }
 
     .hex-box-title {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #8a8578;
       letter-spacing: 0.15rem;
     }
@@ -109,17 +109,17 @@
     .hex-box-lines {
       display: flex;
       flex-direction: column-reverse;
-      gap: 4px;
+      gap: 5px;
       align-items: center;
       width: 100%;
-      max-width: 90px;
+      max-width: 110px;
     }
 
     .hex-box-lines .line {
       width: 100%;
-      height: 9px;
+      height: 11px;
       display: flex;
-      gap: 3px;
+      gap: 4px;
     }
 
     .hex-box-lines .bar-yang {
@@ -130,7 +130,7 @@
 
     .hex-box-lines .yin-pair {
       display: flex;
-      gap: 5px;
+      gap: 7px;
       width: 100%;
     }
 
@@ -142,10 +142,10 @@
 
     /* 卦名：橫排，在六爻圖下方 */
     .hex-box-name {
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       color: #2a2a2a;
       letter-spacing: 0.05rem;
-      min-height: 1.1rem;
+      min-height: 1.3rem;
       text-align: center;
       white-space: nowrap;
     }
@@ -155,8 +155,8 @@
       background: #2a2a2a;
       border: none;
       border-radius: 3px;
-      padding: 0.5rem 1.5rem;
-      font-size: 0.85rem;
+      padding: 0.55rem 1.5rem;
+      font-size: 0.9rem;
       color: #faf8f3;
       letter-spacing: 0.3rem;
       cursor: pointer;
@@ -171,31 +171,31 @@
 
     .error-msg {
       color: #a04a3a;
-      font-size: 0.7rem;
-      margin-top: 0.2rem;
-      min-height: 0.9rem;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      min-height: 1rem;
       text-align: center;
     }
 
     /* 九宮格 */
     .nine-grid-section {
-      margin-top: 0.6rem;
+      margin-top: 0.8rem;
       display: none;
     }
 
     .section-label {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #8a8578;
       letter-spacing: 0.2rem;
       text-align: center;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.4rem;
     }
 
     .nine-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      max-width: 270px;
+      gap: 5px;
+      max-width: 280px;
       margin: 0 auto;
     }
 
@@ -230,7 +230,7 @@
     }
 
     .palace-name {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #8a8578;
     }
 
@@ -242,8 +242,8 @@
     }
 
     .palace-lines .line {
-      width: 28px;
-      height: 5px;
+      width: 30px;
+      height: 6px;
       display: flex;
       gap: 2px;
     }
@@ -268,7 +268,7 @@
 
     /* 飛宮鏈 */
     .chain-section {
-      margin-top: 0.6rem;
+      margin-top: 0.8rem;
       display: none;
     }
 
@@ -277,20 +277,20 @@
       border: 1px solid #d4cfc0;
       border-left: 3px solid #8a6d3b;
       border-radius: 4px;
-      padding: 0.5rem 0.7rem;
-      margin-bottom: 0.35rem;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.4rem;
     }
 
     .chain-item-name {
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: #2a2a2a;
       margin-bottom: 0.25rem;
     }
 
     .chain-item-poem {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: #6a6458;
-      line-height: 1.55;
+      line-height: 1.6;
       white-space: pre-line;
     }
 
@@ -343,7 +343,58 @@
   const LINE_NAMES = ['初', '二', '三', '四', '五', '上'];
   const OPTIONS = ['6', '7', '8', '9'];
 
-  // 生成六爻輸入（上爻在最上、初爻在最下）
+  // ========== 前端本地：八卦定義（公開知識） ==========
+  // 用下到上的三爻表示：1=陽，0=陰
+  const TRIGRAMS = {
+    1: { name: '乾', lines: [1,1,1] },
+    2: { name: '兌', lines: [1,1,0] },
+    3: { name: '離', lines: [1,0,1] },
+    4: { name: '震', lines: [1,0,0] },
+    5: { name: '巽', lines: [0,1,1] },
+    6: { name: '坎', lines: [0,1,0] },
+    7: { name: '艮', lines: [0,0,1] },
+    8: { name: '坤', lines: [0,0,0] }
+  };
+
+  // 六十四卦全名（上卦數字_下卦數字）
+  const HEXAGRAM_NAMES = {
+    '1_1':'乾為天','1_5':'天風姤','1_7':'天山遯','1_8':'天地否',
+    '5_8':'風地觀','7_8':'山地剝','3_8':'火地晉','3_1':'火天大有',
+    '2_2':'兌為澤','2_6':'澤水困','2_8':'澤地萃','2_7':'澤山咸',
+    '6_7':'水山蹇','8_7':'地山謙','4_7':'雷山小過','4_2':'雷澤歸妹',
+    '3_3':'離為火','3_7':'火山旅','3_5':'火風鼎','3_6':'火水未濟',
+    '7_6':'山水蒙','5_6':'風水渙','1_6':'天水訟','1_3':'天火同人',
+    '4_4':'震為雷','4_8':'雷地豫','4_6':'雷水解','4_5':'雷風恆',
+    '8_5':'地風升','6_5':'水風井','2_5':'澤風大過','2_4':'澤雷隨',
+    '5_5':'巽為風','5_1':'風天小畜','5_3':'風火家人','5_4':'風雷益',
+    '1_4':'天雷無妄','3_4':'火雷噬嗑','7_4':'山雷頤','7_5':'山風蠱',
+    '6_6':'坎為水','6_2':'水澤節','6_4':'水雷屯','6_3':'水火既濟',
+    '2_3':'澤火革','4_3':'雷火豐','8_3':'地火明夷','8_6':'地水師',
+    '7_7':'艮為山','7_3':'山火賁','7_1':'山天大畜','7_2':'山澤損',
+    '3_2':'火澤睽','1_2':'天澤履','5_2':'風澤中孚','5_7':'風山漸',
+    '8_8':'坤為地','8_4':'地雷復','8_2':'地澤臨','8_1':'地天泰',
+    '4_1':'雷天大壯','2_1':'澤天夬','6_1':'水天需','6_8':'水地比'
+  };
+
+  // 由三爻（下到上）取得八卦數字
+  function linesToTrigramNum(lines) {
+    for (let i = 1; i <= 8; i++) {
+      const t = TRIGRAMS[i].lines;
+      if (t[0] === lines[0] && t[1] === lines[1] && t[2] === lines[2]) return i;
+    }
+    return 1;
+  }
+
+  // 由六爻（[初,二,三,四,五,上]）取得卦全名
+  function getHexNameFromSixLines(sixLines) {
+    const lower = [sixLines[0], sixLines[1], sixLines[2]];
+    const upper = [sixLines[3], sixLines[4], sixLines[5]];
+    const upperNum = linesToTrigramNum(upper);
+    const lowerNum = linesToTrigramNum(lower);
+    return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
+  }
+
+  // ========== 六爻輸入 ==========
   const inputArea = document.getElementById('inputArea');
   for (let i = 5; i >= 0; i--) {
     const row = document.createElement('div');
@@ -415,18 +466,21 @@
     }
   }
 
+  // ========== 即時更新（含卦名） ==========
   function updateLive() {
     const { sixLines, movingLineIndexes } = getSixLinesInput();
 
+    // 本卦
     renderSixLines(sixLines, document.getElementById('benLines'));
+    document.getElementById('benName').textContent = getHexNameFromSixLines(sixLines);
 
+    // 變卦
     const chgLines = [...sixLines];
     movingLineIndexes.forEach(i => { chgLines[i] = chgLines[i] === 1 ? 0 : 1; });
     renderSixLines(chgLines, document.getElementById('chgLines'));
+    document.getElementById('chgName').textContent = getHexNameFromSixLines(chgLines);
 
-    document.getElementById('benName').textContent = '—';
-    document.getElementById('chgName').textContent = '—';
-
+    // 隱藏九宮格和飛宮鏈（因為六爻改了）
     document.getElementById('nineGridSection').style.display = 'none';
     document.getElementById('chainSection').style.display = 'none';
   }
@@ -437,7 +491,7 @@
 
   updateLive();
 
-  // 起卦
+  // ========== 起卦（只負責顯示九宮格） ==========
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
   const nineGridSection = document.getElementById('nineGridSection');
@@ -469,9 +523,7 @@
         return;
       }
 
-      document.getElementById('benName').textContent = data.ben.name;
-      document.getElementById('chgName').textContent = data.changed.name;
-
+      // 卦名已在前端即時顯示，這裡只拿九宮格資料
       currentPalaces = data.palaces;
       renderNineGrid(data.palaces);
       nineGridSection.style.display = 'block';
