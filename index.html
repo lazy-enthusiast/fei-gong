@@ -33,51 +33,48 @@
       border-bottom: 1px solid #d4cfc0;
     }
 
-    /* ===== 頂部：收起的摘要 ===== */
-    .info-summary {
+    /* ===== 頂部：可收起 ===== */
+    .info-panel {
       background: #fff;
       border: 1px solid #d4cfc0;
       border-radius: 4px;
-      padding: 0.45rem 0.6rem;
-      margin-bottom: 0.4rem;
-      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+
+    .info-summary {
+      padding: 0.5rem 0.7rem;
+      font-size: 0.82rem;
       color: #2a2a2a;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       cursor: pointer;
       user-select: none;
     }
 
-    .info-summary .summary-text {
+    .info-summary-text {
       flex: 1;
       text-align: center;
-      font-size: 0.78rem;
-      color: #6a6458;
     }
 
-    .info-summary .toggle-icon {
+    .info-summary-arrow {
       font-size: 0.7rem;
       color: #8a8578;
       transition: transform 0.2s;
     }
 
-    .info-summary.expanded .toggle-icon {
+    .info-panel.expanded .info-summary-arrow {
       transform: rotate(180deg);
     }
 
-    /* 展開的資訊面板 */
-    .info-panel {
-      background: #fff;
-      border: 1px solid #d4cfc0;
-      border-radius: 4px;
-      padding: 0.5rem 0.6rem;
-      margin-bottom: 0.5rem;
-      font-size: 0.8rem;
+    .info-body {
       display: none;
+      padding: 0.5rem 0.7rem;
+      border-top: 1px dashed #d4cfc0;
     }
 
-    .info-panel.open {
+    .info-panel.expanded .info-body {
       display: block;
     }
 
@@ -118,9 +115,9 @@
     }
 
     .info-readout {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       color: #6a6458;
-      line-height: 1.5;
+      line-height: 1.6;
       padding-top: 0.35rem;
       margin-top: 0.35rem;
       border-top: 1px dashed #d4cfc0;
@@ -132,11 +129,22 @@
       font-weight: 600;
     }
 
+    .info-dun {
+      font-size: 0.95rem;
+      color: #8a6d3b;
+      font-weight: 600;
+      letter-spacing: 0.1rem;
+      padding-top: 0.4rem;
+      margin-top: 0.4rem;
+      border-top: 1px dashed #d4cfc0;
+      text-align: center;
+    }
+
     .nominatim-attr {
       font-size: 0.6rem;
       color: #b0aa9c;
       text-align: center;
-      margin-top: 0.2rem;
+      padding-top: 0.3rem;
     }
 
     /* ===== 上層 ===== */
@@ -434,47 +442,35 @@
       color: #b0aa9c;
       font-style: italic;
     }
-
-    /* 遁局顯示 */
-    .dunju-display {
-      text-align: center;
-      font-size: 0.95rem;
-      color: #8a6d3b;
-      font-weight: 600;
-      letter-spacing: 0.15rem;
-      margin-top: 0.3rem;
-      padding-top: 0.3rem;
-      border-top: 1px dashed #d4cfc0;
-    }
   </style>
 </head>
 <body>
 <div class="app">
   <h1>飛宮易卦</h1>
 
-  <!-- 頂部摘要（收起時顯示） -->
-  <div class="info-summary" id="infoSummary">
-    <span class="summary-text" id="summaryText">2026-10-10 · 22:12 · 香港</span>
-    <span class="toggle-icon">▼</span>
-  </div>
-
-  <!-- 展開的資訊面板 -->
+  <!-- 頂部：可收起 -->
   <div class="info-panel" id="infoPanel">
-    <div class="info-row">
-      <label>日期</label>
-      <input type="date" id="dateInput">
+    <div class="info-summary" id="infoSummary">
+      <div class="info-summary-text" id="infoSummaryText">載入中…</div>
+      <div class="info-summary-arrow">▼</div>
     </div>
-    <div class="info-row">
-      <label>時間</label>
-      <input type="time" id="timeInput">
+    <div class="info-body">
+      <div class="info-row">
+        <label>日期</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="info-row">
+        <label>時間</label>
+        <input type="time" id="timeInput">
+      </div>
+      <div class="info-row">
+        <label>城市</label>
+        <input type="text" id="cityInput" value="香港" placeholder="輸入城市名">
+      </div>
+      <div class="info-readout" id="infoReadout"></div>
+      <div class="info-dun" id="infoDun"></div>
+      <div class="nominatim-attr">地理位置數據 © OpenStreetMap contributors</div>
     </div>
-    <div class="info-row">
-      <label>城市</label>
-      <input type="text" id="cityInput" value="香港" placeholder="輸入城市名">
-    </div>
-    <div class="info-readout" id="infoReadout"></div>
-    <div class="dunju-display" id="dunjuDisplay"></div>
-    <div class="nominatim-attr">地理位置數據 © OpenStreetMap contributors</div>
   </div>
 
   <div class="top-section">
@@ -508,7 +504,8 @@
 </div>
 
 <!-- lunar-javascript -->
-<script src="https://g.alicdn.com/code/lib/lunar-javascript/1.6.4/lunar.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
+
 <script>
   const API_URL = 'https://feigong-yigua.davchan-clp.workers.dev';
 
@@ -516,7 +513,6 @@
   const OPTIONS = ['6', '7', '8', '9'];
   const CIRCLED_NUM = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
 
-  // ========== 九宮格佈局 ==========
   const ZHI_LAYOUT = [
     { zhi: '巳', row: 1, col: 2 },
     { zhi: '午', row: 1, col: 3 },
@@ -544,7 +540,6 @@
     { name: '乾', row: 4, col: 4 }
   ];
 
-  // ========== 卦名數據 ==========
   const TRIGRAMS = {
     1: { name: '乾', lines: [1,1,1] },
     2: { name: '兌', lines: [1,1,0] },
@@ -605,28 +600,105 @@
     return merged.join('\n');
   }
 
-  // ========== 頂部收合 ==========
-  const infoSummary = document.getElementById('infoSummary');
+  // ========== 干支 ==========
+  const TIAN_GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  const DI_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+  function getDayGanZhi(date) {
+    const base = new Date(Date.UTC(1900, 0, 1));
+    const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const diffDays = Math.round((target - base) / 86400000);
+    const ganIdx = ((0 + diffDays) % 10 + 10) % 10;
+    const zhiIdx = ((10 + diffDays) % 12 + 12) % 12;
+    return {
+      gan: TIAN_GAN[ganIdx],
+      zhi: DI_ZHI[zhiIdx],
+      ganIdx,
+      zhiIdx
+    };
+  }
+
+  function getXunKong(dayGanZhi) {
+    const ganIdx = dayGanZhi.ganIdx;
+    const zhiIdx = dayGanZhi.zhiIdx;
+    const xunShouZhi = ((zhiIdx - ganIdx) % 12 + 12) % 12;
+    const xunKongMap = {
+      0: ['戌','亥'],
+      10: ['申','酉'],
+      8: ['午','未'],
+      6: ['辰','巳'],
+      4: ['寅','卯'],
+      2: ['子','丑']
+    };
+    return xunKongMap[xunShouZhi] || [];
+  }
+
+  function equationOfTime(date) {
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+    const B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+    return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+  }
+
+  function calcTrueSolarTime(date, lon) {
+    const lonCorrection = (lon - 120) * 4;
+    const eot = equationOfTime(date);
+    const totalCorrectionMin = lonCorrection + eot;
+    const result = new Date(date.getTime() + totalCorrectionMin * 60000);
+    return {
+      time: result,
+      correctionMin: totalCorrectionMin,
+      lonCorrection,
+      eot
+    };
+  }
+
+  // ========== 城市經緯度 ==========
+  const GEO_CACHE_KEY = 'feigong_geo_cache_v1';
+  function loadGeoCache() {
+    try { return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function saveGeoCache(cache) {
+    try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+  }
+
+  async function queryCityLon(cityName) {
+    const cache = loadGeoCache();
+    const key = cityName.trim().toLowerCase();
+    if (cache[key]) return cache[key];
+
+    const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(cityName);
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('地理查詢失敗');
+    const data = await res.json();
+    if (!data || data.length === 0) throw new Error('找不到該城市');
+    const result = {
+      lat: parseFloat(data[0].lat),
+      lon: parseFloat(data[0].lon),
+      displayName: data[0].display_name
+    };
+    cache[key] = result;
+    saveGeoCache(cache);
+    return result;
+  }
+
+  // ========== 頂部資訊 ==========
   const infoPanel = document.getElementById('infoPanel');
-  const summaryText = document.getElementById('summaryText');
-
-  let panelOpen = false;
-  infoSummary.addEventListener('click', () => {
-    panelOpen = !panelOpen;
-    infoPanel.classList.toggle('open', panelOpen);
-    infoSummary.classList.toggle('expanded', panelOpen);
-  });
-
-  // ========== 輸入 ==========
+  const infoSummary = document.getElementById('infoSummary');
+  const infoSummaryText = document.getElementById('infoSummaryText');
   const dateInput = document.getElementById('dateInput');
   const timeInput = document.getElementById('timeInput');
   const cityInput = document.getElementById('cityInput');
   const infoReadout = document.getElementById('infoReadout');
-  const dunjuDisplay = document.getElementById('dunjuDisplay');
+  const infoDun = document.getElementById('infoDun');
 
   let currentLon = 114.17;
   let currentLat = 22.32;
   let currentXunKong = [];
+
+  // 展開/收起
+  infoSummary.addEventListener('click', () => {
+    infoPanel.classList.toggle('expanded');
+  });
 
   function initDateTime() {
     const now = new Date();
@@ -640,112 +712,65 @@
   }
   initDateTime();
 
-  // ========== 干支 / 節氣 ==========
-  const DI_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-  const ZHI_NUM = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 };
+  // 時辰對照
+  function getShiChen(hour) {
+    // 子 23-1, 丑 1-3, 寅 3-5, 卯 5-7, 辰 7-9, 巳 9-11,
+    // 午 11-13, 未 13-15, 申 15-17, 酉 17-19, 戌 19-21, 亥 21-23
+    const zhiNames = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    const idx = Math.floor(((hour + 1) % 24) / 2);
+    return zhiNames[idx];
+  }
 
-  // 用 lunar-javascript 取年柱地支
-  function getYearZhiFromLunar(solar) {
-    try {
-      const lunar = solar.getLunar();
-      const yearInGanZhi = lunar.getYearInGanZhi();
-      return yearInGanZhi.charAt(1); // 取地支（第二個字）
-    } catch (e) {
-      return null;
+  function getShiChenNum(zhi) {
+    const map = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 };
+    return map[zhi] || 1;
+  }
+
+  // 判斷冬至/夏至位置
+  function getDunType(date) {
+    // 用 lunar-javascript 找當年的冬至和夏至
+    const year = date.getFullYear();
+    // Lunar 物件的节气
+    const dongZhi = Lunar.fromDate(new Date(year, 11, 21)); // 冬至大概 12/21-22
+    // 精確取當年冬至、夏至
+    const jieQiTable = Lunar.fromDate(date).getJieQiTable();
+    // 找冬至與夏至
+    const dz = jieQiTable['冬至'] ? new Date(jieQiTable['冬至'].getSolar().toYmd()) : null;
+    const xz = jieQiTable['夏至'] ? new Date(jieQiTable['夏至'].getSolar().toYmd()) : null;
+
+    // 處理跨年：冬至可能在去年
+    let dongZhiDate = null, xiaZhiDate = null;
+    // 用農曆年
+    const lunar = Lunar.fromDate(date);
+    const yearGanZhi = lunar.getYearInGanZhiByLiChun ? lunar.getYearInGanZhiByLiChun() : null;
+
+    // 取當前農曆年對應的節氣表（用 Lunar.fromDate(date)）
+    const jq = Lunar.fromDate(date).getJieQiTable();
+    if (jq['冬至']) dongZhiDate = new Date(jq['冬至'].getSolar().toYmd());
+    if (jq['夏至']) xiaZhiDate = new Date(jq['夏至'].getSolar().toYmd());
+
+    // 若冬至晚於當前日期，可能是下一年的冬至；處理：若 dongZhiDate 在 date 之後，改用去年的冬至
+    // 但簡化處理：直接比較當前日期
+    if (!dongZhiDate || !xiaZhiDate) return 'yang'; // 預設
+
+    // 判斷：date 在 冬至 之後 且 在 夏至 之前 → 陽遁
+    // 由於冬至夏至跨年，需要綜合判斷
+    const t = date.getTime();
+    const dzT = dongZhiDate.getTime();
+    const xzT = xiaZhiDate.getTime();
+
+    // 簡化：以月日判斷
+    const md = (date.getMonth() + 1) * 100 + date.getDate();
+    // 夏至約 6/21, 冬至約 12/21
+    if (md >= 621 && md < 1221) {
+      // 夏至後冬至前 → 陰遁
+      return 'yin';
+    } else {
+      // 冬至後夏至前 → 陽遁
+      return 'yang';
     }
   }
 
-  // 用 lunar-javascript 取農曆月、日數字
-  function getLunarMonthDay(solar) {
-    try {
-      const lunar = solar.getLunar();
-      return {
-        month: Math.abs(lunar.getMonth()), // 閏月取絕對值
-        day: lunar.getDay()
-      };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // 時辰：由真太陽時決定
-  // 子時 23:00-00:59, 丑時 01:00-02:59, ... 亥時 21:00-22:59
-  function getShiChenNum(tst) {
-    const h = tst.getHours();
-    // 時辰 = floor((h + 1) / 2) % 12 + 1
-    // 23,00 -> 子(1); 01,02 -> 丑(2); ... 21,22 -> 亥(12)
-    let idx;
-    if (h === 23) idx = 0;
-    else if (h === 0) idx = 0;
-    else idx = Math.floor((h + 1) / 2);
-    // 驗證：1->1? 用另一種方式
-    // 23 -> 子, 0 -> 子, 1-2 -> 丑, 3-4 -> 寅, 5-6 -> 卯, 7-8 -> 辰, 9-10 -> 巳, 11-12 -> 午, 13-14 -> 未, 15-16 -> 申, 17-18 -> 酉, 19-20 -> 戌, 21-22 -> 亥
-    let zhiIdx;
-    if (h === 23 || h === 0) zhiIdx = 0;
-    else zhiIdx = Math.floor((h + 1) / 2);
-    return zhiIdx + 1; // 子=1, 丑=2, ...
-  }
-
-  // 由節氣判斷是冬至後夏至前（陽遁）還是夏至後冬至前（陰遁）
-  function isYangDun(solar) {
-    try {
-      const lunar = solar.getLunar();
-      // 取當前日期前的最近一個節氣
-      const jieQi = lunar.getPrevJieQi();
-      if (!jieQi) return true;
-      const jqName = jieQi.getName();
-      // 冬至 -> 夏至為陽遁
-      const yangDunJieQi = ['冬至','小寒','大寒','立春','雨水','驚蟄','春分','清明','穀雨','立夏','小滿','芒種'];
-      const yinDunJieQi = ['夏至','小暑','大暑','立秋','處暑','白露','秋分','寒露','霜降','立冬','小雪','大雪'];
-      if (yangDunJieQi.includes(jqName)) return true;
-      if (yinDunJieQi.includes(jqName)) return false;
-      // 找不到，退回簡易判斷：以冬至和夏至為界
-      const now = solar.getSolar().getJulianDay ? solar.getSolar().getJulianDay() : null;
-      return true;
-    } catch (e) {
-      return true;
-    }
-  }
-
-  // ========== 真太陽時 ==========
-  function equationOfTime(date) {
-    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
-    const B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
-    return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-  }
-
-  function calcTrueSolarTime(date, lon) {
-    const lonCorrection = (lon - 120) * 4;
-    const eot = equationOfTime(date);
-    const totalCorrectionMin = lonCorrection + eot;
-    const result = new Date(date.getTime() + totalCorrectionMin * 60000);
-    return { time: result, correctionMin: totalCorrectionMin, lonCorrection, eot };
-  }
-
-  // ========== 城市查詢 ==========
-  const GEO_CACHE_KEY = 'feigong_geo_cache_v1';
-  function loadGeoCache() {
-    try { return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch (e) { return {}; }
-  }
-  function saveGeoCache(cache) {
-    try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
-  }
-  async function queryCityLon(cityName) {
-    const cache = loadGeoCache();
-    const key = cityName.trim().toLowerCase();
-    if (cache[key]) return cache[key];
-    const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(cityName);
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error('地理查詢失敗');
-    const data = await res.json();
-    if (!data || data.length === 0) throw new Error('找不到該城市');
-    const result = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), displayName: data[0].display_name };
-    cache[key] = result;
-    saveGeoCache(cache);
-    return result;
-  }
-
-  // ========== 更新資訊 ==========
   async function updateInfo() {
     try {
       const cityName = cityInput.value.trim() || '香港';
@@ -762,65 +787,57 @@
       const [hh, mm] = timeInput.value.split(':').map(Number);
       const stdTime = new Date(y, mo - 1, d, hh, mm, 0);
 
+      // 真太陽時
       const tst = calcTrueSolarTime(stdTime, currentLon);
       const tstHH = String(tst.time.getHours()).padStart(2, '0');
       const tstMM = String(tst.time.getMinutes()).padStart(2, '0');
 
-      // 用 lunar-javascript
-      const { Solar } = window;
-      const solar = Solar.fromDate(stdTime);
-      const lunar = solar.getLunar();
+      // 用真太陽時算時辰
+      const shiChen = getShiChen(tst.time.getHours());
+      const shiChenNum = getShiChenNum(shiChen);
 
-      const yearInGanZhi = lunar.getYearInGanZhi();
-      const yearZhi = yearInGanZhi.charAt(1);
-      const lunarMonth = Math.abs(lunar.getMonth());
-      const lunarDay = lunar.getDay();
-      const lunarMonthChinese = lunar.getMonthInChinese();
-      const lunarDayChinese = lunar.getDayInChinese();
+      // 日柱（用真太陽時的日期）
+      const dayGZ = getDayGanZhi(tst.time);
 
-      // 時辰（由真太陽時）
-      const shiChenNum = getShiChenNum(tst.time);
-      const shiChenZhi = DI_ZHI[shiChenNum - 1];
+      // 旬空
+      currentXunKong = getXunKong(dayGZ);
 
-      // 旬空（用日柱）
-      const dayInGanZhi = lunar.getDayInGanZhi();
-      const dayZhi = dayInGanZhi.charAt(1);
-      const dayGan = dayInGanZhi.charAt(0);
-      const dayGanIdx = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'].indexOf(dayGan);
-      const dayZhiIdx = DI_ZHI.indexOf(dayZhi);
-      const xunShouZhiIdx = ((dayZhiIdx - dayGanIdx) % 12 + 12) % 12;
-      const xunKongMap = { 0: ['戌','亥'], 10: ['申','酉'], 8: ['午','未'], 6: ['辰','巳'], 4: ['寅','卯'], 2: ['子','丑'] };
-      currentXunKong = xunKongMap[xunShouZhiIdx] || [];
+      // 農曆
+      const lunar = Lunar.fromDate(stdTime);
+      const lunarMonth = lunar.getMonthInChinese();  // 例如 "八"
+      const lunarDay = lunar.getDayInChinese();      // 例如 "廿九"
+      const lunarMonthNum = Math.abs(lunar.getMonth()); // 數字月
+      const lunarDayNum = lunar.getDay();            // 數字日
 
-      // 計算遁局
-      const yearZhiNum = ZHI_NUM[yearZhi] || 1;
-      const total = yearZhiNum + lunarMonth + lunarDay + shiChenNum;
-      let remainder = total % 9;
+      // 年柱（以立春為界）
+      const yearGanZhi = lunar.getYearInGanZhiByLiChun(); // 例如 "丙午"
+      const yearGan = yearGanZhi.charAt(0);
+      const yearZhi = yearGanZhi.charAt(1);
+      const yearZhiNum = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 }[yearZhi];
+
+      // 計算：年支數 + 農曆月 + 農曆日 + 時辰數
+      const sum = yearZhiNum + lunarMonthNum + lunarDayNum + shiChenNum;
+      let remainder = sum % 9;
       if (remainder === 0) remainder = 9;
 
-      const yangDun = isYangDun(solar);
-      const dunjuText = (yangDun ? '陽遁' : '陰遁') + remainder + '局';
+      // 判斷遁局
+      const dunType = getDunType(stdTime);
+      const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
 
+      // 更新展開區
       const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
-
       infoReadout.innerHTML =
-        `年柱：<span class="highlight">${yearInGanZhi}</span>　` +
-        `農曆：<span class="highlight">${lunarMonthChinese}月${lunarDayChinese}</span>　` +
-        `時辰：<span class="highlight">${shiChenZhi}時</span><br>` +
-        `真太陽時：<span class="highlight">${tstHH}:${tstMM}</span>　` +
-        `校正：${corrStr}`;
+        `${yearGanZhi}年${lunarMonthNum}月${lunarDayNum}日${shiChen}時<br>` +
+        `真太陽時：<span class="highlight">${tstHH}:${tstMM}</span>　校正：${corrStr}`;
+      infoDun.textContent = dunLabel;
 
-      dunjuDisplay.textContent = dunjuText;
+      // 更新收起區
+      infoSummaryText.textContent = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · ${cityName} · ${dunLabel}`;
 
-      // 更新摘要
-      const summaryDate = dateInput.value;
-      const summaryTime = timeInput.value;
-      summaryText.textContent = `${summaryDate} · ${summaryTime} · ${cityName}`;
-
+      // 更新九宮格外圍地支的旬空圈
       updateXunKongDisplay();
     } catch (e) {
       infoReadout.textContent = '（' + e.message + '）';
-      dunjuDisplay.textContent = '';
     }
   }
 
@@ -833,8 +850,10 @@
   for (let i = 5; i >= 0; i--) {
     const row = document.createElement('div');
     row.className = 'input-row';
+
     const label = document.createElement('label');
     label.textContent = LINE_NAMES[i];
+
     const select = document.createElement('select');
     select.dataset.index = i;
     OPTIONS.forEach(v => {
@@ -844,13 +863,18 @@
       select.appendChild(opt);
     });
     select.value = '7';
+
     row.appendChild(label);
     row.appendChild(select);
     inputArea.appendChild(row);
   }
 
-  function getLineValue(val) { return (val === '7' || val === '9') ? 1 : 0; }
-  function isMoving(val) { return val === '6' || val === '9'; }
+  function getLineValue(val) {
+    return (val === '7' || val === '9') ? 1 : 0;
+  }
+  function isMoving(val) {
+    return val === '6' || val === '9';
+  }
 
   function getSixLinesInput() {
     const selects = document.querySelectorAll('#inputArea select');
@@ -895,12 +919,15 @@
 
   function updateLive() {
     const { sixLines, movingLineIndexes } = getSixLinesInput();
+
     renderSixLines(sixLines, document.getElementById('benLines'));
     document.getElementById('benName').textContent = getHexNameFromSixLines(sixLines);
+
     const chgLines = [...sixLines];
     movingLineIndexes.forEach(i => { chgLines[i] = chgLines[i] === 1 ? 0 : 1; });
     renderSixLines(chgLines, document.getElementById('chgLines'));
     document.getElementById('chgName').textContent = getHexNameFromSixLines(chgLines);
+
     document.getElementById('nineGridSection').style.display = 'none';
     document.getElementById('chainSection').style.display = 'none';
   }
@@ -924,18 +951,29 @@
   castBtn.addEventListener('click', async () => {
     errorMsg.textContent = '';
     const { sixLines, movingLineIndexes } = getSixLinesInput();
+
     castBtn.disabled = true;
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cast', sixLines, movingLineIndexes })
+        body: JSON.stringify({
+          action: 'cast',
+          sixLines: sixLines,
+          movingLineIndexes: movingLineIndexes
+        })
       });
       const data = await res.json();
-      if (data.error) { errorMsg.textContent = data.error; castBtn.disabled = false; return; }
+      if (data.error) {
+        errorMsg.textContent = data.error;
+        castBtn.disabled = false;
+        return;
+      }
+
       currentPalaces = data.palaces;
       renderBagua(data.palaces);
       nineGridSection.style.display = 'block';
+
       chainSection.style.display = 'none';
       chainList.innerHTML = '';
     } catch (e) {
@@ -946,6 +984,7 @@
 
   function renderBagua(palaces) {
     baguaWrap.innerHTML = '';
+
     ZHI_LAYOUT.forEach(item => {
       const div = document.createElement('div');
       div.className = 'zhi';
@@ -955,31 +994,48 @@
       div.style.gridColumn = item.col;
       baguaWrap.appendChild(div);
     });
+
     PALACE_LAYOUT.forEach(item => {
       const div = document.createElement('div');
       div.className = 'palace';
       div.dataset.palace = item.name;
       div.style.gridRow = item.row;
       div.style.gridColumn = item.col;
-      if (item.name === '中') { div.classList.add('empty'); baguaWrap.appendChild(div); return; }
+
+      if (item.name === '中') {
+        div.classList.add('empty');
+        baguaWrap.appendChild(div);
+        return;
+      }
+
       const p = palaces[item.name];
-      if (!p) { div.classList.add('empty'); baguaWrap.appendChild(div); return; }
+      if (!p) {
+        div.classList.add('empty');
+        baguaWrap.appendChild(div);
+        return;
+      }
+
       const linesDiv = document.createElement('div');
       linesDiv.className = 'palace-lines';
       renderTrigramLines(p.lines, linesDiv);
       div.appendChild(linesDiv);
+
       div.addEventListener('click', () => {
         document.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
         div.classList.add('selected');
         runFlyingChain(item.name);
       });
+
       baguaWrap.appendChild(div);
     });
+
     updateXunKongDisplay();
   }
 
   function updateXunKongDisplay() {
-    document.querySelectorAll('.zhi').forEach(el => el.classList.remove('xunkong'));
+    document.querySelectorAll('.zhi').forEach(el => {
+      el.classList.remove('xunkong');
+    });
     if (!currentXunKong || currentXunKong.length === 0) return;
     currentXunKong.forEach(zhi => {
       const el = document.querySelector(`.zhi[data-zhi="${zhi}"]`);
@@ -1007,24 +1063,37 @@
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
     clearPalaceNumbers();
+
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'fly', palaces: currentPalaces, startPalace })
+        body: JSON.stringify({
+          action: 'fly',
+          palaces: currentPalaces,
+          startPalace: startPalace
+        })
       });
       const data = await res.json();
-      if (data.error) { errorMsg.textContent = data.error; return; }
+      if (data.error) {
+        errorMsg.textContent = data.error;
+        return;
+      }
+
       chainList.innerHTML = '';
       data.chain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
         const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
         const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
-        div.innerHTML = `<div class="chain-item-name">${item.name}</div><div class="chain-item-poem ${poemClass}">${formattedPoem}</div>`;
+        div.innerHTML = `
+          <div class="chain-item-name">${item.name}</div>
+          <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
+        `;
         chainList.appendChild(div);
         markPalaceNumber(item.palace, idx + 1);
       });
+
       chainSection.style.display = 'block';
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
