@@ -32,7 +32,7 @@
       border-bottom: 1px solid #d4cfc0;
     }
 
-    /* ===== 上層：輸入 + 本卦 + 變卦 ===== */
+    /* ===== 上層 ===== */
     .top-section {
       display: flex;
       gap: 0.6rem;
@@ -40,7 +40,6 @@
       margin-bottom: 0.3rem;
     }
 
-    /* 輸入區（固定寬度） */
     .input-area {
       display: flex;
       flex-direction: column;
@@ -82,7 +81,6 @@
       border-color: #8a6d3b;
     }
 
-    /* 本卦 / 變卦 容器：垂直居中 */
     .hex-result {
       display: flex;
       flex: 1;
@@ -191,6 +189,7 @@
     }
 
     .palace {
+      position: relative;
       background: #fff;
       border: 1px solid #d4cfc0;
       border-radius: 4px;
@@ -249,10 +248,32 @@
       border-radius: 1px;
     }
 
+    /* 圈號（左下角） */
+    .palace-number {
+      position: absolute;
+      bottom: 2px;
+      left: 4px;
+      font-size: 0.7rem;
+      color: #8a6d3b;
+      font-weight: 600;
+      line-height: 1;
+      pointer-events: none;
+    }
+
     /* 飛宮鏈 */
     .chain-section {
       margin-top: 0.6rem;
       display: none;
+    }
+
+    .chain-title {
+      font-size: 1rem;
+      color: #2a2a2a;
+      letter-spacing: 0.15rem;
+      text-align: left;
+      padding-bottom: 0.3rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #d4cfc0;
     }
 
     .chain-item {
@@ -271,15 +292,18 @@
     }
 
     .chain-item-poem {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: #6a6458;
       line-height: 1.6;
-      white-space: pre-line;
+      text-align: justify;
+      text-align-last: justify;
     }
 
     .chain-item-poem.empty {
       color: #b0aa9c;
       font-style: italic;
+      text-align: center;
+      text-align-last: center;
     }
   </style>
 </head>
@@ -312,6 +336,7 @@
   </div>
 
   <div class="chain-section" id="chainSection">
+    <div class="chain-title">正 推</div>
     <div id="chainList"></div>
   </div>
 </div>
@@ -321,6 +346,9 @@
 
   const LINE_NAMES = ['初', '二', '三', '四', '五', '上'];
   const OPTIONS = ['6', '7', '8', '9'];
+
+  // 圈號字符 ①-⑧
+  const CIRCLED_NUM = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
 
   // ========== 本地卦名數據 ==========
   const TRIGRAMS = {
@@ -369,7 +397,7 @@
     return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
   }
 
-  // ========== 卦詩處理：28 字一行 ==========
+  // 卦詩：28 字一行（四句並成一行，中間全角空格）
   function formatPoem(poem) {
     if (!poem || !poem.trim()) return '';
     const lines = poem.split('\n').filter(l => l.trim());
@@ -549,8 +577,37 @@
     });
   }
 
+  // 在指定宮位的格子左下角加圈號
+  function markPalaceNumber(palaceName, number) {
+    const gridOrder = ['巽', '離', '坤', '震', '中', '兌', '艮', '坎', '乾'];
+    const index = gridOrder.indexOf(palaceName);
+    if (index < 0) return;
+    const palaceDiv = nineGrid.children[index];
+    if (!palaceDiv) return;
+
+    // 移除舊的圈號
+    const old = palaceDiv.querySelector('.palace-number');
+    if (old) old.remove();
+
+    if (number >= 1 && number <= 8) {
+      const numDiv = document.createElement('div');
+      numDiv.className = 'palace-number';
+      numDiv.textContent = CIRCLED_NUM[number];
+      palaceDiv.appendChild(numDiv);
+    }
+  }
+
+  // 清除所有圈號
+  function clearPalaceNumbers() {
+    document.querySelectorAll('.palace-number').forEach(el => el.remove());
+  }
+
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
+
+    // 先清除所有圈號
+    clearPalaceNumbers();
+
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -568,7 +625,7 @@
       }
 
       chainList.innerHTML = '';
-      data.chain.forEach(item => {
+      data.chain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
         const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
@@ -578,6 +635,9 @@
           <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
         `;
         chainList.appendChild(div);
+
+        // 在對應宮位左下角加圈號（idx+1 = ①、②、③……）
+        markPalaceNumber(item.palace, idx + 1);
       });
 
       chainSection.style.display = 'block';
