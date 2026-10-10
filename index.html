@@ -36,7 +36,7 @@
     .top-section {
       display: flex;
       gap: 0.6rem;
-      align-items: flex-start;
+      align-items: stretch;
       margin-bottom: 0.3rem;
     }
 
@@ -82,12 +82,13 @@
       border-color: #8a6d3b;
     }
 
-    /* 本卦 / 變卦：左右分開，各佔一半 */
+    /* 本卦 / 變卦 容器：垂直居中 */
     .hex-result {
       display: flex;
       flex: 1;
       gap: 1.2rem;
       justify-content: center;
+      align-items: center;
       min-width: 0;
     }
 
@@ -176,20 +177,20 @@
 
     /* 九宮格 */
     .nine-grid-section {
-      margin-top: 0.6rem;
+      margin-top: 0.5rem;
       display: none;
     }
 
     .nine-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
       gap: 5px;
-      max-width: 260px;
+      justify-content: center;
       margin: 0 auto;
     }
 
     .palace {
-      aspect-ratio: 1;
       background: #fff;
       border: 1px solid #d4cfc0;
       border-radius: 4px;
@@ -219,15 +220,15 @@
     .palace-lines {
       display: flex;
       flex-direction: column-reverse;
-      gap: 3px;
+      gap: 2px;
       align-items: center;
     }
 
     .palace-lines .line {
-      width: 34px;
-      height: 7px;
+      width: 30px;
+      height: 6px;
       display: flex;
-      gap: 3px;
+      gap: 2px;
     }
 
     .palace-lines .bar-yang {
@@ -238,7 +239,7 @@
 
     .palace-lines .yin-pair {
       display: flex;
-      gap: 4px;
+      gap: 3px;
       width: 100%;
     }
 
@@ -250,7 +251,7 @@
 
     /* 飛宮鏈 */
     .chain-section {
-      margin-top: 0.8rem;
+      margin-top: 0.6rem;
       display: none;
     }
 
@@ -266,13 +267,13 @@
     .chain-item-name {
       font-size: 1rem;
       color: #2a2a2a;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.35rem;
     }
 
     .chain-item-poem {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: #6a6458;
-      line-height: 1.6;
+      line-height: 1.8;
       white-space: pre-line;
     }
 
@@ -321,7 +322,7 @@
   const LINE_NAMES = ['初', '二', '三', '四', '五', '上'];
   const OPTIONS = ['6', '7', '8', '9'];
 
-  // ========== 前端本地：八卦與六十四卦名 ==========
+  // ========== 本地卦名數據 ==========
   const TRIGRAMS = {
     1: { name: '乾', lines: [1,1,1] },
     2: { name: '兌', lines: [1,1,0] },
@@ -366,6 +367,21 @@
     const upperNum = linesToTrigramNum(upper);
     const lowerNum = linesToTrigramNum(lower);
     return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
+  }
+
+  // ========== 卦詩處理：兩句並一行（14字一行） ==========
+  function formatPoem(poem) {
+    if (!poem || !poem.trim()) return '';
+    const lines = poem.split('\n').filter(l => l.trim());
+    const merged = [];
+    for (let i = 0; i < lines.length; i += 2) {
+      if (i + 1 < lines.length) {
+        merged.push(lines[i].trim() + '　' + lines[i+1].trim());
+      } else {
+        merged.push(lines[i].trim());
+      }
+    }
+    return merged.join('\n');
   }
 
   // ========== 六爻輸入 ==========
@@ -505,7 +521,6 @@
     castBtn.disabled = false;
   });
 
-  // 九宮格：只顯示三爻，不顯示宮位名稱
   function renderNineGrid(palaces) {
     nineGrid.innerHTML = '';
     const gridOrder = ['巽', '離', '坤', '震', '中', '兌', '艮', '坎', '乾'];
@@ -564,11 +579,11 @@
       data.chain.forEach(item => {
         const div = document.createElement('div');
         div.className = 'chain-item';
-        const poem = item.poem && item.poem.trim() ? item.poem : '（卦詩待補）';
+        const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
         const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
         div.innerHTML = `
           <div class="chain-item-name">${item.name}</div>
-          <div class="chain-item-poem ${poemClass}">${poem}</div>
+          <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
         `;
         chainList.appendChild(div);
       });
