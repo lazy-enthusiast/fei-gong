@@ -54,6 +54,12 @@
   <button class="btn" id="castBtn">起 卦</button>
   <div class="error-msg" id="errorMsg"></div>
 
+  <!-- 四象八情 -->
+  <div class="sixiang-section" id="sixiangSection">
+    <div class="sixiang-title">四象八情</div>
+    <div class="sixiang-text" id="sixiangText"></div>
+  </div>
+
   <div class="nine-grid-section" id="nineGridSection">
     <div class="bagua-wrap" id="baguaWrap"></div>
   </div>
@@ -169,12 +175,7 @@
     const diffDays = Math.round((target - base) / 86400000);
     const ganIdx = ((0 + diffDays) % 10 + 10) % 10;
     const zhiIdx = ((10 + diffDays) % 12 + 12) % 12;
-    return {
-      gan: TIAN_GAN[ganIdx],
-      zhi: DI_ZHI[zhiIdx],
-      ganIdx,
-      zhiIdx
-    };
+    return { gan: TIAN_GAN[ganIdx], zhi: DI_ZHI[zhiIdx], ganIdx, zhiIdx };
   }
 
   function getXunKong(dayGanZhi) {
@@ -182,12 +183,8 @@
     const zhiIdx = dayGanZhi.zhiIdx;
     const xunShouZhi = ((zhiIdx - ganIdx) % 12 + 12) % 12;
     const xunKongMap = {
-      0: ['戌','亥'],
-      10: ['申','酉'],
-      8: ['午','未'],
-      6: ['辰','巳'],
-      4: ['寅','卯'],
-      2: ['子','丑']
+      0: ['戌','亥'], 10: ['申','酉'], 8: ['午','未'],
+      6: ['辰','巳'], 4: ['寅','卯'], 2: ['子','丑']
     };
     return xunKongMap[xunShouZhi] || [];
   }
@@ -203,12 +200,7 @@
     const eot = equationOfTime(date);
     const totalCorrectionMin = lonCorrection + eot;
     const result = new Date(date.getTime() + totalCorrectionMin * 60000);
-    return {
-      time: result,
-      correctionMin: totalCorrectionMin,
-      lonCorrection,
-      eot
-    };
+    return { time: result, correctionMin: totalCorrectionMin, lonCorrection, eot };
   }
 
   const GEO_CACHE_KEY = 'feigong_geo_cache_v1';
@@ -223,106 +215,61 @@
     const cache = loadGeoCache();
     const key = cityName.trim().toLowerCase();
     if (cache[key]) return cache[key];
-
     const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(cityName);
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error('地理查詢失敗');
     const data = await res.json();
     if (!data || data.length === 0) throw new Error('找不到該城市');
-    const result = {
-      lat: parseFloat(data[0].lat),
-      lon: parseFloat(data[0].lon),
-      displayName: data[0].display_name
-    };
+    const result = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), displayName: data[0].display_name };
     cache[key] = result;
     saveGeoCache(cache);
     return result;
   }
 
-  // ========== 天文公式：算冬至、夏至（不依賴節氣 API） ==========
-  // 參考 Meeus《Astronomical Algorithms》第 27 章
-  // 回傳儒略日（Julian Day，UT）
-  // year: 公曆年
-  // type: 0=春分, 1=夏至, 2=秋分, 3=冬至（本工具只用 1 和 3）
+  // ========== 天文公式：算冬至、夏至 ==========
   function jieQiJD(year, type) {
-    // 取年份的 y 值（春分、夏至用 y，秋分、冬至用 y+1 的平黃經）
-    let y;
-    if (type === 0 || type === 1) {
-      y = year;
-    } else {
-      y = year; // 冬至在本年末，用同一年
-    }
-
-    // 對應平黃經的修正項（Meeus 表 27.C）
-    // 春分：0，夏至：90，秋分：180，冬至：270
     const Y = (year - 2000) / 1000;
-    // 各節氣的修正係數（Meeus 表 27.C，只列我們需要的）
-    // 夏至、冬至
     const terms = {
-      // 夏至（黃經 90°）
       summer: [
         2451716.56767, 365241.62603, 0.00325, 0.00888, -0.00030,
         -0.00030, 0.00007, -0.00002, -0.00002, 0.00001
       ],
-      // 冬至（黃經 270°）
       winter: [
         2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032,
         0.00025, -0.00007, 0.00003, 0.00001, -0.00001
       ]
     };
-
     const t = type === 1 ? terms.summer : terms.winter;
-
-    // 計算 JDE0（力學時）
     const JDE0 = t[0] + t[1] * Y + (t[2] + t[3] * Y) * Y * Y
       + (t[4] + t[5] * Y) * Y * Y * Y
       + (t[6] + t[7] * Y) * Y * Y * Y * Y
       + (t[8] + t[9] * Y) * Y * Y * Y * Y * Y;
-
-    // 修正到 UT（略去 ΔT 精修，誤差 < 1 分鐘）
-    // ΔT 近似：2005-2050 年約 62-70 秒
-    const deltaT = 69; // 秒
-    const JD = JDE0 - deltaT / 86400;
-
-    return JD;
+    const deltaT = 69;
+    return JDE0 - deltaT / 86400;
   }
 
-  // 儒略日 → JavaScript Date（UTC）
   function jdToDate(jd) {
-    // JD 0 = 公元前 4713-01-01 12:00 UT
-    // Unix epoch = 1970-01-01 00:00 UT = JD 2440587.5
     const unixMs = (jd - 2440587.5) * 86400000;
     return new Date(unixMs);
   }
 
-  // 取指定公曆年的夏至、冬至（返回 Date，UTC 時刻）
-  function getSummerSolstice(year) {
-    return jdToDate(jieQiJD(year, 1)); // 夏至
-  }
-  function getWinterSolstice(year) {
-    return jdToDate(jieQiJD(year, 3)); // 冬至
-  }
+  function getSummerSolstice(year) { return jdToDate(jieQiJD(year, 1)); }
+  function getWinterSolstice(year) { return jdToDate(jieQiJD(year, 3)); }
 
-  // 精確判斷遁局（用天文公式，不依賴節氣 API）
   function getDunType(date) {
     const year = date.getFullYear();
     const events = [];
-
-    // 取去年、今年、明年的夏至與冬至
     for (const y of [year - 1, year, year + 1]) {
       events.push({ name: '夏至', time: getSummerSolstice(y) });
       events.push({ name: '冬至', time: getWinterSolstice(y) });
     }
-
     events.sort((a, b) => a.time - b.time);
-
     const t = date.getTime();
     let lastEvent = null;
     for (const ev of events) {
       if (ev.time.getTime() <= t) lastEvent = ev;
       else break;
     }
-
     if (!lastEvent) return 'yang';
     return lastEvent.name === '冬至' ? 'yang' : 'yin';
   }
@@ -430,10 +377,8 @@
   for (let i = 5; i >= 0; i--) {
     const row = document.createElement('div');
     row.className = 'input-row';
-
     const label = document.createElement('label');
     label.textContent = LINE_NAMES[i];
-
     const select = document.createElement('select');
     select.dataset.index = i;
     OPTIONS.forEach(v => {
@@ -443,7 +388,6 @@
       select.appendChild(opt);
     });
     select.value = '7';
-
     row.appendChild(label);
     row.appendChild(select);
     inputArea.appendChild(row);
@@ -508,6 +452,7 @@
     renderSixLines(chgLines, document.getElementById('chgLines'));
     document.getElementById('chgName').textContent = getHexNameFromSixLines(chgLines);
 
+    document.getElementById('sixiangSection').style.display = 'none';
     document.getElementById('nineGridSection').style.display = 'none';
     document.getElementById('chainSection').style.display = 'none';
   }
@@ -520,6 +465,8 @@
 
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
+  const sixiangSection = document.getElementById('sixiangSection');
+  const sixiangText = document.getElementById('sixiangText');
   const nineGridSection = document.getElementById('nineGridSection');
   const baguaWrap = document.getElementById('baguaWrap');
   const chainSection = document.getElementById('chainSection');
@@ -547,6 +494,14 @@
         errorMsg.textContent = data.error;
         castBtn.disabled = false;
         return;
+      }
+
+      // 四象八情
+      if (data.sixiang) {
+        sixiangText.textContent = data.sixiang.text;
+        sixiangSection.style.display = 'block';
+      } else {
+        sixiangSection.style.display = 'none';
       }
 
       currentPalaces = data.palaces;

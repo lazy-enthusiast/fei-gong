@@ -436,3 +436,30 @@ h1 {
   color: #b0aa9c;
   font-style: italic;
 }
+
+/* ===== 四象八情 ===== */
+.sixiang-section {
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.sixiang-title {
+  font-size: 0.8rem;
+  color: #8a8578;
+  letter-spacing: 0.2rem;
+  text-align: left;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid #d4cfc0;
+}
+
+.sixiang-text {
+  background: #fff;
+  border: 1px solid #d4cfc0;
+  border-left: 3px solid #8a6d3b;
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+  color: #2a2a2a;
+  line-height: 1.7;
+}
