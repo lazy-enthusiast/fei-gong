@@ -33,7 +33,6 @@
       border-bottom: 1px solid #d4cfc0;
     }
 
-    /* ===== 頂部：可收起 ===== */
     .info-panel {
       background: #fff;
       border: 1px solid #d4cfc0;
@@ -147,7 +146,6 @@
       padding-top: 0.3rem;
     }
 
-    /* ===== 上層 ===== */
     .top-section {
       display: flex;
       gap: 0.5rem;
@@ -288,7 +286,6 @@
       text-align: center;
     }
 
-    /* ===== 九宮格 + 地支 ===== */
     .nine-grid-section {
       margin-top: 0.3rem;
       display: none;
@@ -400,7 +397,6 @@
       pointer-events: none;
     }
 
-    /* ===== 飛宮鏈 ===== */
     .chain-section {
       margin-top: 0.4rem;
       display: none;
@@ -448,7 +444,6 @@
 <div class="app">
   <h1>飛宮易卦</h1>
 
-  <!-- 頂部：可收起 -->
   <div class="info-panel" id="infoPanel">
     <div class="info-summary" id="infoSummary">
       <div class="info-summary-text" id="infoSummaryText">載入中…</div>
@@ -503,7 +498,6 @@
   </div>
 </div>
 
-<!-- lunar-javascript -->
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
 
 <script>
@@ -600,7 +594,6 @@
     return merged.join('\n');
   }
 
-  // ========== 干支 ==========
   const TIAN_GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
   const DI_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 
@@ -652,7 +645,6 @@
     };
   }
 
-  // ========== 城市經緯度 ==========
   const GEO_CACHE_KEY = 'feigong_geo_cache_v1';
   function loadGeoCache() {
     try { return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch (e) { return {}; }
@@ -681,7 +673,6 @@
     return result;
   }
 
-  // ========== 頂部資訊 ==========
   const infoPanel = document.getElementById('infoPanel');
   const infoSummary = document.getElementById('infoSummary');
   const infoSummaryText = document.getElementById('infoSummaryText');
@@ -695,7 +686,6 @@
   let currentLat = 22.32;
   let currentXunKong = [];
 
-  // 展開/收起
   infoSummary.addEventListener('click', () => {
     infoPanel.classList.toggle('expanded');
   });
@@ -712,10 +702,7 @@
   }
   initDateTime();
 
-  // 時辰對照
   function getShiChen(hour) {
-    // 子 23-1, 丑 1-3, 寅 3-5, 卯 5-7, 辰 7-9, 巳 9-11,
-    // 午 11-13, 未 13-15, 申 15-17, 酉 17-19, 戌 19-21, 亥 21-23
     const zhiNames = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
     const idx = Math.floor(((hour + 1) % 24) / 2);
     return zhiNames[idx];
@@ -726,49 +713,60 @@
     return map[zhi] || 1;
   }
 
-  // 判斷冬至/夏至位置
+  // 精確判斷冬至/夏至位置（時分級別）
   function getDunType(date) {
-    // 用 lunar-javascript 找當年的冬至和夏至
     const year = date.getFullYear();
-    // Lunar 物件的节气
-    const dongZhi = Lunar.fromDate(new Date(year, 11, 21)); // 冬至大概 12/21-22
-    // 精確取當年冬至、夏至
-    const jieQiTable = Lunar.fromDate(date).getJieQiTable();
-    // 找冬至與夏至
-    const dz = jieQiTable['冬至'] ? new Date(jieQiTable['冬至'].getSolar().toYmd()) : null;
-    const xz = jieQiTable['夏至'] ? new Date(jieQiTable['夏至'].getSolar().toYmd()) : null;
+    const events = [];
 
-    // 處理跨年：冬至可能在去年
-    let dongZhiDate = null, xiaZhiDate = null;
-    // 用農曆年
-    const lunar = Lunar.fromDate(date);
-    const yearGanZhi = lunar.getYearInGanZhiByLiChun ? lunar.getYearInGanZhiByLiChun() : null;
+    for (let y = year - 1; y <= year + 1; y++) {
+      const summerProbe = new Date(y, 5, 21);
+      const winterProbe = new Date(y, 11, 21);
 
-    // 取當前農曆年對應的節氣表（用 Lunar.fromDate(date)）
-    const jq = Lunar.fromDate(date).getJieQiTable();
-    if (jq['冬至']) dongZhiDate = new Date(jq['冬至'].getSolar().toYmd());
-    if (jq['夏至']) xiaZhiDate = new Date(jq['夏至'].getSolar().toYmd());
+      try {
+        const summerLunar = Lunar.fromDate(summerProbe);
+        const jq1 = summerLunar.getJieQiTable();
+        if (jq1['夏至']) {
+          const solar = jq1['夏至'].getSolar();
+          events.push({
+            name: '夏至',
+            time: new Date(
+              solar.getYear(), solar.getMonth() - 1, solar.getDay(),
+              solar.getHour(), solar.getMinute(), solar.getSecond()
+            )
+          });
+        }
+      } catch (e) {}
 
-    // 若冬至晚於當前日期，可能是下一年的冬至；處理：若 dongZhiDate 在 date 之後，改用去年的冬至
-    // 但簡化處理：直接比較當前日期
-    if (!dongZhiDate || !xiaZhiDate) return 'yang'; // 預設
-
-    // 判斷：date 在 冬至 之後 且 在 夏至 之前 → 陽遁
-    // 由於冬至夏至跨年，需要綜合判斷
-    const t = date.getTime();
-    const dzT = dongZhiDate.getTime();
-    const xzT = xiaZhiDate.getTime();
-
-    // 簡化：以月日判斷
-    const md = (date.getMonth() + 1) * 100 + date.getDate();
-    // 夏至約 6/21, 冬至約 12/21
-    if (md >= 621 && md < 1221) {
-      // 夏至後冬至前 → 陰遁
-      return 'yin';
-    } else {
-      // 冬至後夏至前 → 陽遁
-      return 'yang';
+      try {
+        const winterLunar = Lunar.fromDate(winterProbe);
+        const jq2 = winterLunar.getJieQiTable();
+        if (jq2['冬至']) {
+          const solar = jq2['冬至'].getSolar();
+          events.push({
+            name: '冬至',
+            time: new Date(
+              solar.getYear(), solar.getMonth() - 1, solar.getDay(),
+              solar.getHour(), solar.getMinute(), solar.getSecond()
+            )
+          });
+        }
+      } catch (e) {}
     }
+
+    events.sort((a, b) => a.time - b.time);
+
+    const t = date.getTime();
+    let lastEvent = null;
+    for (const ev of events) {
+      if (ev.time.getTime() <= t) {
+        lastEvent = ev;
+      } else {
+        break;
+      }
+    }
+
+    if (!lastEvent) return 'yang';
+    return lastEvent.name === '冬至' ? 'yang' : 'yin';
   }
 
   async function updateInfo() {
@@ -802,39 +800,32 @@
       // 旬空
       currentXunKong = getXunKong(dayGZ);
 
-      // 農曆
+      // 農曆（用標準時間，因為農曆月日是按當地標準時）
       const lunar = Lunar.fromDate(stdTime);
-      const lunarMonth = lunar.getMonthInChinese();  // 例如 "八"
-      const lunarDay = lunar.getDayInChinese();      // 例如 "廿九"
-      const lunarMonthNum = Math.abs(lunar.getMonth()); // 數字月
-      const lunarDayNum = lunar.getDay();            // 數字日
+      const lunarMonthNum = Math.abs(lunar.getMonth());
+      const lunarDayNum = lunar.getDay();
 
       // 年柱（以立春為界）
-      const yearGanZhi = lunar.getYearInGanZhiByLiChun(); // 例如 "丙午"
-      const yearGan = yearGanZhi.charAt(0);
+      const yearGanZhi = lunar.getYearInGanZhiByLiChun();
       const yearZhi = yearGanZhi.charAt(1);
       const yearZhiNum = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 }[yearZhi];
 
-      // 計算：年支數 + 農曆月 + 農曆日 + 時辰數
       const sum = yearZhiNum + lunarMonthNum + lunarDayNum + shiChenNum;
       let remainder = sum % 9;
       if (remainder === 0) remainder = 9;
 
-      // 判斷遁局
-      const dunType = getDunType(stdTime);
+      // 判斷遁局（改用真太陽時）
+      const dunType = getDunType(tst.time);
       const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
 
-      // 更新展開區
       const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
       infoReadout.innerHTML =
         `${yearGanZhi}年${lunarMonthNum}月${lunarDayNum}日${shiChen}時<br>` +
         `真太陽時：<span class="highlight">${tstHH}:${tstMM}</span>　校正：${corrStr}`;
       infoDun.textContent = dunLabel;
 
-      // 更新收起區
       infoSummaryText.textContent = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · ${cityName} · ${dunLabel}`;
 
-      // 更新九宮格外圍地支的旬空圈
       updateXunKongDisplay();
     } catch (e) {
       infoReadout.textContent = '（' + e.message + '）';
@@ -845,7 +836,6 @@
   timeInput.addEventListener('change', updateInfo);
   cityInput.addEventListener('change', updateInfo);
 
-  // ========== 六爻輸入 ==========
   const inputArea = document.getElementById('inputArea');
   for (let i = 5; i >= 0; i--) {
     const row = document.createElement('div');
@@ -938,7 +928,6 @@
 
   updateLive();
 
-  // ========== 起卦 ==========
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
   const nineGridSection = document.getElementById('nineGridSection');
@@ -1100,7 +1089,6 @@
     }
   }
 
-  // ========== 初始化 ==========
   updateInfo();
 </script>
 </body>
