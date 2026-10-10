@@ -11,7 +11,7 @@
       background: #faf8f3;
       font-family: 'Noto Serif TC', 'Times New Roman', 'Microsoft JhengHei', serif;
       min-height: 100vh;
-      padding: 0.5rem;
+      padding: 0.4rem;
       color: #2a2a2a;
       font-size: 14px;
     }
@@ -27,17 +27,17 @@
       letter-spacing: 0.4rem;
       text-align: center;
       color: #2a2a2a;
-      padding-bottom: 0.3rem;
-      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      margin-bottom: 0.4rem;
       border-bottom: 1px solid #d4cfc0;
     }
 
     /* ===== 上層 ===== */
     .top-section {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.5rem;
       align-items: stretch;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.2rem;
     }
 
     .input-area {
@@ -94,7 +94,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.25rem;
       flex: 0 0 auto;
     }
 
@@ -158,7 +158,7 @@
       cursor: pointer;
       font-family: inherit;
       width: 100%;
-      margin-top: 0.15rem;
+      margin-top: 0.1rem;
     }
 
     .btn:disabled {
@@ -168,14 +168,14 @@
     .error-msg {
       color: #a04a3a;
       font-size: 0.75rem;
-      margin-top: 0.25rem;
-      min-height: 1rem;
+      margin-top: 0.2rem;
+      min-height: 0.9rem;
       text-align: center;
     }
 
     /* 九宮格 */
     .nine-grid-section {
-      margin-top: 0.5rem;
+      margin-top: 0.3rem;
       display: none;
     }
 
@@ -262,7 +262,7 @@
 
     /* 飛宮鏈 */
     .chain-section {
-      margin-top: 0.6rem;
+      margin-top: 0.4rem;
       display: none;
     }
 
@@ -271,8 +271,8 @@
       color: #2a2a2a;
       letter-spacing: 0.15rem;
       text-align: left;
-      padding-bottom: 0.3rem;
-      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      margin-bottom: 0.4rem;
       border-bottom: 1px solid #d4cfc0;
     }
 
@@ -281,14 +281,14 @@
       border: 1px solid #d4cfc0;
       border-left: 3px solid #8a6d3b;
       border-radius: 4px;
-      padding: 0.6rem 0.8rem;
-      margin-bottom: 0.4rem;
+      padding: 0.5rem 0.7rem;
+      margin-bottom: 0.3rem;
     }
 
     .chain-item-name {
       font-size: 1.15rem;
       color: #2a2a2a;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
     }
 
     .chain-item-poem {
@@ -392,7 +392,6 @@
     return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
   }
 
-  // 卦詩：14 字一行（兩句並一行）
   function formatPoem(poem) {
     if (!poem || !poem.trim()) return '';
     const lines = poem.split('\n').filter(l => l.trim());
