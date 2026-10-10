@@ -55,9 +55,11 @@
   <div class="error-msg" id="errorMsg"></div>
 
   <!-- 四象八情 -->
-  <div class="sixiang-section" id="sixiangSection">
-    <div class="sixiang-title">四象八情</div>
-    <div class="sixiang-text" id="sixiangText"></div>
+  <div class="chain-section" id="sixiangSection">
+    <div class="chain-title">四 象 八 情</div>
+    <div class="chain-item">
+      <div class="sixiang-text" id="sixiangText"></div>
+    </div>
   </div>
 
   <div class="nine-grid-section" id="nineGridSection">
@@ -226,7 +228,6 @@
     return result;
   }
 
-  // ========== 天文公式：算冬至、夏至 ==========
   function jieQiJD(year, type) {
     const Y = (year - 2000) / 1000;
     const terms = {
