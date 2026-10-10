@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飛宮易卦 v0</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: linear-gradient(145deg, #1e2b3c 0%, #0e1a26 100%);
+      font-family: 'Segoe UI', 'Noto Serif TC', 'Microsoft JhengHei', serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 1.5rem;
+      color: #e8e6e3;
+    }
+    .app-container {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(18, 30, 41, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 215, 140, 0.15);
+      padding: 2rem 2rem 2.5rem;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 400;
+      letter-spacing: 0.3rem;
+      text-align: center;
+      color: #e4c580;
+      text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+      margin-bottom: 0.5rem;
+    }
+    .subhead {
+      text-align: center;
+      font-size: 0.9rem;
+      letter-spacing: 0.2rem;
+      color: #b9afa0;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      color: #cbae6b;
+      letter-spacing: 0.15rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #c6a75c;
+      padding-left: 1rem;
+    }
+    /* 六爻輸入 */
+    .input-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #15232e;
+      border-radius: 1rem;
+      padding: 0.6rem 1.2rem;
+      border: 1px solid #2f4352;
+    }
+    .input-row label {
+      width: 5rem;
+      color: #a7b7c2;
+      font-size: 0.95rem;
+      letter-spacing: 0.1rem;
+    }
+    .input-row select {
+      flex: 1;
+      background: #1b2a36;
+      border: 1px solid #455a6b;
+      border-radius: 2rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      color: #f0ead8;
+      outline: none;
+      font-family: inherit;
+    }
+    .input-row select:focus {
+      border-color: #d4af37;
+    }
+    .btn {
+      background: radial-gradient(circle at 30% 10%, #f5e7c8, #bb9b50);
+      border: none;
+      border-radius: 60px;
+      padding: 0.9rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1a1f24;
+      letter-spacing: 0.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 6px 0 #6b4f1e, 0 10px 20px #00000080;
+      font-family: inherit;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+    .btn:hover {
+      transform: translateY(2px);
+      box-shadow: 0 4px 0 #6b4f1e, 0 10px 20px #00000080;
+    }
+    .btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #6b4f1e, 0 8px 15px #00000080;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #6b4f1e, 0 8px 15px #00000080;
+      pointer-events: none;
+    }
+    /* 結果區 */
+    .result-area { margin-top: 2rem; }
+    .hex-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .hex-card {
+      flex: 1 1 240px;
+      background: #15232e;
+      border-radius: 1.5rem;
+      padding: 1.2rem;
+      box-shadow: inset 0 0 0 1px #3e5566, 0 10px 20px -5px black;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hex-card-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.15rem;
+      color: #cbae6b;
+      margin-bottom: 0.8rem;
+      text-transform: uppercase;
+    }
+    .hex-card-name {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: #f2e3c2;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.15rem;
+    }
+    .lines-container {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 6px;
+      width: 100%;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .line {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      width: 100%;
+      max-width: 120px;
+      height: 14px;
+    }
+    .bar-yang {
+      flex: 1;
+      height: 100%;
+      background: linear-gradient(90deg, #e9d39b, #b3924b);
+      border-radius: 20px;
+      box-shadow: 0 0 6px #d4af3750;
+    }
+    .yin-pair {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .half-bar {
+      flex: 1;
+      height: 100%;
+      background: linear-gradient(90deg, #5f6f7a, #3e4f5b);
+      border-radius: 20px;
+      box-shadow: 0 0 6px #1e2b3c;
+    }
+    /* 九宮格 */
+    .nine-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .palace {
+      background: #15232e;
+      border-radius: 1.2rem;
+      padding: 0.8rem;
+      box-shadow: inset 0 0 0 1px #3e5566;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+    .palace:hover {
+      background: #1a2e3b;
+      box-shadow: inset 0 0 0 1px #d4af3766, 0 0 15px #d4af3733;
+    }
+    .palace.selected {
+      border-color: #d4af37;
+      box-shadow: 0 0 20px #d4af3766, inset 0 0 0 1px #d4af37;
+      background: #1e3140;
+    }
+    .palace.empty {
+      cursor: default;
+      opacity: 0.4;
+    }
+    .palace-name {
+      font-size: 0.9rem;
+      color: #cbae6b;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.1rem;
+    }
+    .palace-trigram {
+      font-size: 1.2rem;
+      color: #f2e3c2;
+      margin-bottom: 0.3rem;
+    }
+    .palace-lines {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 4px;
+      width: 100%;
+      align-items: center;
+      margin-top: 0.3rem;
+    }
+    .palace-lines .line {
+      max-width: 70px;
+      height: 10px;
+    }
+    /* 飛宮鏈 */
+    .chain-area {
+      margin-top: 1.5rem;
+    }
+    .chain-item {
+      background: #15232e;
+      border-radius: 1.2rem;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 5px solid #d4af37;
+      box-shadow: 0 5px 15px -5px black;
+    }
+    .chain-item-title {
+      font-size: 1.1rem;
+      color: #e4c580;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.1rem;
+    }
+    .chain-item-poem {
+      font-size: 0.95rem;
+      color: #b9c8d3;
+      line-height: 1.8;
+      white-space: pre-line;
+      font-style: italic;
+    }
+    .chain-item-poem.empty {
+      color: #5f6f7a;
+    }
+    .error-msg {
+      color: #e6b17e;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+    }
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #60717e;
+      letter-spacing: 0.1rem;
+      border-top: 1px solid #2f3f4b;
+      padding-top: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <h1>飛宮易卦</h1>
+  <div class="subhead">◆ 雛形 · 正推 ◆</div>
+
+  <!-- 六爻輸入 -->
+  <div class="section-title">輸入六爻（由下而上）</div>
+  <div class="input-rows" id="inputRows">
+    <!-- 動態生成六列 -->
+  </div>
+  <div style="text-align:center;">
+    <button class="btn" id="castBtn">起 卦</button>
+  </div>
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- 結果區 -->
+  <div class="result-area" id="resultArea" style="display:none;">
+    <!-- 本卦、變卦 -->
+    <div class="hex-cards" id="hexCards"></div>
+
+    <!-- 九宮格 -->
+    <div class="section-title" style="margin-top:2rem;">九宮格 · 點選用神宮</div>
+    <div class="nine-grid" id="nineGrid"></div>
+
+    <!-- 飛宮鏈 -->
+    <div class="chain-area" id="chainArea" style="display:none;">
+      <div class="section-title">飛宮鏈 · 正推</div>
+      <div id="chainList"></div>
+    </div>
+  </div>
+
+  <div class="footer">⚲ 飛宮易卦 · 心法在後端 · 前端僅顯示結果</div>
+</div>
+
+<script>
+  // ---------- 後端 API 位址 ----------
+  // 部署後請改成你的 Worker 網址
+  const API_URL = 'https://your-worker.your-subdomain.workers.dev';
+
+  // ---------- 爻的名稱 ----------
+  const LINE_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
+
+  // ---------- 選項 ----------
+  const OPTIONS = [
+    { value: 'old_yang', label: '老陽 ⚊（動，變陰）' },
+    { value: 'old_yin',  label: '老陰 ⚋（動，變陽）' },
+    { value: 'young_yang', label: '少陽 ⚊（不變）' },
+    { value: 'young_yin',  label: '少陰 ⚋（不變）' }
+  ];
+
+  // ---------- 生成六爻輸入列 ----------
+  const inputRows = document.getElementById('inputRows');
+  for (let i = 0; i < 6; i++) {
+    const row = document.createElement('div');
+    row.className = 'input-row';
+    const label = document.createElement('label');
+    label.textContent = LINE_NAMES[i];
+    const select = document.createElement('select');
+    select.dataset.index = i;
+    OPTIONS.forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.label;
+      select.appendChild(option);
+    });
+    // 預設選少陽
+    select.value = 'young_yang';
+    row.appendChild(label);
+    row.appendChild(select);
+    inputRows.appendChild(row);
+  }
+
+  // ---------- 取得六爻資料 ----------
+  function getSixLinesInput() {
+    const selects = document.querySelectorAll('#inputRows select');
+    const sixLines = [];
+    const movingLines = [];
+    selects.forEach((sel, i) => {
+      const val = sel.value;
+      let lineValue, isMoving;
+      if (val === 'old_yang') { lineValue = 1; isMoving = true; }
+      else if (val === 'old_yin') { lineValue = 0; isMoving = true; }
+      else if (val === 'young_yang') { lineValue = 1; isMoving = false; }
+      else { lineValue = 0; isMoving = false; }
+      sixLines.push(lineValue);
+      if (isMoving) movingLines.push(i);
+    });
+    return { sixLines, movingLines };
+  }
+
+  // ---------- 繪製六爻圖 ----------
+  function renderLines(lines, container) {
+    container.innerHTML = '';
+    for (let i = 5; i >= 0; i--) {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'line';
+      if (lines[i] === 1) {
+        const bar = document.createElement('div');
+        bar.className = 'bar-yang';
+        lineDiv.appendChild(bar);
+      } else {
+        const pair = document.createElement('div');
+        pair.className = 'yin-pair';
+        const h1 = document.createElement('div');
+        h1.className = 'half-bar';
+        const h2 = document.createElement('div');
+        h2.className = 'half-bar';
+        pair.appendChild(h1);
+        pair.appendChild(h2);
+        lineDiv.appendChild(pair);
+      }
+      container.appendChild(lineDiv);
+    }
+  }
+
+  // ---------- 繪製三爻圖（小） ----------
+  function renderTrigramLines(lines, container) {
+    container.innerHTML = '';
+    for (let i = 2; i >= 0; i--) {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'line';
+      if (lines[i] === 1) {
+        const bar = document.createElement('div');
+        bar.className = 'bar-yang';
+        lineDiv.appendChild(bar);
+      } else {
+        const pair = document.createElement('div');
+        pair.className = 'yin-pair';
+        const h1 = document.createElement('div');
+        h1.className = 'half-bar';
+        const h2 = document.createElement('div');
+        h2.className = 'half-bar';
+        pair.appendChild(h1);
+        pair.appendChild(h2);
+        lineDiv.appendChild(pair);
+      }
+      container.appendChild(lineDiv);
+    }
+  }
+
+  // ---------- 八卦名稱（由數字） ----------
+  const TRIGRAM_NAMES = { 1:'乾', 2:'兌', 3:'離', 4:'震', 5:'巽', 6:'坎', 7:'艮', 8:'坤' };
+  const TRIGRAM_SYMBOLS = { 1:'☰', 2:'☱', 3:'☲', 4:'☳', 5:'☴', 6:'☵', 7:'☶', 8:'☷' };
+
+  // ---------- 起卦 ----------
+  const castBtn = document.getElementById('castBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  const resultArea = document.getElementById('resultArea');
+  const hexCards = document.getElementById('hexCards');
+  const nineGrid = document.getElementById('nineGrid');
+  const chainArea = document.getElementById('chainArea');
+  const chainList = document.getElementById('chainList');
+
+  let currentPalaces = null;
+
+  castBtn.addEventListener('click', async () => {
+    errorMsg.textContent = '';
+    const { sixLines, movingLines } = getSixLinesInput();
+
+    if (movingLines.length === 0) {
+      errorMsg.textContent = '請至少有一個動爻（老陽或老陰）。';
+      return;
+    }
+    if (movingLines.length > 1) {
+      errorMsg.textContent = '雛形目前只支援一個動爻，請只選一個老陽或老陰。';
+      return;
+    }
+
+    const movingLineIndex = movingLines[0];
+
+    castBtn.disabled = true;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cast',
+          sixLines: sixLines,
+          movingLineIndex: movingLineIndex
+        })
+      });
+      const data = await res.json();
+      if (data.error) {
+        errorMsg.textContent = data.error;
+        castBtn.disabled = false;
+        return;
+      }
+
+      // 顯示本卦、變卦
+      hexCards.innerHTML = '';
+
+      const benCard = document.createElement('div');
+      benCard.className = 'hex-card';
+      benCard.innerHTML = `<div class="hex-card-title">本 卦</div><div class="hex-card-name">${data.ben.name}</div>`;
+      const benLinesDiv = document.createElement('div');
+      benLinesDiv.className = 'lines-container';
+      renderLines(data.ben.lines, benLinesDiv);
+      benCard.appendChild(benLinesDiv);
+      hexCards.appendChild(benCard);
+
+      const chgCard = document.createElement('div');
+      chgCard.className = 'hex-card';
+      chgCard.innerHTML = `<div class="hex-card-title">變 卦</div><div class="hex-card-name">${data.changed.name}</div>`;
+      const chgLinesDiv = document.createElement('div');
+      chgLinesDiv.className = 'lines-container';
+      renderLines(data.changed.lines, chgLinesDiv);
+      chgCard.appendChild(chgLinesDiv);
+      hexCards.appendChild(chgCard);
+
+      // 儲存八宮資料
+      currentPalaces = data.palaces;
+
+      // 繪製九宮格
+      renderNineGrid(data.palaces);
+
+      // 隱藏飛宮鏈（等待選用神宮）
+      chainArea.style.display = 'none';
+      chainList.innerHTML = '';
+
+      resultArea.style.display = 'block';
+    } catch (e) {
+      errorMsg.textContent = '連線後端失敗：' + e.message;
+    }
+    castBtn.disabled = false;
+  });
+
+  // ---------- 繪製九宮格 ----------
+  function renderNineGrid(palaces) {
+    nineGrid.innerHTML = '';
+
+    // 九宮格順序：巽 離 坤 / 震 中 兌 / 艮 坎 乾
+    const gridOrder = [
+      '巽', '離', '坤',
+      '震', '中', '兌',
+      '艮', '坎', '乾'
+    ];
+
+    gridOrder.forEach(pos => {
+      const div = document.createElement('div');
+      div.className = 'palace';
+
+      if (pos === '中') {
+        div.classList.add('empty');
+        div.innerHTML = `<div class="palace-name">中宮</div><div class="palace-trigram">（留空）</div>`;
+        nineGrid.appendChild(div);
+        return;
+      }
+
+      const p = palaces[pos];
+      if (!p) {
+        div.classList.add('empty');
+        nineGrid.appendChild(div);
+        return;
+      }
+
+      const trigramNum = p.trigramNum;
+      const trigramName = TRIGRAM_NAMES[trigramNum];
+      const trigramSymbol = TRIGRAM_SYMBOLS[trigramNum];
+
+      div.dataset.palace = pos;
+      div.innerHTML = `
+        <div class="palace-name">${pos}宮</div>
+        <div class="palace-trigram">${trigramSymbol} ${trigramName}</div>
+      `;
+      const linesDiv = document.createElement('div');
+      linesDiv.className = 'palace-lines';
+      renderTrigramLines(p.lines, linesDiv);
+      div.appendChild(linesDiv);
+
+      div.addEventListener('click', () => {
+        // 移除其他選中
+        document.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
+        div.classList.add('selected');
+        // 執行飛宮
+        runFlyingChain(pos);
+      });
+
+      nineGrid.appendChild(div);
+    });
+  }
+
+  // ---------- 執行飛宮鏈 ----------
+  async function runFlyingChain(startPalace) {
+    if (!currentPalaces) return;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'fly',
+          palaces: currentPalaces,
+          startPalace: startPalace
+        })
+      });
+      const data = await res.json();
+      if (data.error) {
+        errorMsg.textContent = data.error;
+        return;
+      }
+
+      // 顯示飛宮鏈
+      chainList.innerHTML = '';
+      data.chain.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'chain-item';
+        const poem = item.poem && item.poem.trim() ? item.poem : '（卦詩待補）';
+        const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
+        div.innerHTML = `
+          <div class="chain-item-title">第${idx + 1}卦 · ${item.name}（${item.palace}宮起飛）</div>
+          <div class="chain-item-poem ${poemClass}">${poem}</div>
+        `;
+        chainList.appendChild(div);
+      });
+
+      chainArea.style.display = 'block';
+    } catch (e) {
+      errorMsg.textContent = '飛宮鏈計算失敗：' + e.message;
+    }
+  }
+</script>
+</body>
+</html>
