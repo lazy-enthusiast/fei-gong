@@ -714,41 +714,47 @@
   }
 
   // 精確判斷冬至/夏至位置（時分級別）
+  // 回傳 'yang'（冬至後夏至前）或 'yin'（夏至後冬至前）
   function getDunType(date) {
     const year = date.getFullYear();
     const events = [];
 
     for (let y = year - 1; y <= year + 1; y++) {
-      const summerProbe = new Date(y, 5, 21);
-      const winterProbe = new Date(y, 11, 21);
-
+      // 夏至
       try {
-        const summerLunar = Lunar.fromDate(summerProbe);
-        const jq1 = summerLunar.getJieQiTable();
-        if (jq1['夏至']) {
-          const solar = jq1['夏至'].getSolar();
-          events.push({
-            name: '夏至',
-            time: new Date(
-              solar.getYear(), solar.getMonth() - 1, solar.getDay(),
-              solar.getHour(), solar.getMinute(), solar.getSecond()
-            )
-          });
+        const probe = new Date(y, 5, 22, 12, 0, 0);
+        const lunar = Lunar.fromDate(probe);
+        const jq = lunar.getJieQiTable();
+        if (jq['夏至']) {
+          const solar = jq['夏至'].getSolar();
+          if (solar.getYear() === y) {
+            events.push({
+              name: '夏至',
+              time: new Date(
+                solar.getYear(), solar.getMonth() - 1, solar.getDay(),
+                solar.getHour(), solar.getMinute(), solar.getSecond()
+              )
+            });
+          }
         }
       } catch (e) {}
 
+      // 冬至
       try {
-        const winterLunar = Lunar.fromDate(winterProbe);
-        const jq2 = winterLunar.getJieQiTable();
-        if (jq2['冬至']) {
-          const solar = jq2['冬至'].getSolar();
-          events.push({
-            name: '冬至',
-            time: new Date(
-              solar.getYear(), solar.getMonth() - 1, solar.getDay(),
-              solar.getHour(), solar.getMinute(), solar.getSecond()
-            )
-          });
+        const probe = new Date(y, 11, 22, 12, 0, 0);
+        const lunar = Lunar.fromDate(probe);
+        const jq = lunar.getJieQiTable();
+        if (jq['冬至']) {
+          const solar = jq['冬至'].getSolar();
+          if (solar.getYear() === y) {
+            events.push({
+              name: '冬至',
+              time: new Date(
+                solar.getYear(), solar.getMonth() - 1, solar.getDay(),
+                solar.getHour(), solar.getMinute(), solar.getSecond()
+              )
+            });
+          }
         }
       } catch (e) {}
     }
@@ -758,11 +764,8 @@
     const t = date.getTime();
     let lastEvent = null;
     for (const ev of events) {
-      if (ev.time.getTime() <= t) {
-        lastEvent = ev;
-      } else {
-        break;
-      }
+      if (ev.time.getTime() <= t) lastEvent = ev;
+      else break;
     }
 
     if (!lastEvent) return 'yang';
@@ -785,27 +788,20 @@
       const [hh, mm] = timeInput.value.split(':').map(Number);
       const stdTime = new Date(y, mo - 1, d, hh, mm, 0);
 
-      // 真太陽時
       const tst = calcTrueSolarTime(stdTime, currentLon);
       const tstHH = String(tst.time.getHours()).padStart(2, '0');
       const tstMM = String(tst.time.getMinutes()).padStart(2, '0');
 
-      // 用真太陽時算時辰
       const shiChen = getShiChen(tst.time.getHours());
       const shiChenNum = getShiChenNum(shiChen);
 
-      // 日柱（用真太陽時的日期）
       const dayGZ = getDayGanZhi(tst.time);
-
-      // 旬空
       currentXunKong = getXunKong(dayGZ);
 
-      // 農曆（用標準時間，因為農曆月日是按當地標準時）
       const lunar = Lunar.fromDate(stdTime);
       const lunarMonthNum = Math.abs(lunar.getMonth());
       const lunarDayNum = lunar.getDay();
 
-      // 年柱（以立春為界）
       const yearGanZhi = lunar.getYearInGanZhiByLiChun();
       const yearZhi = yearGanZhi.charAt(1);
       const yearZhiNum = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 }[yearZhi];
@@ -814,7 +810,6 @@
       let remainder = sum % 9;
       if (remainder === 0) remainder = 9;
 
-      // 判斷遁局（改用真太陽時）
       const dunType = getDunType(tst.time);
       const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
 
