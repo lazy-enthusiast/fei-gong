@@ -74,6 +74,11 @@
     <div class="chain-title">旁 通</div>
     <div id="pangtongList"></div>
   </div>
+
+  <div class="chain-section" id="chuleiSection">
+    <div class="chain-title">觸 類</div>
+    <div id="chuleiList"></div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
@@ -462,6 +467,7 @@
     document.getElementById('nineGridSection').style.display = 'none';
     document.getElementById('chainSection').style.display = 'none';
     document.getElementById('pangtongSection').style.display = 'none';
+    document.getElementById('chuleiSection').style.display = 'none';
   }
 
   document.querySelectorAll('#inputArea select').forEach(sel => {
@@ -480,6 +486,8 @@
   const chainList = document.getElementById('chainList');
   const pangtongSection = document.getElementById('pangtongSection');
   const pangtongList = document.getElementById('pangtongList');
+  const chuleiSection = document.getElementById('chuleiSection');
+  const chuleiList = document.getElementById('chuleiList');
 
   let currentPalaces = null;
 
@@ -520,6 +528,8 @@
       chainList.innerHTML = '';
       pangtongSection.style.display = 'none';
       pangtongList.innerHTML = '';
+      chuleiSection.style.display = 'none';
+      chuleiList.innerHTML = '';
     } catch (e) {
       errorMsg.textContent = '連線失敗：' + e.message;
     }
@@ -623,6 +633,22 @@
     document.querySelectorAll('.palace-letter').forEach(el => el.remove());
   }
 
+  // 觸類：星號（下緣中間）
+  function markPalaceAsterisk(palaceName) {
+    const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
+    if (!el) return;
+    const old = el.querySelector('.palace-asterisk');
+    if (old) old.remove();
+    const astDiv = document.createElement('div');
+    astDiv.className = 'palace-asterisk';
+    astDiv.textContent = '＊';
+    el.appendChild(astDiv);
+  }
+
+  function clearPalaceAsterisks() {
+    document.querySelectorAll('.palace-asterisk').forEach(el => el.remove());
+  }
+
   async function runChain(startPalace, mode) {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -636,48 +662,67 @@
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    return data.chain;
+    return data;
+  }
+
+  function makeChainItemHTML(item) {
+    const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
+    const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
+    return `
+      <div class="chain-item-name">${item.name}</div>
+      <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
+    `;
   }
 
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
     clearPalaceNumbers();
     clearPalaceLetters();
+    clearPalaceAsterisks();
 
     try {
       // 正推
-      const zhengtuiChain = await runChain(startPalace, 'zhengtui');
+      const zhengtuiData = await runChain(startPalace, 'zhengtui');
       chainList.innerHTML = '';
-      zhengtuiChain.forEach((item, idx) => {
+      zhengtuiData.chain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
-        const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
-        const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
-        div.innerHTML = `
-          <div class="chain-item-name">${item.name}</div>
-          <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
-        `;
+        div.innerHTML = makeChainItemHTML(item);
         chainList.appendChild(div);
         markPalaceNumber(item.palace, idx + 1);
       });
       chainSection.style.display = 'block';
 
-      // 旁通
-      const pangtongChain = await runChain(startPalace, 'pangtong');
+      // 旁通（這次請求會一起回傳 chulei）
+      const pangtongData = await runChain(startPalace, 'pangtong');
       pangtongList.innerHTML = '';
-      pangtongChain.forEach((item, idx) => {
+      pangtongData.chain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
-        const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
-        const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
-        div.innerHTML = `
-          <div class="chain-item-name">${item.name}</div>
-          <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
-        `;
+        div.innerHTML = makeChainItemHTML(item);
         pangtongList.appendChild(div);
         markPalaceLetter(item.palace, idx + 1);
       });
       pangtongSection.style.display = 'block';
+
+      // 觸類
+      chuleiList.innerHTML = '';
+      const chulei = pangtongData.chulei;
+      if (chulei && chulei.found && chulei.items.length > 0) {
+        chulei.items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'chain-item';
+          div.innerHTML = makeChainItemHTML(item);
+          chuleiList.appendChild(div);
+          markPalaceAsterisk(item.palace);
+        });
+      } else {
+        const div = document.createElement('div');
+        div.className = 'chain-item';
+        div.innerHTML = '<div class="chain-item-name" style="color:#8a8578;">無處觸類</div>';
+        chuleiList.appendChild(div);
+      }
+      chuleiSection.style.display = 'block';
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
     }
