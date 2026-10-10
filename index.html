@@ -271,9 +271,9 @@
     }
 
     .chain-item-poem {
-      font-size: 0.82rem;
+      font-size: 0.75rem;
       color: #6a6458;
-      line-height: 1.8;
+      line-height: 1.6;
       white-space: pre-line;
     }
 
@@ -369,19 +369,11 @@
     return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
   }
 
-  // ========== 卦詩處理：兩句並一行（14字一行） ==========
+  // ========== 卦詩處理：28 字一行 ==========
   function formatPoem(poem) {
     if (!poem || !poem.trim()) return '';
     const lines = poem.split('\n').filter(l => l.trim());
-    const merged = [];
-    for (let i = 0; i < lines.length; i += 2) {
-      if (i + 1 < lines.length) {
-        merged.push(lines[i].trim() + '　' + lines[i+1].trim());
-      } else {
-        merged.push(lines[i].trim());
-      }
-    }
-    return merged.join('\n');
+    return lines.map(l => l.trim()).join('　');
   }
 
   // ========== 六爻輸入 ==========
