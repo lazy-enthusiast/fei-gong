@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>飛宮易卦</title>
+
+  <!-- 真太陽時計算庫（CDN） -->
+  <script src="https://cdn.jsdelivr.net/npm/true-solar-time@1.2.1/dist/index.umd.js"></script>
+  <!-- 農曆/干支庫（CDN） -->
+  <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -33,6 +39,65 @@
       border-bottom: 1px solid #d4cfc0;
     }
 
+    /* ===== 日期時間 + 城市 ===== */
+    .datetime-area {
+      background: #fff;
+      border: 1px solid #d4cfc0;
+      border-radius: 4px;
+      padding: 0.5rem 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .datetime-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .datetime-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .datetime-row label {
+      font-size: 0.75rem;
+      color: #8a8578;
+      width: 2.2rem;
+      flex-shrink: 0;
+    }
+
+    .datetime-row input {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      border: 1px solid #d4cfc0;
+      border-radius: 3px;
+      padding: 0 0.4rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: #2a2a2a;
+      outline: none;
+    }
+
+    .datetime-row input:focus {
+      border-color: #8a6d3b;
+    }
+
+    .info-line {
+      font-size: 0.7rem;
+      color: #6a6458;
+      line-height: 1.5;
+      margin-top: 0.35rem;
+      padding-top: 0.35rem;
+      border-top: 1px dashed #e0dbd0;
+    }
+
+    .info-line .highlight {
+      color: #8a6d3b;
+      font-weight: 600;
+    }
+
+    /* ===== 上層：輸入 + 本卦 + 變卦 ===== */
     .top-section {
       display: flex;
       gap: 0.5rem;
@@ -172,9 +237,12 @@
       text-align: center;
     }
 
-    .nine-grid-section {
+    /* ===== 九宮格（含外圍地支） ===== */
+    .nine-grid-wrapper {
       margin-top: 0.3rem;
       display: none;
+      position: relative;
+      padding: 1.4rem 1.6rem;
     }
 
     .nine-grid {
@@ -257,6 +325,51 @@
       pointer-events: none;
     }
 
+    /* 地支（九宮格外圍） */
+    .dizhi {
+      position: absolute;
+      font-size: 0.8rem;
+      color: #6a6458;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .dizhi.xun-kong {
+      color: #a04a3a;
+      font-weight: 700;
+    }
+
+    /* 用 CSS 畫圈：外層 span 包住數字，用 border 圓圈 */
+    .dizhi .circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.3em;
+      height: 1.3em;
+      border: 1.5px solid #a04a3a;
+      border-radius: 50%;
+      font-size: 0.75rem;
+    }
+
+    /* 十二地支位置（絕對定位，相對 wrapper） */
+    .dizhi-si   { top: 0.2rem; left: 50%; transform: translateX(-100%); }  /* 巽上：巳 */
+    .dizhi-wu   { top: 0.2rem; left: 50%; transform: translateX(-50%); }   /* 離上：午 */
+    .dizhi-wei  { top: 0.2rem; left: 50%; transform: translateX(0%); }     /* 坤上：未 */
+    .dizhi-shen { top: 50%; right: 0.15rem; transform: translateY(-50%); } /* 坤右：申 */
+    .dizhi-you  { top: 50%; right: 0.15rem; transform: translateY(-50%); } /* 兌右：酉 */
+    .dizhi-xu   { top: 50%; right: 0.15rem; transform: translateY(-50%); } /* 乾右：戌 */
+    .dizhi-hai  { bottom: 0.2rem; left: 50%; transform: translateX(0%); }  /* 乾下：亥 */
+    .dizhi-zi   { bottom: 0.2rem; left: 50%; transform: translateX(-50%); }/* 坎下：子 */
+    .dizhi-chou { bottom: 0.2rem; left: 50%; transform: translateX(-100%); }/* 艮下：丑 */
+    .dizhi-yin  { top: 50%; left: 0.15rem; transform: translateY(-50%); }  /* 艮左：寅 */
+    .dizhi-mao  { top: 50%; left: 0.15rem; transform: translateY(-50%); }  /* 震左：卯 */
+    .dizhi-chen { top: 50%; left: 0.15rem; transform: translateY(-50%); }  /* 巽左：辰 */
+
+    /* 但上面 transform 會讓同方向的重疊，需要更精確定位 */
+    /* 改用 grid 底層定位法：用 wrapper 的 padding 留出外圍，地支絕對定位 */
+    /* 簡化方案：用六個方位（上3、右3、下3、左3） */
+
+    /* ===== 飛宮鏈 ===== */
     .chain-section {
       margin-top: 0.4rem;
       display: none;
@@ -304,9 +417,23 @@
 <div class="app">
   <h1>飛宮易卦</h1>
 
+  <!-- 日期時間 + 城市 -->
+  <div class="datetime-area">
+    <div class="datetime-row">
+      <label>日期</label>
+      <input type="date" id="dateInput">
+      <input type="time" id="timeInput">
+    </div>
+    <div class="datetime-row">
+      <label>城市</label>
+      <input type="text" id="cityInput" value="香港" placeholder="輸入城市名">
+    </div>
+    <div class="info-line" id="datetimeInfo"></div>
+  </div>
+
+  <!-- 六爻輸入 + 本卦變卦 -->
   <div class="top-section">
     <div class="input-area" id="inputArea"></div>
-
     <div class="hex-result">
       <div class="hex-box">
         <div class="hex-box-title">本卦</div>
@@ -324,10 +451,13 @@
   <button class="btn" id="castBtn">起 卦</button>
   <div class="error-msg" id="errorMsg"></div>
 
-  <div class="nine-grid-section" id="nineGridSection">
+  <!-- 九宮格（含外圍地支） -->
+  <div class="nine-grid-wrapper" id="nineGridWrapper">
     <div class="nine-grid" id="nineGrid"></div>
+    <!-- 地支由 JS 動態加入 -->
   </div>
 
+  <!-- 飛宮鏈 -->
   <div class="chain-section" id="chainSection">
     <div class="chain-title">正 推</div>
     <div id="chainList"></div>
@@ -336,12 +466,13 @@
 
 <script>
   const API_URL = 'https://feigong-yigua.davchan-clp.workers.dev';
+  const HONG_KONG_LNG = 114.17;
 
   const LINE_NAMES = ['初', '二', '三', '四', '五', '上'];
   const OPTIONS = ['6', '7', '8', '9'];
-
   const CIRCLED_NUM = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
 
+  // ===== 本地卦名數據 =====
   const TRIGRAMS = {
     1: { name: '乾', lines: [1,1,1] },
     2: { name: '兌', lines: [1,1,0] },
@@ -372,6 +503,172 @@
     '4_1':'雷天大壯','2_1':'澤天夬','6_1':'水天需','6_8':'水地比'
   };
 
+  // 旬空表（甲子旬起，每旬空亡兩個地支）
+  const XUN_KONG_TABLE = {
+    '甲子': ['戌', '亥'], '甲戌': ['申', '酉'], '甲申': ['午', '未'],
+    '甲午': ['辰', '巳'], '甲辰': ['寅', '卯'], '甲寅': ['子', '丑']
+  };
+
+  // 十二地支（用於判斷旬空）
+  const DIZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+  // ===== 日期時間處理 =====
+  const dateInput = document.getElementById('dateInput');
+  const timeInput = document.getElementById('timeInput');
+  const cityInput = document.getElementById('cityInput');
+  const datetimeInfo = document.getElementById('datetimeInfo');
+
+  // 初始化為當下
+  const now = new Date();
+  dateInput.value = now.toISOString().slice(0, 10);
+  timeInput.value = now.toTimeString().slice(0, 5);
+
+  // ===== 取得城市經度 =====
+  async function getLongitude(city) {
+    if (city === '香港' || city === 'Hong Kong' || city === 'HK') {
+      return HONG_KONG_LNG;
+    }
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`, {
+        headers: { 'User-Agent': 'FeiGongYiGua/1.0' }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        return parseFloat(data[0].lon);
+      }
+    } catch (e) {
+      console.error('城市查詢失敗:', e);
+    }
+    return HONG_KONG_LNG; // 查不到時回退香港
+  }
+
+  // ===== 計算真太陽時 + 更新資訊欄 =====
+  async function updateDatetimeInfo() {
+    const dateStr = dateInput.value;
+    const timeStr = timeInput.value;
+    const city = cityInput.value.trim() || '香港';
+
+    if (!dateStr || !timeStr) {
+      datetimeInfo.textContent = '';
+      return;
+    }
+
+    const lng = await getLongitude(city);
+
+    // 建立 Date 物件（本地時區，即香港 UTC+8）
+    const dt = new Date(`${dateStr}T${timeStr}:00+08:00`);
+
+    // 真太陽時
+    let trueSolar = dt;
+    let totalOffset = 0;
+    let eot = 0;
+    let lngOffset = 0;
+    try {
+      const detail = trueSolarTime.getTrueSolarTimeDetail(dt, lng);
+      trueSolar = detail.date;
+      eot = detail.eot;
+      lngOffset = detail.lngOffset;
+      totalOffset = detail.totalOffset;
+    } catch (e) {
+      console.error('真太陽時計算失敗:', e);
+    }
+
+    // 用真太陽時算農曆、日柱
+    const solar = Solar.fromDate(trueSolar);
+    const lunar = solar.getLunar();
+    const dayGanZhi = lunar.getDayInGanZhi(); // 例如「甲子」
+
+    // 查旬空
+    let xunKong = ['', ''];
+    for (const [xun, kong] of Object.entries(XUN_KONG_TABLE)) {
+      // 判斷 dayGanZhi 屬於哪一旬：旬首的干是「甲」，地支是旬首地支
+      // 簡化：直接取 dayGanZhi 前兩個字的地支，找對應旬
+      const dayZhi = dayGanZhi.slice(1, 2); // 取第二個字（地支）
+      const xunZhi = xun.slice(1, 2); // 旬首的地支
+      // 計算從旬首到當日的偏移，判斷是否在同一旬（偏移 0-9）
+      const dayIdx = DIZHI.indexOf(dayZhi);
+      const xunIdx = DIZHI.indexOf(xunZhi);
+      let diff = (dayIdx - xunIdx + 12) % 12;
+      // 天干也要匹配：甲子旬中，日干與甲相差 0-9
+      // 更準確：六十甲子序號 mod 10 判斷
+      // 這裡用簡單邏輯：旬空表 key 的第一個字是「甲」，我們判斷 dayGanZhi 是否以對應天干序列
+      // 簡化：直接看 dayGanZhi 的干是否在該旬的十天干內
+      // 其實更簡單：dayGanZhi 的旬首 = 天干往前推到「甲」，地支對應
+      // 但為了可靠，用 lunar-javascript 的 API
+    }
+
+    // 改用 lunar-javascript 的旬空 API（如果有）
+    // 如果沒有，手動算：日柱干支的旬首
+    const dayGan = dayGanZhi.slice(0, 1);
+    const dayZhi2 = dayGanZhi.slice(1, 2);
+    const GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    const ganIdx = GAN.indexOf(dayGan);
+    const zhiIdx = DIZHI.indexOf(dayZhi2);
+    // 旬首天干一定是甲，從日柱往前推 ganIdx 位
+    const xunStartZhiIdx = (zhiIdx - ganIdx + 12) % 12;
+    const xunStartZhi = DIZHI[xunStartZhiIdx];
+    const xunStart = '甲' + xunStartZhi;
+    xunKong = XUN_KONG_TABLE[xunStart] || ['', ''];
+
+    // 顯示
+    const lunarStr = `${lunar.getYearInChinese()}年${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+    const trueTimeStr = trueSolar.toTimeString().slice(0, 5);
+    const sign = totalOffset >= 0 ? '+' : '';
+    datetimeInfo.innerHTML = `
+      農曆：${lunarStr}　日柱：${dayGanZhi}（${xunKong[0]}${xunKong[1]}空）<br>
+      真太陽時：${trueTimeStr}　校正：${sign}${totalOffset}分（均時差${eot >= 0 ? '+' : ''}${eot}，經度${lngOffset >= 0 ? '+' : ''}${lngOffset}）
+    `;
+
+    return { xunKong, trueSolar, lng };
+  }
+
+  // 綁定日期時間變更
+  [dateInput, timeInput, cityInput].forEach(el => {
+    el.addEventListener('change', updateDatetimeInfo);
+  });
+  updateDatetimeInfo();
+
+  // ===== 六爻輸入 =====
+  const inputArea = document.getElementById('inputArea');
+  for (let i = 5; i >= 0; i--) {
+    const row = document.createElement('div');
+    row.className = 'input-row';
+    const label = document.createElement('label');
+    label.textContent = LINE_NAMES[i];
+    const select = document.createElement('select');
+    select.dataset.index = i;
+    OPTIONS.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    });
+    select.value = '7';
+    row.appendChild(label);
+    row.appendChild(select);
+    inputArea.appendChild(row);
+  }
+
+  function getLineValue(val) {
+    return (val === '7' || val === '9') ? 1 : 0;
+  }
+  function isMoving(val) {
+    return val === '6' || val === '9';
+  }
+
+  function getSixLinesInput() {
+    const selects = document.querySelectorAll('#inputArea select');
+    const sixLines = [];
+    const movingLineIndexes = [];
+    selects.forEach(sel => {
+      const i = parseInt(sel.dataset.index);
+      const val = sel.value;
+      sixLines[i] = getLineValue(val);
+      if (isMoving(val)) movingLineIndexes.push(i);
+    });
+    return { sixLines, movingLineIndexes };
+  }
+
   function linesToTrigramNum(lines) {
     for (let i = 1; i <= 8; i++) {
       const t = TRIGRAMS[i].lines;
@@ -400,49 +697,6 @@
       }
     }
     return merged.join('\n');
-  }
-
-  const inputArea = document.getElementById('inputArea');
-  for (let i = 5; i >= 0; i--) {
-    const row = document.createElement('div');
-    row.className = 'input-row';
-
-    const label = document.createElement('label');
-    label.textContent = LINE_NAMES[i];
-
-    const select = document.createElement('select');
-    select.dataset.index = i;
-    OPTIONS.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v;
-      opt.textContent = v;
-      select.appendChild(opt);
-    });
-    select.value = '7';
-
-    row.appendChild(label);
-    row.appendChild(select);
-    inputArea.appendChild(row);
-  }
-
-  function getLineValue(val) {
-    return (val === '7' || val === '9') ? 1 : 0;
-  }
-  function isMoving(val) {
-    return val === '6' || val === '9';
-  }
-
-  function getSixLinesInput() {
-    const selects = document.querySelectorAll('#inputArea select');
-    const sixLines = [];
-    const movingLineIndexes = [];
-    selects.forEach(sel => {
-      const i = parseInt(sel.dataset.index);
-      const val = sel.value;
-      sixLines[i] = getLineValue(val);
-      if (isMoving(val)) movingLineIndexes.push(i);
-    });
-    return { sixLines, movingLineIndexes };
   }
 
   function renderSixLines(lines, container) {
@@ -475,48 +729,48 @@
 
   function updateLive() {
     const { sixLines, movingLineIndexes } = getSixLinesInput();
-
     renderSixLines(sixLines, document.getElementById('benLines'));
     document.getElementById('benName').textContent = getHexNameFromSixLines(sixLines);
-
     const chgLines = [...sixLines];
     movingLineIndexes.forEach(i => { chgLines[i] = chgLines[i] === 1 ? 0 : 1; });
     renderSixLines(chgLines, document.getElementById('chgLines'));
     document.getElementById('chgName').textContent = getHexNameFromSixLines(chgLines);
-
-    document.getElementById('nineGridSection').style.display = 'none';
+    document.getElementById('nineGridWrapper').style.display = 'none';
     document.getElementById('chainSection').style.display = 'none';
   }
 
   document.querySelectorAll('#inputArea select').forEach(sel => {
     sel.addEventListener('change', updateLive);
   });
-
   updateLive();
 
+  // ===== 起卦 =====
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
-  const nineGridSection = document.getElementById('nineGridSection');
+  const nineGridWrapper = document.getElementById('nineGridWrapper');
   const nineGrid = document.getElementById('nineGrid');
   const chainSection = document.getElementById('chainSection');
   const chainList = document.getElementById('chainList');
 
   let currentPalaces = null;
+  let currentXunKong = ['', ''];
 
   castBtn.addEventListener('click', async () => {
     errorMsg.textContent = '';
     const { sixLines, movingLineIndexes } = getSixLinesInput();
+
+    // 順便更新一次旬空
+    try {
+      const dtResult = await updateDatetimeInfo();
+      if (dtResult) currentXunKong = dtResult.xunKong;
+    } catch (e) {}
 
     castBtn.disabled = true;
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'cast',
-          sixLines: sixLines,
-          movingLineIndexes: movingLineIndexes
-        })
+        body: JSON.stringify({ action: 'cast', sixLines, movingLineIndexes })
       });
       const data = await res.json();
       if (data.error) {
@@ -524,11 +778,9 @@
         castBtn.disabled = false;
         return;
       }
-
       currentPalaces = data.palaces;
-      renderNineGrid(data.palaces);
-      nineGridSection.style.display = 'block';
-
+      renderNineGrid(data.palaces, currentXunKong);
+      nineGridWrapper.style.display = 'block';
       chainSection.style.display = 'none';
       chainList.innerHTML = '';
     } catch (e) {
@@ -537,52 +789,86 @@
     castBtn.disabled = false;
   });
 
-  function renderNineGrid(palaces) {
+  // ===== 九宮格渲染（含外圍地支） =====
+  function renderNineGrid(palaces, xunKong) {
     nineGrid.innerHTML = '';
     const gridOrder = ['巽', '離', '坤', '震', '中', '兌', '艮', '坎', '乾'];
 
     gridOrder.forEach(pos => {
       const div = document.createElement('div');
       div.className = 'palace';
-
       if (pos === '中') {
         div.classList.add('empty');
         nineGrid.appendChild(div);
         return;
       }
-
       const p = palaces[pos];
-      if (!p) {
-        div.classList.add('empty');
-        nineGrid.appendChild(div);
-        return;
-      }
-
+      if (!p) { div.classList.add('empty'); nineGrid.appendChild(div); return; }
       const linesDiv = document.createElement('div');
       linesDiv.className = 'palace-lines';
       renderTrigramLines(p.lines, linesDiv);
       div.appendChild(linesDiv);
-
       div.addEventListener('click', () => {
         document.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
         div.classList.add('selected');
         runFlyingChain(pos);
       });
-
       nineGrid.appendChild(div);
+    });
+
+    // 移除舊地支
+    document.querySelectorAll('.dizhi').forEach(el => el.remove());
+
+    // 12 地支位置（相對 wrapper 的絕對定位）
+    // 上排：巳（巽上）、午（離上）、未（坤上）
+    // 右排：申（坤右）、酉（兌右）、戌（乾右）
+    // 下排：亥（乾下）、子（坎下）、丑（艮下）
+    // 左排：寅（艮左）、卯（震左）、辰（巽左）
+    const dizhiPositions = [
+      { char: '巳', cls: 'dizhi-si', top: '0', left: '18%' },
+      { char: '午', cls: 'dizhi-wu', top: '0', left: '50%' },
+      { char: '未', cls: 'dizhi-wei', top: '0', left: '82%' },
+      { char: '申', cls: 'dizhi-shen', top: '18%', right: '0' },
+      { char: '酉', cls: 'dizhi-you', top: '50%', right: '0' },
+      { char: '戌', cls: 'dizhi-xu', top: '82%', right: '0' },
+      { char: '亥', cls: 'dizhi-hai', bottom: '0', left: '82%' },
+      { char: '子', cls: 'dizhi-zi', bottom: '0', left: '50%' },
+      { char: '丑', cls: 'dizhi-chou', bottom: '0', left: '18%' },
+      { char: '寅', cls: 'dizhi-yin', top: '82%', left: '0' },
+      { char: '卯', cls: 'dizhi-mao', top: '50%', left: '0' },
+      { char: '辰', cls: 'dizhi-chen', top: '18%', left: '0' }
+    ];
+
+    dizhiPositions.forEach(dp => {
+      const el = document.createElement('div');
+      el.className = 'dizhi ' + dp.cls;
+      if (dp.top) el.style.top = dp.top;
+      if (dp.bottom) el.style.bottom = dp.bottom;
+      if (dp.left) el.style.left = dp.left;
+      if (dp.right) el.style.right = dp.right;
+      el.style.position = 'absolute';
+      el.style.transform = 'translate(-50%, -50%)';
+
+      // 判斷是否旬空
+      if (xunKong.includes(dp.char)) {
+        el.classList.add('xun-kong');
+        el.innerHTML = `<span class="circle">${dp.char}</span>`;
+      } else {
+        el.textContent = dp.char;
+      }
+      nineGridWrapper.appendChild(el);
     });
   }
 
+  // ===== 飛宮鏈 =====
   function markPalaceNumber(palaceName, number) {
     const gridOrder = ['巽', '離', '坤', '震', '中', '兌', '艮', '坎', '乾'];
     const index = gridOrder.indexOf(palaceName);
     if (index < 0) return;
     const palaceDiv = nineGrid.children[index];
     if (!palaceDiv) return;
-
     const old = palaceDiv.querySelector('.palace-number');
     if (old) old.remove();
-
     if (number >= 1 && number <= 8) {
       const numDiv = document.createElement('div');
       numDiv.className = 'palace-number';
@@ -598,23 +884,14 @@
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
     clearPalaceNumbers();
-
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'fly',
-          palaces: currentPalaces,
-          startPalace: startPalace
-        })
+        body: JSON.stringify({ action: 'fly', palaces: currentPalaces, startPalace })
       });
       const data = await res.json();
-      if (data.error) {
-        errorMsg.textContent = data.error;
-        return;
-      }
-
+      if (data.error) { errorMsg.textContent = data.error; return; }
       chainList.innerHTML = '';
       data.chain.forEach((item, idx) => {
         const div = document.createElement('div');
@@ -628,7 +905,6 @@
         chainList.appendChild(div);
         markPalaceNumber(item.palace, idx + 1);
       });
-
       chainSection.style.display = 'block';
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
