@@ -459,12 +459,12 @@ h1 {
 /* 觸類：星號（下緣中間） */
 .palace-asterisk {
   position: absolute;
-  bottom: 4px;
+  bottom: 3px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1rem;
+  font-size: 0.65rem;
   color: #a04a3a;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   pointer-events: none;
 }
