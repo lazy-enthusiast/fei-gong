@@ -19,7 +19,7 @@
     .app {
       max-width: 480px;
       margin: 0 auto;
-      padding: 0 0.6rem;
+      padding: 0 0.5rem;
     }
 
     h1 {
@@ -33,89 +33,82 @@
       border-bottom: 1px solid #d4cfc0;
     }
 
-    /* ===== 頂部資訊（可收合） ===== */
-    .info-bar {
+    /* ===== 頂部：日期時間城市 ===== */
+    .info-panel {
       background: #fff;
       border: 1px solid #d4cfc0;
       border-radius: 4px;
+      padding: 0.5rem 0.6rem;
       margin-bottom: 0.5rem;
-      overflow: hidden;
+      font-size: 0.8rem;
+      color: #2a2a2a;
     }
 
-    .info-summary {
-      padding: 0.4rem 0.7rem;
-      font-size: 0.8rem;
-      color: #6a6458;
-      cursor: pointer;
+    .info-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      user-select: none;
+      gap: 0.4rem;
+      margin-bottom: 0.35rem;
     }
 
-    .info-summary:active {
-      background: #f5efe0;
+    .info-row:last-child {
+      margin-bottom: 0;
     }
 
-    .info-toggle {
-      font-size: 0.7rem;
+    .info-row label {
+      width: 2.2rem;
       color: #8a8578;
-      transition: transform 0.2s;
-    }
-
-    .info-bar.open .info-toggle {
-      transform: rotate(180deg);
-    }
-
-    .info-detail {
-      display: none;
-      padding: 0.6rem 0.7rem;
-      border-top: 1px dashed #d4cfc0;
-      font-size: 0.8rem;
-      color: #6a6458;
-      line-height: 1.7;
-    }
-
-    .info-bar.open .info-detail {
-      display: block;
-    }
-
-    .info-detail-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.3rem;
-    }
-
-    .info-detail-row label {
-      width: 3rem;
-      color: #8a8578;
+      font-size: 0.75rem;
       flex-shrink: 0;
     }
 
-    .info-detail-row input,
-    .info-detail-row select {
+    .info-row input {
       flex: 1;
+      min-width: 0;
+      height: 26px;
+      background: #faf8f3;
       border: 1px solid #d4cfc0;
       border-radius: 3px;
-      padding: 0.2rem 0.4rem;
-      font-family: inherit;
+      padding: 0 0.4rem;
       font-size: 0.8rem;
-      background: #faf8f3;
+      font-family: inherit;
       color: #2a2a2a;
       outline: none;
     }
 
-    .info-detail-row input:focus,
-    .info-detail-row select:focus {
+    .info-row input:focus {
       border-color: #8a6d3b;
     }
 
-    /* ===== 上層：輸入 + 本卦 + 變卦 ===== */
+    .info-readout {
+      font-size: 0.72rem;
+      color: #6a6458;
+      line-height: 1.5;
+      padding-top: 0.35rem;
+      margin-top: 0.35rem;
+      border-top: 1px dashed #d4cfc0;
+      text-align: center;
+    }
+
+    .info-readout .highlight {
+      color: #8a6d3b;
+      font-weight: 600;
+    }
+
+    .nominatim-attr {
+      font-size: 0.6rem;
+      color: #b0aa9c;
+      text-align: center;
+      margin-top: 0.2rem;
+    }
+
+    /* ===== 上層 ===== */
     .top-section {
       display: flex;
       gap: 0.5rem;
       align-items: stretch;
       margin-bottom: 0.2rem;
+      padding-left: 0.3rem;
     }
 
     .input-area {
@@ -162,7 +155,7 @@
     .hex-result {
       display: flex;
       flex: 1;
-      gap: 1.2rem;
+      gap: 1rem;
       justify-content: center;
       align-items: center;
       min-width: 0;
@@ -250,28 +243,59 @@
       text-align: center;
     }
 
-    /* ===== 九宮格（含地支標註） ===== */
+    /* ===== 九宮格 + 地支 ===== */
     .nine-grid-section {
-      margin-top: 0.5rem;
+      margin-top: 0.3rem;
       display: none;
     }
 
-    .nine-grid-wrapper {
-      position: relative;
-      width: 252px;         /* 3*80 + 2*6 = 252 */
-      margin: 0 auto;
-      padding: 18px;        /* 給地支留出空間 */
-    }
-
-    .nine-grid {
+    /* 用 grid 做「地支 + 九宮」的整體佈局：
+       5 列 x 5 行
+       第 1/3/5 行：地支（上/中/下）
+       第 1/3/5 列：地支（左/中/右）
+       核心九宮在中間 3x3
+    */
+    .bagua-wrap {
       display: grid;
-      grid-template-columns: repeat(3, 80px);
-      grid-template-rows: repeat(3, 80px);
-      gap: 6px;
-      position: relative;
-      z-index: 1;
+      grid-template-columns: 22px 80px 80px 80px 22px;
+      grid-template-rows: 22px 80px 80px 80px 22px;
+      gap: 4px;
+      justify-content: center;
+      margin: 0 auto;
     }
 
+    /* 地支（每格一個字） */
+    .zhi {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: #6a6458;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    /* 旬空的地支：畫紅圈 */
+    .zhi.xunkong {
+      color: #a04a3a;
+      font-weight: 700;
+    }
+
+    .zhi.xunkong::before {
+      content: '';
+      position: absolute;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 1.5px solid #a04a3a;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .zhi {
+      position: relative;
+    }
+
+    /* 九宮格（3x3，在 bagua-wrap 的中央） */
     .palace {
       position: relative;
       background: #fff;
@@ -343,71 +367,9 @@
       pointer-events: none;
     }
 
-    /* 地支標註：絕對定位，緊貼九宮格邊緣 */
-    .earthly-branch {
-      position: absolute;
-      font-size: 0.7rem;
-      color: #a09884;
-      line-height: 1;
-      pointer-events: none;
-    }
-
-    /* 上方三個（巳午未） */
-    .eb-top-1 { top: 2px; left: 26px; }
-    .eb-top-2 { top: 2px; left: 112px; }
-    .eb-top-3 { top: 2px; left: 198px; }
-
-    /* 下方三個（寅卯辰、亥子丑 分兩排？實際上是：左下寅、中下子、右下亥？ */
-    /* 用你的截圖：底排由左至右：寅、卯、辰 → 但截圖是「寅」左下，「亥」右下，中間「子」 */
-    /* 我再確認：你的截圖底排從左到右是「寅、子、亥」？ */
-    /* 看截圖：下方是 寅(左)、子(中)、亥(右)？但好像又是「寅、卯、辰」...
-       實際上你的截圖下方是：寅、子、亥 三個？不對，有四個？ */
-    /* 從截圖看：
-       頂：巳 午 未（三個，在上方）
-       左：辰（左上）、卯（左中）、寅（左下）→ 三個在左側
-       右：申（右上）、酉（右中）、戌（右下）→ 三個在右側
-       底：亥（右下角）、子（底部中間）、丑？→ 好像底部是「亥、子、丑」但丑沒顯示？
-       看起來底部是 亥、子（只有兩個？）+ 醜？
-       我再仔細看：底部由左至右是「醜？寅？子？亥？」
-       從截圖看，底部只有「亥」和「子」，加上左下角「寅」，右下角「戌」
-       所以地支分布是：
-       - 上：巳午未
-       - 左：辰卯寅
-       - 右：申酉戌
-       - 下：丑子亥（丑在最左下？）
-       由於我不確定，我用一個更穩妥的方式：地支環繞九宮格。
-       標準後天八卦配地支：
-       離(南)=午、坎(北)=子、震(東)=卯、兌(西)=酉、
-       巽(東南)=巳、坤(西南)=申、乾(西北)=亥、艮(東北)=寅、
-       以及四維：辰(東南偏東)、未(南偏西)、戌(西偏北)、丑(北偏東)
-       我先按你截圖的位置對應：
-       從截圖：
-       上方：巳(左)、午(中)、未(右)
-       左側：辰(上)、卯(中)、寅(下)
-       右側：申(上)、酉(中)、戌(下)
-       下方：丑(左)、子(中)、亥(右)？但截圖下方只看到「亥」和「子」
-       ——先按 12 地支環繞的方式排，上3、左3、右3、下3
-    */
-    /* 上方 */
-    .eb-s1 { top: 2px; left: 28px; }      /* 巳 */
-    .eb-s2 { top: 2px; left: 114px; }     /* 午 */
-    .eb-s3 { top: 2px; left: 200px; }     /* 未 */
-    /* 左側 */
-    .eb-w1 { top: 28px; left: 2px; }      /* 辰 */
-    .eb-w2 { top: 114px; left: 2px; }     /* 卯 */
-    .eb-w3 { top: 200px; left: 2px; }     /* 寅 */
-    /* 右側 */
-    .eb-e1 { top: 28px; right: 2px; }     /* 申 */
-    .eb-e2 { top: 114px; right: 2px; }    /* 酉 */
-    .eb-e3 { top: 200px; right: 2px; }    /* 戌 */
-    /* 下方 */
-    .eb-n1 { bottom: 2px; left: 28px; }   /* 丑 */
-    .eb-n2 { bottom: 2px; left: 114px; }  /* 子 */
-    .eb-n3 { bottom: 2px; right: 28px; }  /* 亥 */
-
     /* ===== 飛宮鏈 ===== */
     .chain-section {
-      margin-top: 0.6rem;
+      margin-top: 0.4rem;
       display: none;
     }
 
@@ -426,24 +388,20 @@
       border: 1px solid #d4cfc0;
       border-left: 3px solid #8a6d3b;
       border-radius: 4px;
-      padding: 0.6rem 0.8rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .chain-item:last-child {
-      margin-bottom: 0;
+      padding: 0.5rem 0.7rem;
+      margin-bottom: 0.3rem;
     }
 
     .chain-item-name {
       font-size: 1.15rem;
       color: #2a2a2a;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.3rem;
     }
 
     .chain-item-poem {
       font-size: 0.9rem;
       color: #6a6458;
-      line-height: 1.8;
+      line-height: 1.7;
       white-space: pre-line;
     }
 
@@ -457,27 +415,24 @@
 <div class="app">
   <h1>飛宮易卦</h1>
 
-  <!-- 頂部資訊（可收合） -->
-  <div class="info-bar" id="infoBar">
-    <div class="info-summary" id="infoSummary">
-      <span id="infoSummaryText">Oct 10, 2026 · 香港</span>
-      <span class="info-toggle">▼</span>
+  <!-- 頂部：日期時間城市 -->
+  <div class="info-panel">
+    <div class="info-row">
+      <label>日期</label>
+      <input type="date" id="dateInput">
     </div>
-    <div class="info-detail">
-      <div class="info-detail-row">
-        <label>日期</label>
-        <input type="date" id="infoDate" value="2026-10-10">
-        <input type="time" id="infoTime" value="22:52">
-      </div>
-      <div class="info-detail-row">
-        <label>城市</label>
-        <input type="text" id="infoCity" value="香港">
-      </div>
-      <div style="color: #a09884; font-size: 0.75rem; margin-top: 0.4rem;">
-        農曆：二〇二六年九月初一　日柱：丁巳（子丑空）<br>
-        真太陽時：22:52　校正：+0分（均時差+0，經度+0）
-      </div>
+    <div class="info-row">
+      <label>時間</label>
+      <input type="time" id="timeInput">
     </div>
+    <div class="info-row">
+      <label>城市</label>
+      <input type="text" id="cityInput" value="香港" placeholder="輸入城市名">
+    </div>
+    <div class="info-readout" id="infoReadout">
+      <!-- 動態顯示 -->
+    </div>
+    <div class="nominatim-attr">地理位置數據 © OpenStreetMap contributors</div>
   </div>
 
   <div class="top-section">
@@ -501,25 +456,8 @@
   <div class="error-msg" id="errorMsg"></div>
 
   <div class="nine-grid-section" id="nineGridSection">
-    <div class="nine-grid-wrapper">
-      <!-- 上方地支 -->
-      <span class="earthly-branch eb-s1">巳</span>
-      <span class="earthly-branch eb-s2">午</span>
-      <span class="earthly-branch eb-s3">未</span>
-      <!-- 左側地支 -->
-      <span class="earthly-branch eb-w1">辰</span>
-      <span class="earthly-branch eb-w2">卯</span>
-      <span class="earthly-branch eb-w3">寅</span>
-      <!-- 右側地支 -->
-      <span class="earthly-branch eb-e1">申</span>
-      <span class="earthly-branch eb-e2">酉</span>
-      <span class="earthly-branch eb-e3">戌</span>
-      <!-- 下方地支 -->
-      <span class="earthly-branch eb-n1">丑</span>
-      <span class="earthly-branch eb-n2">子</span>
-      <span class="earthly-branch eb-n3">亥</span>
-
-      <div class="nine-grid" id="nineGrid"></div>
+    <div class="bagua-wrap" id="baguaWrap">
+      <!-- 地支與九宮格由 JS 生成 -->
     </div>
   </div>
 
@@ -534,9 +472,45 @@
 
   const LINE_NAMES = ['初', '二', '三', '四', '五', '上'];
   const OPTIONS = ['6', '7', '8', '9'];
-
   const CIRCLED_NUM = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
 
+  // ========== 九宮格佈局（與地支對應） ==========
+  // 九宮格位置：[gridRow, gridCol] in bagua-wrap 的 5x5 網格
+  // 地支位置：以 5x5 為座標系
+  //   (1,2)=巳 (1,3)=午 (1,4)=未
+  //   (2,1)=辰              (2,5)=申
+  //   (3,1)=卯   (3,3)=中    (3,5)=酉
+  //   (4,1)=寅              (4,5)=戌
+  //   (5,2)=丑 (5,3)=子 (5,4)=亥
+  const ZHI_LAYOUT = [
+    { zhi: '巳', row: 1, col: 2 },
+    { zhi: '午', row: 1, col: 3 },
+    { zhi: '未', row: 1, col: 4 },
+    { zhi: '辰', row: 2, col: 1 },
+    { zhi: '申', row: 2, col: 5 },
+    { zhi: '卯', row: 3, col: 1 },
+    { zhi: '酉', row: 3, col: 5 },
+    { zhi: '寅', row: 4, col: 1 },
+    { zhi: '戌', row: 4, col: 5 },
+    { zhi: '丑', row: 5, col: 2 },
+    { zhi: '子', row: 5, col: 3 },
+    { zhi: '亥', row: 5, col: 4 }
+  ];
+
+  // 九宮格在 5x5 中的位置
+  const PALACE_LAYOUT = [
+    { name: '巽', row: 2, col: 2 },
+    { name: '離', row: 2, col: 3 },
+    { name: '坤', row: 2, col: 4 },
+    { name: '震', row: 3, col: 2 },
+    { name: '中', row: 3, col: 3 },
+    { name: '兌', row: 3, col: 4 },
+    { name: '艮', row: 4, col: 2 },
+    { name: '坎', row: 4, col: 3 },
+    { name: '乾', row: 4, col: 4 }
+  ];
+
+  // ========== 卦名數據 ==========
   const TRIGRAMS = {
     1: { name: '乾', lines: [1,1,1] },
     2: { name: '兌', lines: [1,1,0] },
@@ -578,10 +552,11 @@
   function getHexNameFromSixLines(sixLines) {
     const lower = [sixLines[0], sixLines[1], sixLines[2]];
     const upper = [sixLines[3], sixLines[4], sixLines[5]];
-    const upperNum = linesToTrigramNum(upper);
-    const lowerNum = linesToTrigramNum(lower);
+    const upperNum = linesToTrigramNumber(upper);
+    const lowerNum = linesToTrigramNumber(lower);
     return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
   }
+  function linesToTrigramNumber(lines) { return linesToTrigramNum(lines); }
 
   function formatPoem(poem) {
     if (!poem || !poem.trim()) return '';
@@ -597,6 +572,195 @@
     return merged.join('\n');
   }
 
+  // ========== 干支推算 ==========
+  const TIAN_GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  const DI_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+  // 日柱：以 1900-01-01 為「甲戌日」為基準
+  // 天干序：甲戌 = 甲(0) 戌(10)
+  function getDayGanZhi(date) {
+    const base = new Date(Date.UTC(1900, 0, 1)); // 1900-01-01
+    const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const diffDays = Math.round((target - base) / 86400000);
+    // 1900-01-01 是甲戌日：天干 index 0，地支 index 10
+    const ganIdx = ((0 + diffDays) % 10 + 10) % 10;
+    const zhiIdx = ((10 + diffDays) % 12 + 12) % 12;
+    return {
+      gan: TIAN_GAN[ganIdx],
+      zhi: DI_ZHI[zhiIdx],
+      ganIdx,
+      zhiIdx
+    };
+  }
+
+  // 旬空：由日柱查所屬旬
+  // 甲子旬（甲子~癸酉）空戌亥
+  // 甲戌旬（甲戌~癸未）空申酉
+  // 甲申旬（甲申~癸巳）空午未
+  // 甲午旬（甲午~癸卯）空辰巳
+  // 甲辰旬（甲辰~癸丑）空寅卯
+  // 甲寅旬（甲寅~癸亥）空子丑
+  function getXunKong(dayGanZhi) {
+    const ganIdx = dayGanZhi.ganIdx;
+    const zhiIdx = dayGanZhi.zhiIdx;
+    // 旬首：找該旬的甲
+    // 旬首的甲，其地支索引 = (zhiIdx - ganIdx + 12) % 12
+    const xunShouZhi = ((zhiIdx - ganIdx) % 12 + 12) % 12;
+    // xunShouZhi 為 0=子 → 甲子旬空戌亥
+    //          10=戌 → 甲戌旬空申酉
+    //           8=申 → 甲申旬空午未
+    //           6=午 → 甲午旬空辰巳
+    //           4=辰 → 甲辰旬空寅卯
+    //           2=寅 → 甲寅旬空子丑
+    const xunKongMap = {
+      0: ['戌','亥'],
+      10: ['申','酉'],
+      8: ['午','未'],
+      6: ['辰','巳'],
+      4: ['寅','卯'],
+      2: ['子','丑']
+    };
+    return xunKongMap[xunShouZhi] || [];
+  }
+
+  // ========== 真太陽時 ==========
+  // 均時差（Equation of Time），簡化公式
+  // 回傳分鐘數
+  function equationOfTime(date) {
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+    const B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+    const eot = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+    return eot; // 分鐘
+  }
+
+  // 真太陽時 = 標準時 + (經度 - 120) * 4 分鐘 + 均時差
+  // 香港默認經度 114.17
+  function calcTrueSolarTime(date, lon) {
+    const lonCorrection = (lon - 120) * 4; // 分鐘
+    const eot = equationOfTime(date);
+    const totalCorrectionMin = lonCorrection + eot;
+    const result = new Date(date.getTime() + totalCorrectionMin * 60000);
+    return {
+      time: result,
+      correctionMin: totalCorrectionMin,
+      lonCorrection,
+      eot
+    };
+  }
+
+  // ========== 城市經緯度查詢（Nominatim） ==========
+  const GEO_CACHE_KEY = 'feigong_geo_cache_v1';
+
+  function loadGeoCache() {
+    try {
+      return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+  function saveGeoCache(cache) {
+    try {
+      localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {}
+  }
+
+  async function queryCityLon(cityName) {
+    const cache = loadGeoCache();
+    const key = cityName.trim().toLowerCase();
+    if (cache[key]) return cache[key];
+
+    const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(cityName);
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    if (!res.ok) throw new Error('地理查詢失敗');
+    const data = await res.json();
+    if (!data || data.length === 0) throw new Error('找不到該城市');
+    const result = {
+      lat: parseFloat(data[0].lat),
+      lon: parseFloat(data[0].lon),
+      displayName: data[0].display_name
+    };
+    cache[key] = result;
+    saveGeoCache(cache);
+    return result;
+  }
+
+  // ========== 頂部資訊更新 ==========
+  const dateInput = document.getElementById('dateInput');
+  const timeInput = document.getElementById('timeInput');
+  const cityInput = document.getElementById('cityInput');
+  const infoReadout = document.getElementById('infoReadout');
+
+  let currentLon = 114.17; // 香港默認
+  let currentLat = 22.32;
+  let currentXunKong = [];
+
+  // 初始化日期時間
+  function initDateTime() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    dateInput.value = `${y}-${m}-${d}`;
+    timeInput.value = `${hh}:${mm}`;
+  }
+  initDateTime();
+
+  async function updateInfo() {
+    try {
+      // 城市 → 經度
+      const cityName = cityInput.value.trim() || '香港';
+      let geo;
+      if (cityName === '香港' || cityName === 'Hong Kong') {
+        geo = { lat: 22.32, lon: 114.17, displayName: '香港' };
+      } else {
+        geo = await queryCityLon(cityName);
+      }
+      currentLon = geo.lon;
+      currentLat = geo.lat;
+
+      // 組合日期時間
+      const [y, mo, d] = dateInput.value.split('-').map(Number);
+      const [hh, mm] = timeInput.value.split(':').map(Number);
+      const stdTime = new Date(y, mo - 1, d, hh, mm, 0);
+
+      // 真太陽時
+      const tst = calcTrueSolarTime(stdTime, currentLon);
+      const tstHH = String(tst.time.getHours()).padStart(2, '0');
+      const tstMM = String(tst.time.getMinutes()).padStart(2, '0');
+
+      // 日柱
+      const dayGZ = getDayGanZhi(stdTime);
+
+      // 旬空
+      currentXunKong = getXunKong(dayGZ);
+
+      // 校正值顯示
+      const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
+
+      infoReadout.innerHTML =
+        `日柱：<span class="highlight">${dayGZ.gan}${dayGZ.zhi}</span>　` +
+        `旬空：<span class="highlight">${currentXunKong.join('、')}</span><br>` +
+        `真太陽時：<span class="highlight">${tstHH}:${tstMM}</span>　` +
+        `校正：${corrStr}`;
+
+      // 更新九宮格外圍地支的旬空圈
+      updateXunKongDisplay();
+    } catch (e) {
+      infoReadout.textContent = '（' + e.message + '）';
+    }
+  }
+
+  dateInput.addEventListener('change', updateInfo);
+  timeInput.addEventListener('change', updateInfo);
+  cityInput.addEventListener('change', updateInfo);
+
+  // ========== 六爻輸入 ==========
   const inputArea = document.getElementById('inputArea');
   for (let i = 5; i >= 0; i--) {
     const row = document.createElement('div');
@@ -689,17 +853,11 @@
 
   updateLive();
 
-  // ===== 頂部資訊收合 =====
-  const infoBar = document.getElementById('infoBar');
-  const infoSummary = document.getElementById('infoSummary');
-  infoSummary.addEventListener('click', () => {
-    infoBar.classList.toggle('open');
-  });
-
+  // ========== 起卦 ==========
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
   const nineGridSection = document.getElementById('nineGridSection');
-  const nineGrid = document.getElementById('nineGrid');
+  const baguaWrap = document.getElementById('baguaWrap');
   const chainSection = document.getElementById('chainSection');
   const chainList = document.getElementById('chainList');
 
@@ -728,7 +886,7 @@
       }
 
       currentPalaces = data.palaces;
-      renderNineGrid(data.palaces);
+      renderBagua(data.palaces);
       nineGridSection.style.display = 'block';
 
       chainSection.style.display = 'none';
@@ -739,24 +897,39 @@
     castBtn.disabled = false;
   });
 
-  function renderNineGrid(palaces) {
-    nineGrid.innerHTML = '';
-    const gridOrder = ['巽', '離', '坤', '震', '中', '兌', '艮', '坎', '乾'];
+  // ========== 繪製地支 + 九宮格 ==========
+  function renderBagua(palaces) {
+    baguaWrap.innerHTML = '';
 
-    gridOrder.forEach(pos => {
+    // 地支
+    ZHI_LAYOUT.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'zhi';
+      div.dataset.zhi = item.zhi;
+      div.textContent = item.zhi;
+      div.style.gridRow = item.row;
+      div.style.gridColumn = item.col;
+      baguaWrap.appendChild(div);
+    });
+
+    // 九宮格
+    PALACE_LAYOUT.forEach(item => {
       const div = document.createElement('div');
       div.className = 'palace';
+      div.dataset.palace = item.name;
+      div.style.gridRow = item.row;
+      div.style.gridColumn = item.col;
 
-      if (pos === '中') {
+      if (item.name === '中') {
         div.classList.add('empty');
-        nineGrid.appendChild(div);
+        baguaWrap.appendChild(div);
         return;
       }
 
-      const p = palaces[pos];
+      const p = palaces[item.name];
       if (!p) {
         div.classList.add('empty');
-        nineGrid.appendChild(div);
+        baguaWrap.appendChild(div);
         return;
       }
 
@@ -768,28 +941,39 @@
       div.addEventListener('click', () => {
         document.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
         div.classList.add('selected');
-        runFlyingChain(pos);
+        runFlyingChain(item.name);
       });
 
-      nineGrid.appendChild(div);
+      baguaWrap.appendChild(div);
+    });
+
+    // 更新旬空圈
+    updateXunKongDisplay();
+  }
+
+  // ========== 旬空圈 ==========
+  function updateXunKongDisplay() {
+    document.querySelectorAll('.zhi').forEach(el => {
+      el.classList.remove('xunkong');
+    });
+    if (!currentXunKong || currentXunKong.length === 0) return;
+    currentXunKong.forEach(zhi => {
+      const el = document.querySelector(`.zhi[data-zhi="${zhi}"]`);
+      if (el) el.classList.add('xunkong');
     });
   }
 
+  // ========== 宮位圈號 ==========
   function markPalaceNumber(palaceName, number) {
-    const gridOrder = ['巽', '離', '坤', '震', '中', '兌', '艮', '坎', '乾'];
-    const index = gridOrder.indexOf(palaceName);
-    if (index < 0) return;
-    const palaceDiv = nineGrid.children[index];
-    if (!palaceDiv) return;
-
-    const old = palaceDiv.querySelector('.palace-number');
+    const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
+    if (!el) return;
+    const old = el.querySelector('.palace-number');
     if (old) old.remove();
-
     if (number >= 1 && number <= 8) {
       const numDiv = document.createElement('div');
       numDiv.className = 'palace-number';
       numDiv.textContent = CIRCLED_NUM[number];
-      palaceDiv.appendChild(numDiv);
+      el.appendChild(numDiv);
     }
   }
 
@@ -797,6 +981,7 @@
     document.querySelectorAll('.palace-number').forEach(el => el.remove());
   }
 
+  // ========== 飛宮鏈 ==========
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
     clearPalaceNumbers();
@@ -836,6 +1021,9 @@
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
     }
   }
+
+  // ========== 初始化 ==========
+  updateInfo();
 </script>
 </body>
 </html>
