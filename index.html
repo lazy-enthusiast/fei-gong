@@ -295,15 +295,12 @@
       font-size: 0.9rem;
       color: #6a6458;
       line-height: 1.7;
-      text-align: justify;
-      text-align-last: justify;
+      white-space: pre-line;
     }
 
     .chain-item-poem.empty {
       color: #b0aa9c;
       font-style: italic;
-      text-align: center;
-      text-align-last: center;
     }
   </style>
 </head>
@@ -395,7 +392,7 @@
     return HEXAGRAM_NAMES[`${upperNum}_${lowerNum}`] || '—';
   }
 
-  // 卦詩：14 字一行（兩句並一行，中間全角空格）
+  // 卦詩：14 字一行（兩句並一行）
   function formatPoem(poem) {
     if (!poem || !poem.trim()) return '';
     const lines = poem.split('\n').filter(l => l.trim());
