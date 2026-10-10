@@ -713,63 +713,126 @@
     return map[zhi] || 1;
   }
 
-  // 精確判斷冬至/夏至位置（時分級別）
-  // 回傳 'yang'（冬至後夏至前）或 'yin'（夏至後冬至前）
-  function getDunType(date) {
+  // ========== 天文算法：計算夏至/冬至精確時刻 ==========
+  // 基於 Meeus《Astronomical Algorithms》，精度 ±1 分鐘
+
+  // 儒略日 → Date（UTC）
+  function jdToDate(jd) {
+    const z = Math.floor(jd + 0.5);
+    const f = (jd + 0.5) - z;
+    let A = z;
+    if (z >= 2299161) {
+      const alpha = Math.floor((z - 1867216.25) / 36524.25);
+      A = z + 1 + alpha - Math.floor(alpha / 4);
+    }
+    const B = A + 1524;
+    const C = Math.floor((B - 122.1) / 365.25);
+    const D = Math.floor(365.25 * C);
+    const E = Math.floor((B - D) / 30.6001);
+    const day = B - D - Math.floor(30.6001 * E) + f;
+    const month = E < 14 ? E - 1 : E - 13;
+    const year = month > 2 ? C - 4716 : C - 4715;
+    const dayInt = Math.floor(day);
+    const frac = day - dayInt;
+    const hours = frac * 24;
+    const hh = Math.floor(hours);
+    const mm = Math.floor((hours - hh) * 60);
+    const ss = Math.floor(((hours - hh) * 60 - mm) * 60);
+    return new Date(Date.UTC(year, month - 1, dayInt, hh, mm, ss));
+  }
+
+  // 太陽黃經（度），輸入儒略日
+  function sunLongitude(jd) {
+    const T = (jd - 2451545.0) / 36525.0;
+
+    let L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+    L0 = ((L0 % 360) + 360) % 360;
+
+    let M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+    M = ((M % 360) + 360) % 360;
+    const Mrad = M * Math.PI / 180;
+
+    const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mrad)
+            + (0.019993 - 0.000101 * T) * Math.sin(2 * Mrad)
+            + 0.000289 * Math.sin(3 * Mrad);
+
+    let trueLong = L0 + C;
+
+    const omega = 125.04 - 1934.136 * T;
+    const lambda = trueLong - 0.00569 - 0.00478 * Math.sin(omega * Math.PI / 180);
+
+    return ((lambda % 360) + 360) % 360;
+  }
+
+  // 找太陽黃經達到 targetDeg 的精確時刻（返回儒略日）
+  function findSunLongitude(targetDeg, approxJD) {
+    let jd = approxJD;
+    for (let i = 0; i < 15; i++) {
+      const lon = sunLongitude(jd);
+      let diff = targetDeg - lon;
+      while (diff > 180) diff -= 360;
+      while (diff < -180) diff += 360;
+      const deltaJD = diff / 0.98564736;
+      jd += deltaJD;
+      if (Math.abs(diff) < 0.0000001) break;
+    }
+    return jd;
+  }
+
+  // 算某年夏至的精確時刻（返回 Date，UTC）
+  function getSummerSolstice(year) {
+    const approxJD = 2451545.0 + 365.2422 * (year - 2000) + 172;
+    const jd = findSunLongitude(90, approxJD);
+    return jdToDate(jd);
+  }
+
+  // 算某年冬至的精確時刻（返回 Date，UTC）
+  function getWinterSolstice(year) {
+    const approxJD = 2451545.0 + 365.2422 * (year - 2000) + 355;
+    const jd = findSunLongitude(270, approxJD);
+    return jdToDate(jd);
+  }
+
+  // ========== 精確判斷冬至/夏至位置（把節氣時刻轉真太陽時再比較） ==========
+  // date: 當前真太陽時
+  // lon: 經度
+  // timezoneOffsetHours: 時區偏移（香港 = 8）
+  function getDunType(date, lon, timezoneOffsetHours) {
     const year = date.getFullYear();
     const events = [];
 
+    // 收集 當前年前後三年 的夏至、冬至（UTC 時刻）
     for (let y = year - 1; y <= year + 1; y++) {
-      // 夏至
-      try {
-        const probe = new Date(y, 5, 22, 12, 0, 0);
-        const lunar = Lunar.fromDate(probe);
-        const jq = lunar.getJieQiTable();
-        if (jq['夏至']) {
-          const solar = jq['夏至'].getSolar();
-          if (solar.getYear() === y) {
-            events.push({
-              name: '夏至',
-              time: new Date(
-                solar.getYear(), solar.getMonth() - 1, solar.getDay(),
-                solar.getHour(), solar.getMinute(), solar.getSecond()
-              )
-            });
-          }
-        }
-      } catch (e) {}
-
-      // 冬至
-      try {
-        const probe = new Date(y, 11, 22, 12, 0, 0);
-        const lunar = Lunar.fromDate(probe);
-        const jq = lunar.getJieQiTable();
-        if (jq['冬至']) {
-          const solar = jq['冬至'].getSolar();
-          if (solar.getYear() === y) {
-            events.push({
-              name: '冬至',
-              time: new Date(
-                solar.getYear(), solar.getMonth() - 1, solar.getDay(),
-                solar.getHour(), solar.getMinute(), solar.getSecond()
-              )
-            });
-          }
-        }
-      } catch (e) {}
+      const summerUTC = getSummerSolstice(y);
+      const winterUTC = getWinterSolstice(y);
+      events.push({ name: '夏至', timeUTC: summerUTC });
+      events.push({ name: '冬至', timeUTC: winterUTC });
     }
 
-    events.sort((a, b) => a.time - b.time);
+    // 把每個節氣時刻轉成「當地真太陽時」：
+    // 1. UTC → 當地標準時：+ timezoneOffsetHours
+    // 2. 當地標準時 → 真太陽時：+ (lon - 120) * 4 分 + 均時差
+    for (const ev of events) {
+      // UTC → 標準時
+      const stdTime = new Date(ev.timeUTC.getTime() + timezoneOffsetHours * 3600000);
+      // 標準時 → 真太陽時
+      const lonCorr = (lon - 120) * 4;
+      const eot = equationOfTime(stdTime);
+      const tst = new Date(stdTime.getTime() + (lonCorr + eot) * 60000);
+      ev.timeTST = tst;
+    }
+
+    events.sort((a, b) => a.timeTST - b.timeTST);
 
     const t = date.getTime();
-    let lastEvent = null;
+    let last = null;
     for (const ev of events) {
-      if (ev.time.getTime() <= t) lastEvent = ev;
+      if (ev.timeTST.getTime() <= t) last = ev;
       else break;
     }
 
-    if (!lastEvent) return 'yang';
-    return lastEvent.name === '冬至' ? 'yang' : 'yin';
+    if (!last) return 'yang';
+    return last.name === '冬至' ? 'yang' : 'yin';
   }
 
   async function updateInfo() {
@@ -810,7 +873,8 @@
       let remainder = sum % 9;
       if (remainder === 0) remainder = 9;
 
-      const dunType = getDunType(tst.time);
+      // 判斷遁局（精確版：把節氣時刻轉真太陽時再比較）
+      const dunType = getDunType(tst.time, currentLon, 8);
       const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
 
       const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
