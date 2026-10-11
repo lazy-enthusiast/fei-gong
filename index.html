@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>飛宮易卦</title>
+  <title>飛宮易卦</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -76,7 +76,7 @@
     <div id="pangtongList"></div>
   </div>
 
-    <div class="chain-section" id="chuleiSection">
+  <div class="chain-section" id="chuleiSection">
     <div class="chain-title">觸 類</div>
     <div id="chuleiList"></div>
   </div>
@@ -602,7 +602,6 @@
     });
   }
 
-  // 正推：數字圈（左下角）
   function markPalaceNumber(palaceName, number) {
     const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
@@ -620,7 +619,6 @@
     document.querySelectorAll('.palace-number').forEach(el => el.remove());
   }
 
-  // 旁通：字母圈（右下角）
   function markPalaceLetter(palaceName, index) {
     const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
@@ -638,7 +636,6 @@
     document.querySelectorAll('.palace-letter').forEach(el => el.remove());
   }
 
-  // 觸類：星號（下緣中間）
   function markPalaceAsterisk(palaceName) {
     const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
@@ -646,7 +643,7 @@
     if (old) old.remove();
     const astDiv = document.createElement('div');
     astDiv.className = 'palace-asterisk';
-    astDiv.textContent = '*'; 
+    astDiv.textContent = '*';
     el.appendChild(astDiv);
   }
 
@@ -673,9 +670,9 @@
   function makeChainItemHTML(item) {
     const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
     const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
-    const fuyinMark = item.fuyin ? ' 【反吟】' : '';
+    const fanyinMark = item.fanyin ? ' 【反吟】' : '';
     return `
-      <div class="chain-item-name">${item.name}${fuyinMark}</div>
+      <div class="chain-item-name">${item.name}${fanyinMark}</div>
       <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
     `;
   }
@@ -687,7 +684,6 @@
     clearPalaceAsterisks();
 
     try {
-      // 正推
       const zhengtuiData = await runChain(startPalace, 'zhengtui');
       chainList.innerHTML = '';
       zhengtuiData.chain.forEach((item, idx) => {
@@ -699,7 +695,6 @@
       });
       chainSection.style.display = 'block';
 
-      // 旁通（這次請求會一起回傳 chulei）
       const pangtongData = await runChain(startPalace, 'pangtong');
       pangtongList.innerHTML = '';
       pangtongData.chain.forEach((item, idx) => {
@@ -711,7 +706,6 @@
       });
       pangtongSection.style.display = 'block';
 
-      // 觸類
       chuleiList.innerHTML = '';
       const chulei = pangtongData.chulei;
       if (chulei && chulei.found && chulei.items.length > 0) {
@@ -736,7 +730,6 @@
 
   updateInfo();
 
-  // 一鍵生成長圖（顯示在頁面，長按保存）
   const screenshotBtn = document.getElementById('screenshotBtn');
   if (screenshotBtn) {
     screenshotBtn.addEventListener('click', async () => {
@@ -761,7 +754,6 @@
         screenshotBtn.disabled = false;
         screenshotBtn.textContent = '📷 生 成 長 圖';
 
-        // 顯示預覽
         showScreenshotPreview(dataUrl);
       } catch (e) {
         footerActions.style.display = '';
@@ -773,7 +765,6 @@
   }
 
   function showScreenshotPreview(dataUrl) {
-    // 移除舊的
     const old = document.getElementById('screenshotPreview');
     if (old) old.remove();
 
@@ -801,4 +792,4 @@
   }
 </script>
 </body>
-</html>	
+</html>
