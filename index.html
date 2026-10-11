@@ -735,7 +735,7 @@
 
   updateInfo();
 
-  // 一鍵生成長圖
+  // 一鍵生成長圖（顯示在頁面，長按保存）
   const screenshotBtn = document.getElementById('screenshotBtn');
   if (screenshotBtn) {
     screenshotBtn.addEventListener('click', async () => {
@@ -754,20 +754,14 @@
           logging: false
         });
 
-        canvas.toBlob(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          const now = new Date();
-          const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
-          a.href = url;
-          a.download = `飛宮易卦_${ts}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
+        const dataUrl = canvas.toDataURL('image/png');
 
-          footerActions.style.display = '';
-          screenshotBtn.disabled = false;
-          screenshotBtn.textContent = '📷 生 成 長 圖';
-        }, 'image/png');
+        footerActions.style.display = '';
+        screenshotBtn.disabled = false;
+        screenshotBtn.textContent = '📷 生 成 長 圖';
+
+        // 顯示預覽
+        showScreenshotPreview(dataUrl);
       } catch (e) {
         footerActions.style.display = '';
         alert('生成失敗：' + e.message);
@@ -775,6 +769,34 @@
         screenshotBtn.textContent = '📷 生 成 長 圖';
       }
     });
+  }
+
+  function showScreenshotPreview(dataUrl) {
+    // 移除舊的
+    const old = document.getElementById('screenshotPreview');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'screenshotPreview';
+    overlay.className = 'screenshot-preview';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'screenshot-close';
+    closeBtn.textContent = '✕ 關閉';
+    closeBtn.addEventListener('click', () => overlay.remove());
+
+    const hint = document.createElement('div');
+    hint.className = 'screenshot-hint';
+    hint.textContent = '長按圖片 → 存儲到照片';
+
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = '飛宮易卦長圖';
+
+    overlay.appendChild(closeBtn);
+    overlay.appendChild(hint);
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
   }
 </script>
 </body>
