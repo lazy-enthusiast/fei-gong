@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>飛宮易卦</title>
+    <title>飛宮易卦</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -75,9 +76,13 @@
     <div id="pangtongList"></div>
   </div>
 
-  <div class="chain-section" id="chuleiSection">
+    <div class="chain-section" id="chuleiSection">
     <div class="chain-title">觸 類</div>
     <div id="chuleiList"></div>
+  </div>
+
+  <div class="footer-actions" id="footerActions">
+    <button class="btn-screenshot" id="screenshotBtn">📷 生 成 長 圖</button>
   </div>
 </div>
 
@@ -729,6 +734,48 @@
   }
 
   updateInfo();
+
+  // 一鍵生成長圖
+  const screenshotBtn = document.getElementById('screenshotBtn');
+  if (screenshotBtn) {
+    screenshotBtn.addEventListener('click', async () => {
+      screenshotBtn.disabled = true;
+      screenshotBtn.textContent = '生成中…';
+
+      const footerActions = document.getElementById('footerActions');
+      footerActions.style.display = 'none';
+
+      try {
+        const app = document.querySelector('.app');
+        const canvas = await html2canvas(app, {
+          scale: 2,
+          backgroundColor: '#faf8f3',
+          useCORS: true,
+          logging: false
+        });
+
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const now = new Date();
+          const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+          a.href = url;
+          a.download = `飛宮易卦_${ts}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          footerActions.style.display = '';
+          screenshotBtn.disabled = false;
+          screenshotBtn.textContent = '📷 生 成 長 圖';
+        }, 'image/png');
+      } catch (e) {
+        footerActions.style.display = '';
+        alert('生成失敗：' + e.message);
+        screenshotBtn.disabled = false;
+        screenshotBtn.textContent = '📷 生 成 長 圖';
+      }
+    });
+  }
 </script>
 </body>
 </html>	
