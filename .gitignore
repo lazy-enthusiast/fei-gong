@@ -1,4 +1,4 @@
 worker.js
 wrangler.toml
 .wrangler/
-.cursorrules
+AGENTS.md
