@@ -468,3 +468,31 @@ h1 {
   line-height: 1;
   pointer-events: none;
 }
+
+/* 一鍵生成長圖 */
+.footer-actions {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.btn-screenshot {
+  background: #fff;
+  border: 1px solid #8a6d3b;
+  border-radius: 4px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.85rem;
+  color: #8a6d3b;
+  letter-spacing: 0.2rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-screenshot:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-screenshot:active {
+  background: #f5efe0;
+}
