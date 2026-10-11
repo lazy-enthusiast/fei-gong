@@ -350,13 +350,20 @@
       const tstHH = String(tst.time.getHours()).padStart(2, '0');
       const tstMM = String(tst.time.getMinutes()).padStart(2, '0');
 
+      // 夜子時（23:00–23:59）：換日
+      // 時辰仍用真太陽時（23 → 子時），但日柱、農曆用次日
+      let effectiveDate = new Date(tst.time);
+      if (tst.time.getHours() === 23) {
+        effectiveDate = new Date(tst.time.getTime() + 3600000);
+      }
+
       const shiChen = getShiChen(tst.time.getHours());
       const shiChenNum = getShiChenNum(shiChen);
 
-      const dayGZ = getDayGanZhi(tst.time);
+      const dayGZ = getDayGanZhi(effectiveDate);
       currentXunKong = getXunKong(dayGZ);
 
-      const lunar = Lunar.fromDate(stdTime);
+      const lunar = Lunar.fromDate(effectiveDate);
       const lunarMonthNum = Math.abs(lunar.getMonth());
       const lunarDayNum = lunar.getDay();
 
