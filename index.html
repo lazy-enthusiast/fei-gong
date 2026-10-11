@@ -673,8 +673,9 @@
   function makeChainItemHTML(item) {
     const formattedPoem = item.poem && item.poem.trim() ? formatPoem(item.poem) : '（卦詩待補）';
     const poemClass = item.poem && item.poem.trim() ? '' : 'empty';
+    const fuyinMark = item.fuyin ? ' 【伏吟】' : '';
     return `
-      <div class="chain-item-name">${item.name}</div>
+      <div class="chain-item-name">${item.name}${fuyinMark}</div>
       <div class="chain-item-poem ${poemClass}">${formattedPoem}</div>
     `;
   }
