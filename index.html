@@ -35,6 +35,11 @@
     </div>
   </div>
 
+  <div class="info-row">
+    <label for="questionInput">問事</label>
+    <input type="text" id="questionInput" placeholder="這次問什麼">
+  </div>
+
   <div class="top-section">
     <div class="input-area" id="inputArea"></div>
 
@@ -83,6 +88,9 @@
 
   <div class="footer-actions" id="footerActions">
     <button class="btn-screenshot" id="screenshotBtn">📷 生 成 長 圖</button>
+    <div style="margin-top:0.6rem;">
+      <button class="btn-screenshot" id="saveHistoryBtn" type="button">存入紀錄</button>
+    </div>
   </div>
 </div>
 
@@ -302,6 +310,19 @@
   let currentLon = 114.17;
   let currentLat = 22.32;
   let currentXunKong = [];
+  let lastTrueSolarTime = '';
+  let lastDun = '';
+  let lastYongshen = '';
+  let lastZhengtui = null;
+  let lastPangtong = null;
+  let lastChulei = null;
+
+  function clearChainMemory() {
+    lastYongshen = '';
+    lastZhengtui = null;
+    lastPangtong = null;
+    lastChulei = null;
+  }
 
   infoSummary.addEventListener('click', () => {
     infoPanel.classList.toggle('expanded');
@@ -377,6 +398,8 @@
 
       const dunType = getDunType(tst.time);
       const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
+      lastTrueSolarTime = `${tstHH}:${tstMM}`;
+      lastDun = dunLabel;
 
       const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
       infoReadout.innerHTML =
@@ -436,6 +459,14 @@
     return { sixLines, movingLineIndexes };
   }
 
+  function getRawSixLines() {
+    const raw = [];
+    document.querySelectorAll('#inputArea select').forEach(sel => {
+      raw[parseInt(sel.dataset.index)] = sel.value;
+    });
+    return raw;
+  }
+
   function renderSixLines(lines, container) {
     container.innerHTML = '';
     for (let i = 0; i <= 5; i++) {
@@ -480,6 +511,7 @@
     document.getElementById('chainSection').style.display = 'none';
     document.getElementById('pangtongSection').style.display = 'none';
     document.getElementById('chuleiSection').style.display = 'none';
+    clearChainMemory();
   }
 
   document.querySelectorAll('#inputArea select').forEach(sel => {
@@ -542,6 +574,7 @@
       pangtongList.innerHTML = '';
       chuleiSection.style.display = 'none';
       chuleiList.innerHTML = '';
+      clearChainMemory();
     } catch (e) {
       errorMsg.textContent = '連線失敗：' + e.message;
     }
@@ -686,6 +719,7 @@
 
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
+    clearChainMemory();
     clearPalaceNumbers();
     clearPalaceLetters();
     clearPalaceAsterisks();
@@ -730,12 +764,69 @@
         chuleiList.appendChild(div);
       }
       chuleiSection.style.display = 'block';
+
+      lastYongshen = startPalace;
+      lastZhengtui = zhengtuiData.chain;
+      lastPangtong = pangtongData.chain;
+      lastChulei = pangtongData.chulei || { found: false, items: [] };
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
     }
   }
 
   updateInfo();
+
+  const saveHistoryBtn = document.getElementById('saveHistoryBtn');
+  if (saveHistoryBtn) {
+    saveHistoryBtn.addEventListener('click', async () => {
+      errorMsg.textContent = '';
+      if (!currentPalaces) {
+        errorMsg.textContent = '請先起卦';
+        return;
+      }
+      if (!lastYongshen || !lastZhengtui || !lastPangtong) {
+        errorMsg.textContent = '請先點選用神宮';
+        return;
+      }
+
+      saveHistoryBtn.disabled = true;
+      saveHistoryBtn.textContent = '儲存中…';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'saveHistory',
+            data: {
+              問事: document.getElementById('questionInput').value.trim(),
+              六爻: getRawSixLines(),
+              本卦: document.getElementById('benName').textContent,
+              變卦: document.getElementById('chgName').textContent,
+              用神宮: lastYongshen,
+              正推: lastZhengtui,
+              旁通: lastPangtong,
+              觸類: lastChulei || { found: false, items: [] },
+              日期: dateInput.value,
+              時間: timeInput.value,
+              城市: cityInput.value.trim(),
+              真太陽時: lastTrueSolarTime,
+              遁局: lastDun
+            }
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          errorMsg.textContent = data.error || '儲存失敗';
+        } else {
+          errorMsg.textContent = '已存入紀錄';
+        }
+      } catch (e) {
+        errorMsg.textContent = '連線失敗：' + e.message;
+      }
+      saveHistoryBtn.disabled = false;
+      saveHistoryBtn.textContent = '存入紀錄';
+    });
+  }
 
   const screenshotBtn = document.getElementById('screenshotBtn');
   if (screenshotBtn) {
