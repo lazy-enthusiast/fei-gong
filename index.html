@@ -776,6 +776,24 @@
 
   updateInfo();
 
+  function formatChainForSheet(chain) {
+    if (!Array.isArray(chain) || chain.length === 0) return '';
+    return chain.map(item => {
+      const fanyin = item.fanyin ? '【反吟】' : '';
+      return `${item.palace}・${item.name}${fanyin}`;
+    }).join(' → ');
+  }
+
+  function formatChuleiForSheet(chulei) {
+    if (!chulei || !chulei.found || !Array.isArray(chulei.items) || chulei.items.length === 0) {
+      return '無處觸類';
+    }
+    return chulei.items.map(item => {
+      const fanyin = item.fanyin ? '【反吟】' : '';
+      return `${item.palace}・${item.name}${fanyin}`;
+    }).join('、');
+  }
+
   const saveHistoryBtn = document.getElementById('saveHistoryBtn');
   const saveHistoryMsg = document.getElementById('saveHistoryMsg');
   if (saveHistoryBtn) {
@@ -799,19 +817,19 @@
           body: JSON.stringify({
             action: 'saveHistory',
             data: {
-              問事: document.getElementById('questionInput').value.trim(),
-              六爻: getRawSixLines(),
-              本卦: document.getElementById('benName').textContent,
-              變卦: document.getElementById('chgName').textContent,
-              用神宮: lastYongshen,
-              正推: lastZhengtui,
-              旁通: lastPangtong,
-              觸類: lastChulei || { found: false, items: [] },
-              日期: dateInput.value,
-              時間: timeInput.value,
-              城市: cityInput.value.trim(),
-              真太陽時: lastTrueSolarTime,
-              遁局: lastDun
+              question: document.getElementById('questionInput').value.trim(),
+              sixLines: getRawSixLines().join(''),
+              benName: document.getElementById('benName').textContent,
+              chgName: document.getElementById('chgName').textContent,
+              startPalace: lastYongshen,
+              zhengtui: formatChainForSheet(lastZhengtui),
+              pangtong: formatChainForSheet(lastPangtong),
+              chulei: formatChuleiForSheet(lastChulei),
+              date: dateInput.value,
+              time: timeInput.value,
+              city: cityInput.value.trim(),
+              trueSolarTime: lastTrueSolarTime,
+              dunLabel: lastDun
             }
           })
         });
