@@ -35,9 +35,8 @@
     </div>
   </div>
 
-  <div class="info-row">
-    <label for="questionInput">問事</label>
-    <input type="text" id="questionInput" placeholder="這次問什麼">
+  <div class="question-row">
+    <input type="text" id="questionInput" placeholder="今次問甚麼">
   </div>
 
   <div class="top-section">
@@ -91,6 +90,7 @@
     <div style="margin-top:0.6rem;">
       <button class="btn-screenshot" id="saveHistoryBtn" type="button">存入紀錄</button>
     </div>
+    <div class="save-history-msg" id="saveHistoryMsg"></div>
   </div>
 </div>
 
@@ -777,15 +777,16 @@
   updateInfo();
 
   const saveHistoryBtn = document.getElementById('saveHistoryBtn');
+  const saveHistoryMsg = document.getElementById('saveHistoryMsg');
   if (saveHistoryBtn) {
     saveHistoryBtn.addEventListener('click', async () => {
-      errorMsg.textContent = '';
+      if (saveHistoryMsg) saveHistoryMsg.textContent = '';
       if (!currentPalaces) {
-        errorMsg.textContent = '請先起卦';
+        if (saveHistoryMsg) saveHistoryMsg.textContent = '請先起卦';
         return;
       }
       if (!lastYongshen || !lastZhengtui || !lastPangtong) {
-        errorMsg.textContent = '請先點選用神宮';
+        if (saveHistoryMsg) saveHistoryMsg.textContent = '請先點選用神宮';
         return;
       }
 
@@ -816,12 +817,12 @@
         });
         const data = await res.json();
         if (!res.ok || data.error) {
-          errorMsg.textContent = data.error || '儲存失敗';
+          if (saveHistoryMsg) saveHistoryMsg.textContent = data.error || '儲存失敗';
         } else {
-          errorMsg.textContent = '已存入紀錄';
+          if (saveHistoryMsg) saveHistoryMsg.textContent = '已存入紀錄';
         }
       } catch (e) {
-        errorMsg.textContent = '連線失敗：' + e.message;
+        if (saveHistoryMsg) saveHistoryMsg.textContent = '連線失敗：' + e.message;
       }
       saveHistoryBtn.disabled = false;
       saveHistoryBtn.textContent = '存入紀錄';
