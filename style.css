@@ -671,14 +671,11 @@ body {
 .qimen-god,
 .qimen-star,
 .qimen-door {
+  font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.04rem;
   min-height: 1em;
 }
-
-.qimen-god { font-size: 0.98rem; }
-.qimen-star { font-size: 1.1rem; letter-spacing: 0.02rem; }
-.qimen-door { font-size: 1.05rem; }
 
 /* 五行色：金橙黃／木綠／水藍／火紅／土啡 */
 .qimen-god[data-wx="jin"],
@@ -750,9 +747,9 @@ body {
     grid-template-rows: 1.4rem repeat(3, minmax(5.6rem, auto)) 1.4rem;
   }
 
-  .qimen-god { font-size: 0.92rem; }
-  .qimen-star { font-size: 1.02rem; }
-  .qimen-door { font-size: 0.98rem; }
+  .qimen-god,
+  .qimen-star,
+  .qimen-door { font-size: 1.02rem; }
   .qimen-tian { font-size: 1.12rem; }
   .qimen-di { font-size: 0.95rem; }
 }
