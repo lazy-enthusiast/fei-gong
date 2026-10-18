@@ -113,6 +113,52 @@
     </div>
     <div class="case-search-status" id="caseSearchStatus"></div>
     <div class="case-results" id="caseResults"></div>
+
+    <div id="caseDetail" class="case-detail" hidden>
+      <button type="button" class="case-back-btn" id="caseBackBtn">← 返回列表</button>
+      <div class="case-meta" id="caseMeta"></div>
+
+      <div class="top-section case-hex-section">
+        <div class="hex-result case-hex-result">
+          <div class="hex-box">
+            <div class="hex-box-title">本卦</div>
+            <div class="hex-box-lines" id="caseBenLines"></div>
+            <div class="hex-box-name" id="caseBenName">—</div>
+          </div>
+          <div class="hex-box">
+            <div class="hex-box-title">變卦</div>
+            <div class="hex-box-lines" id="caseChgLines"></div>
+            <div class="hex-box-name" id="caseChgName">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chain-section" id="caseSixiangSection" style="display:none;">
+        <div class="chain-title">四 象 八 情</div>
+        <div class="chain-item">
+          <div class="sixiang-text" id="caseSixiangText"></div>
+        </div>
+      </div>
+
+      <div class="nine-grid-section" id="caseNineGridSection" style="display:block;">
+        <div class="bagua-wrap" id="caseBaguaWrap"></div>
+      </div>
+
+      <div class="chain-section" id="caseChainSection" style="display:none;">
+        <div class="chain-title">正 推</div>
+        <div id="caseChainList"></div>
+      </div>
+
+      <div class="chain-section" id="casePangtongSection" style="display:none;">
+        <div class="chain-title">旁 通</div>
+        <div id="casePangtongList"></div>
+      </div>
+
+      <div class="chain-section" id="caseChuleiSection" style="display:none;">
+        <div class="chain-title">觸 類</div>
+        <div id="caseChuleiList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -626,8 +672,13 @@
     castBtn.disabled = false;
   });
 
-  function renderBagua(palaces) {
-    baguaWrap.innerHTML = '';
+  function renderBagua(palaces, options = {}) {
+    const wrap = options.wrap || baguaWrap;
+    const interactive = options.interactive !== false;
+    const xunKong = options.xunKong !== undefined ? options.xunKong : currentXunKong;
+    const onSelect = options.onSelect || ((name) => runFlyingChain(name));
+
+    wrap.innerHTML = '';
 
     ZHI_LAYOUT.forEach(item => {
       const div = document.createElement('div');
@@ -636,7 +687,7 @@
       div.textContent = item.zhi;
       div.style.gridRow = item.row;
       div.style.gridColumn = item.col;
-      baguaWrap.appendChild(div);
+      wrap.appendChild(div);
     });
 
     PALACE_LAYOUT.forEach(item => {
@@ -648,14 +699,14 @@
 
       if (item.name === '中') {
         div.classList.add('empty');
-        baguaWrap.appendChild(div);
+        wrap.appendChild(div);
         return;
       }
 
       const p = palaces[item.name];
       if (!p) {
         div.classList.add('empty');
-        baguaWrap.appendChild(div);
+        wrap.appendChild(div);
         return;
       }
 
@@ -664,31 +715,36 @@
       renderTrigramLines(p.lines, linesDiv);
       div.appendChild(linesDiv);
 
-      div.addEventListener('click', () => {
-        document.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
-        div.classList.add('selected');
-        runFlyingChain(item.name);
-      });
+      if (interactive) {
+        div.addEventListener('click', () => {
+          wrap.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
+          div.classList.add('selected');
+          onSelect(item.name);
+        });
+      }
 
-      baguaWrap.appendChild(div);
+      wrap.appendChild(div);
     });
 
-    updateXunKongDisplay();
+    updateXunKongDisplay(wrap, xunKong);
   }
 
-  function updateXunKongDisplay() {
-    document.querySelectorAll('.zhi').forEach(el => {
+  function updateXunKongDisplay(root, xunKongList) {
+    const scope = root || baguaWrap || document;
+    const list = xunKongList !== undefined ? xunKongList : currentXunKong;
+    scope.querySelectorAll('.zhi').forEach(el => {
       el.classList.remove('xunkong');
     });
-    if (!currentXunKong || currentXunKong.length === 0) return;
-    currentXunKong.forEach(zhi => {
-      const el = document.querySelector(`.zhi[data-zhi="${zhi}"]`);
+    if (!list || list.length === 0) return;
+    list.forEach(zhi => {
+      const el = scope.querySelector(`.zhi[data-zhi="${zhi}"]`);
       if (el) el.classList.add('xunkong');
     });
   }
 
-  function markPalaceNumber(palaceName, number) {
-    const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
+  function markPalaceNumber(palaceName, number, root) {
+    const scope = root || baguaWrap;
+    const el = scope.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
     const old = el.querySelector('.palace-number');
     if (old) old.remove();
@@ -700,12 +756,14 @@
     }
   }
 
-  function clearPalaceNumbers() {
-    document.querySelectorAll('.palace-number').forEach(el => el.remove());
+  function clearPalaceNumbers(root) {
+    const scope = root || baguaWrap;
+    scope.querySelectorAll('.palace-number').forEach(el => el.remove());
   }
 
-  function markPalaceLetter(palaceName, index) {
-    const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
+  function markPalaceLetter(palaceName, index, root) {
+    const scope = root || baguaWrap;
+    const el = scope.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
     const old = el.querySelector('.palace-letter');
     if (old) old.remove();
@@ -717,12 +775,14 @@
     }
   }
 
-  function clearPalaceLetters() {
-    document.querySelectorAll('.palace-letter').forEach(el => el.remove());
+  function clearPalaceLetters(root) {
+    const scope = root || baguaWrap;
+    scope.querySelectorAll('.palace-letter').forEach(el => el.remove());
   }
 
-  function markPalaceAsterisk(palaceName) {
-    const el = document.querySelector(`.palace[data-palace="${palaceName}"]`);
+  function markPalaceAsterisk(palaceName, root) {
+    const scope = root || baguaWrap;
+    const el = scope.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
     const old = el.querySelector('.palace-asterisk');
     if (old) old.remove();
@@ -732,17 +792,19 @@
     el.appendChild(astDiv);
   }
 
-  function clearPalaceAsterisks() {
-    document.querySelectorAll('.palace-asterisk').forEach(el => el.remove());
+  function clearPalaceAsterisks(root) {
+    const scope = root || baguaWrap;
+    scope.querySelectorAll('.palace-asterisk').forEach(el => el.remove());
   }
 
-  async function runChain(startPalace, mode) {
+  async function runChain(startPalace, mode, palaces) {
+    const source = palaces || currentPalaces;
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'fly',
-        palaces: currentPalaces,
+        palaces: source,
         startPalace: startPalace,
         mode: mode
       })
@@ -765,30 +827,30 @@
   async function runFlyingChain(startPalace) {
     if (!currentPalaces) return;
     clearChainMemory();
-    clearPalaceNumbers();
-    clearPalaceLetters();
-    clearPalaceAsterisks();
+    clearPalaceNumbers(baguaWrap);
+    clearPalaceLetters(baguaWrap);
+    clearPalaceAsterisks(baguaWrap);
 
     try {
-      const zhengtuiData = await runChain(startPalace, 'zhengtui');
+      const zhengtuiData = await runChain(startPalace, 'zhengtui', currentPalaces);
       chainList.innerHTML = '';
       zhengtuiData.chain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
         div.innerHTML = makeChainItemHTML(item);
         chainList.appendChild(div);
-        markPalaceNumber(item.palace, idx + 1);
+        markPalaceNumber(item.palace, idx + 1, baguaWrap);
       });
       chainSection.style.display = 'block';
 
-      const pangtongData = await runChain(startPalace, 'pangtong');
+      const pangtongData = await runChain(startPalace, 'pangtong', currentPalaces);
       pangtongList.innerHTML = '';
       pangtongData.chain.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'chain-item';
         div.innerHTML = makeChainItemHTML(item);
         pangtongList.appendChild(div);
-        markPalaceLetter(item.palace, idx + 1);
+        markPalaceLetter(item.palace, idx + 1, baguaWrap);
       });
       pangtongSection.style.display = 'block';
 
@@ -800,7 +862,7 @@
           div.className = 'chain-item';
           div.innerHTML = makeChainItemHTML(item);
           chuleiList.appendChild(div);
-          markPalaceAsterisk(item.palace);
+          markPalaceAsterisk(item.palace, baguaWrap);
         });
       } else {
         const div = document.createElement('div');
@@ -953,7 +1015,7 @@
     document.body.appendChild(overlay);
   }
 
-  // ===== 卦例頁：選單切換 + 問事關鍵詞搜尋 =====
+  // ===== 卦例頁：選單切換 + 問事關鍵詞搜尋 + 完整排盤 =====
   const menuBtn = document.getElementById('menuBtn');
   const appTitle = document.getElementById('appTitle');
   const viewCast = document.getElementById('viewCast');
@@ -961,9 +1023,28 @@
   const caseSearchInput = document.getElementById('caseSearchInput');
   const caseSearchStatus = document.getElementById('caseSearchStatus');
   const caseResults = document.getElementById('caseResults');
+  const caseDetail = document.getElementById('caseDetail');
+  const caseBackBtn = document.getElementById('caseBackBtn');
+  const caseMeta = document.getElementById('caseMeta');
+  const caseBaguaWrap = document.getElementById('caseBaguaWrap');
+  const caseBenLines = document.getElementById('caseBenLines');
+  const caseBenName = document.getElementById('caseBenName');
+  const caseChgLines = document.getElementById('caseChgLines');
+  const caseChgName = document.getElementById('caseChgName');
+  const caseSixiangSection = document.getElementById('caseSixiangSection');
+  const caseSixiangText = document.getElementById('caseSixiangText');
+  const caseChainSection = document.getElementById('caseChainSection');
+  const caseChainList = document.getElementById('caseChainList');
+  const casePangtongSection = document.getElementById('casePangtongSection');
+  const casePangtongList = document.getElementById('casePangtongList');
+  const caseChuleiSection = document.getElementById('caseChuleiSection');
+  const caseChuleiList = document.getElementById('caseChuleiList');
+
   let showingCases = false;
   let caseSearchTimer = null;
   let caseSearchSeq = 0;
+  let caseItemsCache = [];
+  let casePalaces = null;
 
   function setViewMode(cases) {
     showingCases = cases;
@@ -974,6 +1055,8 @@
     menuBtn.setAttribute('aria-label', cases ? '返回起卦頁面' : '切換卦例頁面');
     if (cases) {
       caseSearchInput.focus();
+    } else {
+      showCaseList();
     }
   }
 
@@ -996,34 +1079,182 @@
     return `${day}-${months[d.getMonth()]}-${d.getFullYear()} ${hh}:${mm}`;
   }
 
-  function renderCaseCard(item) {
-    const rows = [
-      ['時間戳', formatCaseTimestamp(item.timestamp)],
-      ['問事', item.question],
-      ['六爻', item.sixLines],
-      ['本卦', item.benName],
-      ['變卦', item.chgName],
-      ['用神宮', item.startPalace],
-      ['正推', item.zhengtui],
-      ['旁通', item.pangtong],
-      ['觸類', item.chulei],
-      ['日期', item.date],
-      ['時間', item.time],
-      ['城市', item.city],
-      ['真太陽時', item.trueSolarTime],
-      ['遁局', item.dunLabel]
-    ];
-    const body = rows.map(([label, value]) => {
-      const text = value == null || value === '' ? '—' : String(value);
-      return `<div class="case-row"><span class="case-label">${escapeHtml(label)}</span><span class="case-value">${escapeHtml(text)}</span></div>`;
-    }).join('');
-    return `<article class="case-card"><div class="case-card-title">${escapeHtml(item.question || '（無問事）')}</div>${body}</article>`;
+  function formatCaseDateLabel(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return dateStr || '';
+    const parts = dateStr.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(n => Number.isNaN(n))) return dateStr;
+    return formatDateDisplay(parts[0], parts[1], parts[2]);
+  }
+
+  function parseRawSixLines(raw) {
+    const text = String(raw == null ? '' : raw).trim();
+    const chars = text.length === 6 ? text.split('') : text.split(/[,\s]+/).filter(Boolean);
+    if (chars.length !== 6 || chars.some(c => !['6', '7', '8', '9'].includes(c))) {
+      throw new Error('六爻資料不完整');
+    }
+    const sixLines = chars.map(getLineValue);
+    const movingLineIndexes = [];
+    chars.forEach((c, i) => { if (isMoving(c)) movingLineIndexes.push(i); });
+    return { raw: chars, sixLines, movingLineIndexes };
+  }
+
+  function xunKongFromCaseDate(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return [];
+    const [y, mo, d] = dateStr.split('-').map(Number);
+    if ([y, mo, d].some(n => Number.isNaN(n))) return [];
+    return getXunKong(getDayGanZhi(new Date(y, mo - 1, d)));
+  }
+
+  function showCaseList() {
+    caseDetail.hidden = true;
+    caseResults.hidden = false;
+  }
+
+  function renderCaseListItem(item, index) {
+    const q = item.question || '（無問事）';
+    const meta = [
+      formatCaseDateLabel(item.date) || formatCaseTimestamp(item.timestamp),
+      item.time || '',
+      item.benName || '',
+      item.startPalace ? `用神${item.startPalace}` : ''
+    ].filter(Boolean).join(' · ');
+    return `<button type="button" class="case-list-item" data-case-index="${index}">
+      <div class="case-list-title">${escapeHtml(q)}</div>
+      <div class="case-list-meta">${escapeHtml(meta)}</div>
+    </button>`;
+  }
+
+  async function fillCaseChains(startPalace, palaces) {
+    clearPalaceNumbers(caseBaguaWrap);
+    clearPalaceLetters(caseBaguaWrap);
+    clearPalaceAsterisks(caseBaguaWrap);
+
+    const zhengtuiData = await runChain(startPalace, 'zhengtui', palaces);
+    caseChainList.innerHTML = '';
+    zhengtuiData.chain.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'chain-item';
+      div.innerHTML = makeChainItemHTML(item);
+      caseChainList.appendChild(div);
+      markPalaceNumber(item.palace, idx + 1, caseBaguaWrap);
+    });
+    caseChainSection.style.display = 'block';
+
+    const pangtongData = await runChain(startPalace, 'pangtong', palaces);
+    casePangtongList.innerHTML = '';
+    pangtongData.chain.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'chain-item';
+      div.innerHTML = makeChainItemHTML(item);
+      casePangtongList.appendChild(div);
+      markPalaceLetter(item.palace, idx + 1, caseBaguaWrap);
+    });
+    casePangtongSection.style.display = 'block';
+
+    caseChuleiList.innerHTML = '';
+    const chulei = pangtongData.chulei;
+    if (chulei && chulei.found && chulei.items.length > 0) {
+      chulei.items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'chain-item';
+        div.innerHTML = makeChainItemHTML(item);
+        caseChuleiList.appendChild(div);
+        markPalaceAsterisk(item.palace, caseBaguaWrap);
+      });
+    } else {
+      const div = document.createElement('div');
+      div.className = 'chain-item';
+      div.innerHTML = '<div class="chain-item-name" style="color:#8a8578;">無處觸類</div>';
+      caseChuleiList.appendChild(div);
+    }
+    caseChuleiSection.style.display = 'block';
+  }
+
+  async function openCaseDetail(item) {
+    caseResults.hidden = true;
+    caseDetail.hidden = false;
+    caseSearchStatus.textContent = '載入排盤…';
+    caseChainSection.style.display = 'none';
+    casePangtongSection.style.display = 'none';
+    caseChuleiSection.style.display = 'none';
+    caseChainList.innerHTML = '';
+    casePangtongList.innerHTML = '';
+    caseChuleiList.innerHTML = '';
+
+    const metaBits = [
+      item.question ? `問事：${item.question}` : '',
+      [formatCaseDateLabel(item.date), item.time, item.city].filter(Boolean).join(' · '),
+      item.trueSolarTime ? `真太陽時 ${item.trueSolarTime}` : '',
+      item.dunLabel || '',
+      item.startPalace ? `用神宮 ${item.startPalace}` : ''
+    ].filter(Boolean);
+    caseMeta.innerHTML = metaBits.map(t => `<div>${escapeHtml(t)}</div>`).join('');
+
+    try {
+      const parsed = parseRawSixLines(item.sixLines);
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cast',
+          sixLines: parsed.sixLines,
+          movingLineIndexes: parsed.movingLineIndexes
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '起卦失敗');
+
+      const benLines = data.ben ? data.ben.lines : parsed.sixLines;
+      const chgLines = data.changed ? data.changed.lines : parsed.sixLines;
+      renderSixLines(benLines, caseBenLines);
+      renderSixLines(chgLines, caseChgLines);
+      caseBenName.textContent = (data.ben && data.ben.name) || item.benName || getHexNameFromSixLines(benLines);
+      caseChgName.textContent = (data.changed && data.changed.name) || item.chgName || getHexNameFromSixLines(chgLines);
+
+      if (data.sixiang) {
+        caseSixiangText.textContent = data.sixiang.text;
+        caseSixiangSection.style.display = 'block';
+      } else {
+        caseSixiangSection.style.display = 'none';
+      }
+
+      casePalaces = data.palaces;
+      const startPalace = item.startPalace;
+      renderBagua(casePalaces, {
+        wrap: caseBaguaWrap,
+        interactive: true,
+        xunKong: xunKongFromCaseDate(item.date),
+        onSelect: async (name) => {
+          try {
+            caseSearchStatus.textContent = '';
+            await fillCaseChains(name, casePalaces);
+            caseBaguaWrap.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
+            const sel = caseBaguaWrap.querySelector(`.palace[data-palace="${name}"]`);
+            if (sel) sel.classList.add('selected');
+          } catch (e) {
+            caseSearchStatus.textContent = '飛宮鏈失敗：' + e.message;
+          }
+        }
+      });
+
+      if (startPalace) {
+        const sel = caseBaguaWrap.querySelector(`.palace[data-palace="${startPalace}"]`);
+        if (sel) sel.classList.add('selected');
+        await fillCaseChains(startPalace, casePalaces);
+      }
+
+      caseSearchStatus.textContent = '';
+    } catch (e) {
+      caseSearchStatus.textContent = '載入失敗：' + e.message;
+    }
   }
 
   async function searchCases(query) {
     const seq = ++caseSearchSeq;
     caseSearchStatus.textContent = '搜尋中…';
+    caseItemsCache = [];
     caseResults.innerHTML = '';
+    showCaseList();
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -1036,13 +1267,13 @@
         caseSearchStatus.textContent = data.error || '搜尋失敗';
         return;
       }
-      const items = Array.isArray(data.items) ? data.items : [];
-      if (items.length === 0) {
+      caseItemsCache = Array.isArray(data.items) ? data.items : [];
+      if (caseItemsCache.length === 0) {
         caseSearchStatus.textContent = '沒有符合的卦例';
         return;
       }
-      caseSearchStatus.textContent = `找到 ${items.length} 筆`;
-      caseResults.innerHTML = items.map(renderCaseCard).join('');
+      caseSearchStatus.textContent = `找到 ${caseItemsCache.length} 筆，點選查看排盤`;
+      caseResults.innerHTML = caseItemsCache.map(renderCaseListItem).join('');
     } catch (e) {
       if (seq !== caseSearchSeq) return;
       caseSearchStatus.textContent = '連線失敗：' + e.message;
@@ -1053,6 +1284,25 @@
     menuBtn.addEventListener('click', () => setViewMode(!showingCases));
   }
 
+  if (caseBackBtn) {
+    caseBackBtn.addEventListener('click', () => {
+      showCaseList();
+      caseSearchStatus.textContent = caseItemsCache.length
+        ? `找到 ${caseItemsCache.length} 筆，點選查看排盤`
+        : '';
+    });
+  }
+
+  if (caseResults) {
+    caseResults.addEventListener('click', (e) => {
+      const btn = e.target.closest('.case-list-item');
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.caseIndex, 10);
+      const item = caseItemsCache[idx];
+      if (item) openCaseDetail(item);
+    });
+  }
+
   if (caseSearchInput) {
     caseSearchInput.addEventListener('input', () => {
       const query = caseSearchInput.value.trim();
@@ -1061,6 +1311,8 @@
         caseSearchSeq += 1;
         caseSearchStatus.textContent = '';
         caseResults.innerHTML = '';
+        caseItemsCache = [];
+        showCaseList();
         return;
       }
       caseSearchTimer = setTimeout(() => searchCases(query), 350);

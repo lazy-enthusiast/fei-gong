@@ -88,44 +88,74 @@ body {
 .case-results {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.45rem;
   padding-bottom: 1.2rem;
 }
 
-.case-card {
+.case-list-item {
+  width: 100%;
+  text-align: left;
   background: #fff;
   border: 1px solid #d4cfc0;
   border-radius: 4px;
-  padding: 0.7rem 0.75rem;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
 }
 
-.case-card-title {
-  font-size: 0.95rem;
+.case-list-item:active {
+  background: #f5efe0;
+}
+
+.case-list-title {
+  font-size: 0.92rem;
   color: #8a6d3b;
-  letter-spacing: 0.06rem;
-  margin-bottom: 0.45rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px dashed #d4cfc0;
+  margin-bottom: 0.2rem;
 }
 
-.case-row {
-  display: grid;
-  grid-template-columns: 4.2rem 1fr;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  padding: 0.12rem 0;
-}
-
-.case-label {
+.case-list-meta {
+  font-size: 0.72rem;
   color: #8a8578;
-  flex-shrink: 0;
+  line-height: 1.4;
 }
 
-.case-value {
-  color: #2a2a2a;
-  word-break: break-word;
-  white-space: pre-wrap;
+.case-detail {
+  padding-bottom: 1.2rem;
+}
+
+.case-back-btn {
+  display: inline-block;
+  background: transparent;
+  border: none;
+  color: #8a6d3b;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.05rem;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  margin-bottom: 0.45rem;
+}
+
+.case-meta {
+  background: #fff;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  padding: 0.55rem 0.7rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.78rem;
+  color: #6a6458;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.case-hex-section {
+  justify-content: center;
+}
+
+.case-hex-result {
+  width: 100%;
+  justify-content: center;
 }
 
 /* ===== 頂部：可收起 ===== */
