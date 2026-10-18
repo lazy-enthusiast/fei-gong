@@ -1242,8 +1242,7 @@
       formatCaseDateLabel(item.date),
       timePart,
       item.city || '',
-      item.dunLabel || '',
-      item.startPalace ? `用神${item.startPalace}` : ''
+      item.dunLabel || ''
     ].filter(Boolean).join(' · ');
     caseMeta.innerHTML =
       `<div class="case-meta-question">${escapeHtml(question)}</div>` +
@@ -1281,24 +1280,20 @@
       const startPalace = item.startPalace;
       renderBagua(casePalaces, {
         wrap: caseBaguaWrap,
-        interactive: true,
-        xunKong: xunKongFromCaseDate(item.date),
-        onSelect: async (name) => {
-          try {
-            caseSearchStatus.textContent = '';
-            await fillCaseChains(name, casePalaces);
-            caseBaguaWrap.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
-            const sel = caseBaguaWrap.querySelector(`.palace[data-palace="${name}"]`);
-            if (sel) sel.classList.add('selected');
-          } catch (e) {
-            caseSearchStatus.textContent = '飛宮鏈失敗：' + e.message;
-          }
-        }
+        interactive: false,
+        xunKong: xunKongFromCaseDate(item.date)
       });
+      caseBaguaWrap.classList.add('case-bagua-locked');
 
       if (startPalace) {
         const sel = caseBaguaWrap.querySelector(`.palace[data-palace="${startPalace}"]`);
-        if (sel) sel.classList.add('selected');
+        if (sel) {
+          sel.classList.add('selected', 'yongshen');
+          const mark = document.createElement('div');
+          mark.className = 'palace-yongshen';
+          mark.textContent = '用';
+          sel.appendChild(mark);
+        }
         await fillCaseChains(startPalace, casePalaces);
       }
 

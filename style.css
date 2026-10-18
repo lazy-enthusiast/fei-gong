@@ -564,6 +564,32 @@ body {
   box-shadow: 0 0 0 2px #8a6d3b44;
 }
 
+.case-bagua-locked .palace {
+  cursor: default;
+}
+
+.case-bagua-locked .palace:active {
+  background: #fff;
+}
+
+.case-bagua-locked .palace.selected:active,
+.case-bagua-locked .palace.yongshen:active {
+  background: #f5efe0;
+}
+
+.palace-yongshen {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: #8a6d3b;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  letter-spacing: 0;
+}
+
 .palace.empty {
   cursor: default;
   opacity: 0.3;
