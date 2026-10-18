@@ -1201,9 +1201,15 @@
     caseChuleiList.innerHTML = '';
 
     const question = item.question || '（無問事）';
+    let timePart = item.time || '';
+    if (item.trueSolarTime) {
+      timePart = timePart
+        ? `${timePart}（${item.trueSolarTime}）`
+        : `（${item.trueSolarTime}）`;
+    }
     const metaLine = [
       formatCaseDateLabel(item.date) || item.date || '',
-      item.time || '',
+      timePart,
       item.city || '',
       item.dunLabel || ''
     ].filter(Boolean).join(' · ');
