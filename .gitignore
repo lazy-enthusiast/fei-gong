@@ -1,5 +1,7 @@
 worker.js
+worker.js.bak
 wrangler.toml
 .wrangler/
 AGENTS.md
 WORK_LOG.md
+apps-script.gs

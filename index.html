@@ -9,8 +9,15 @@
 </head>
 <body>
 <div class="app">
-  <h1>飛宮易卦</h1>
+  <header class="app-header">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="切換卦例頁面">
+      <span></span><span></span><span></span>
+    </button>
+    <h1 id="appTitle">飛宮易卦</h1>
+    <div class="header-spacer" aria-hidden="true"></div>
+  </header>
 
+  <div id="viewCast">
   <div class="info-panel" id="infoPanel">
     <div class="info-summary" id="infoSummary">
       <div class="info-summary-text" id="infoSummaryText">載入中…</div>
@@ -97,6 +104,15 @@
       <button class="btn-footer" id="saveHistoryBtn" type="button">📝 存 入 紀 錄</button>
     </div>
     <div class="save-history-msg" id="saveHistoryMsg"></div>
+  </div>
+  </div>
+
+  <div id="viewCases" class="view-cases" hidden>
+    <div class="question-row">
+      <input type="text" id="caseSearchInput" placeholder="搜尋問事關鍵詞" autocomplete="off">
+    </div>
+    <div class="case-search-status" id="caseSearchStatus"></div>
+    <div class="case-results" id="caseResults"></div>
   </div>
 </div>
 
@@ -886,8 +902,8 @@
       footerActions.style.display = 'none';
 
       try {
-        const app = document.querySelector('.app');
-        const canvas = await html2canvas(app, {
+        const castView = document.getElementById('viewCast');
+        const canvas = await html2canvas(castView, {
           scale: 2,
           backgroundColor: '#faf8f3',
           useCORS: true,
@@ -935,6 +951,120 @@
     overlay.appendChild(hint);
     overlay.appendChild(img);
     document.body.appendChild(overlay);
+  }
+
+  // ===== 卦例頁：選單切換 + 問事關鍵詞搜尋 =====
+  const menuBtn = document.getElementById('menuBtn');
+  const appTitle = document.getElementById('appTitle');
+  const viewCast = document.getElementById('viewCast');
+  const viewCases = document.getElementById('viewCases');
+  const caseSearchInput = document.getElementById('caseSearchInput');
+  const caseSearchStatus = document.getElementById('caseSearchStatus');
+  const caseResults = document.getElementById('caseResults');
+  let showingCases = false;
+  let caseSearchTimer = null;
+  let caseSearchSeq = 0;
+
+  function setViewMode(cases) {
+    showingCases = cases;
+    viewCast.hidden = cases;
+    viewCases.hidden = !cases;
+    appTitle.textContent = cases ? '卦 例' : '飛宮易卦';
+    menuBtn.classList.toggle('is-open', cases);
+    menuBtn.setAttribute('aria-label', cases ? '返回起卦頁面' : '切換卦例頁面');
+    if (cases) {
+      caseSearchInput.focus();
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatCaseTimestamp(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    const day = d.getDate();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${day}-${months[d.getMonth()]}-${d.getFullYear()} ${hh}:${mm}`;
+  }
+
+  function renderCaseCard(item) {
+    const rows = [
+      ['時間戳', formatCaseTimestamp(item.timestamp)],
+      ['問事', item.question],
+      ['六爻', item.sixLines],
+      ['本卦', item.benName],
+      ['變卦', item.chgName],
+      ['用神宮', item.startPalace],
+      ['正推', item.zhengtui],
+      ['旁通', item.pangtong],
+      ['觸類', item.chulei],
+      ['日期', item.date],
+      ['時間', item.time],
+      ['城市', item.city],
+      ['真太陽時', item.trueSolarTime],
+      ['遁局', item.dunLabel]
+    ];
+    const body = rows.map(([label, value]) => {
+      const text = value == null || value === '' ? '—' : String(value);
+      return `<div class="case-row"><span class="case-label">${escapeHtml(label)}</span><span class="case-value">${escapeHtml(text)}</span></div>`;
+    }).join('');
+    return `<article class="case-card"><div class="case-card-title">${escapeHtml(item.question || '（無問事）')}</div>${body}</article>`;
+  }
+
+  async function searchCases(query) {
+    const seq = ++caseSearchSeq;
+    caseSearchStatus.textContent = '搜尋中…';
+    caseResults.innerHTML = '';
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'searchHistory', query })
+      });
+      const data = await res.json();
+      if (seq !== caseSearchSeq) return;
+      if (!res.ok || data.error) {
+        caseSearchStatus.textContent = data.error || '搜尋失敗';
+        return;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (items.length === 0) {
+        caseSearchStatus.textContent = '沒有符合的卦例';
+        return;
+      }
+      caseSearchStatus.textContent = `找到 ${items.length} 筆`;
+      caseResults.innerHTML = items.map(renderCaseCard).join('');
+    } catch (e) {
+      if (seq !== caseSearchSeq) return;
+      caseSearchStatus.textContent = '連線失敗：' + e.message;
+    }
+  }
+
+  if (menuBtn) {
+    menuBtn.addEventListener('click', () => setViewMode(!showingCases));
+  }
+
+  if (caseSearchInput) {
+    caseSearchInput.addEventListener('input', () => {
+      const query = caseSearchInput.value.trim();
+      if (caseSearchTimer) clearTimeout(caseSearchTimer);
+      if (!query) {
+        caseSearchSeq += 1;
+        caseSearchStatus.textContent = '';
+        caseResults.innerHTML = '';
+        return;
+      }
+      caseSearchTimer = setTimeout(() => searchCases(query), 350);
+    });
   }
 </script>
 </body>
