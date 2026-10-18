@@ -142,6 +142,10 @@ body {
   padding-bottom: 1.2rem;
 }
 
+.case-footer-actions {
+  margin-top: 1.1rem;
+}
+
 .case-back-btn {
   display: inline-block;
   background: transparent;
