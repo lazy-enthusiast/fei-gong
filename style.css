@@ -590,6 +590,150 @@ body {
   letter-spacing: 0;
 }
 
+/* ===== 奇門轉盤 ===== */
+.qimen-wrap {
+  margin: 0.35rem auto 0.15rem;
+}
+
+.qimen-meta {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #8a8578;
+  letter-spacing: 0.04rem;
+  margin-bottom: 0.45rem;
+  line-height: 1.4;
+}
+
+.qimen-board {
+  display: grid;
+  grid-template-columns: 28px 112px 112px 112px 28px;
+  grid-template-rows: 28px 126px 126px 126px 28px;
+  gap: 5px;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.qimen-board .zhi {
+  font-size: 1rem;
+}
+
+.qimen-cell {
+  position: relative;
+  background: #fff;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.16rem;
+  padding: 0.32rem 0.18rem 0.28rem;
+  user-select: none;
+  line-height: 1.15;
+}
+
+.qimen-cell.qimen-yongshen {
+  border-color: #8a6d3b;
+  background: #f5efe0;
+  box-shadow: 0 0 0 2px #8a6d3b44;
+}
+
+.qimen-cell.qimen-haiwei {
+  border-color: #a04a3a;
+  box-shadow: 0 0 0 2px #a04a3a33;
+}
+
+.qimen-cell.qimen-yongshen.qimen-haiwei {
+  border-color: #8a6d3b;
+  background: #f5efe0;
+  box-shadow:
+    0 0 0 2px #8a6d3b55,
+    inset 0 0 0 1.5px #a04a3a88;
+}
+
+.qimen-god,
+.qimen-star,
+.qimen-door {
+  font-weight: 600;
+  letter-spacing: 0.04rem;
+  min-height: 1em;
+}
+
+.qimen-god { font-size: 1.08rem; }
+.qimen-star { font-size: 1.22rem; letter-spacing: 0.02rem; }
+.qimen-door { font-size: 1.15rem; }
+
+/* 五行色：金橙黃／木綠／水藍／火紅／土啡 */
+.qimen-god[data-wx="jin"],
+.qimen-star[data-wx="jin"],
+.qimen-door[data-wx="jin"],
+.qimen-tian[data-wx="jin"],
+.qimen-di[data-wx="jin"] { color: #d4a017; }
+
+.qimen-god[data-wx="mu"],
+.qimen-star[data-wx="mu"],
+.qimen-door[data-wx="mu"],
+.qimen-tian[data-wx="mu"],
+.qimen-di[data-wx="mu"] { color: #2f7d4a; }
+
+.qimen-god[data-wx="shui"],
+.qimen-star[data-wx="shui"],
+.qimen-door[data-wx="shui"],
+.qimen-tian[data-wx="shui"],
+.qimen-di[data-wx="shui"] { color: #2f6fad; }
+
+.qimen-god[data-wx="huo"],
+.qimen-star[data-wx="huo"],
+.qimen-door[data-wx="huo"],
+.qimen-tian[data-wx="huo"],
+.qimen-di[data-wx="huo"] { color: #c43b2e; }
+
+.qimen-god[data-wx="tu"],
+.qimen-star[data-wx="tu"],
+.qimen-door[data-wx="tu"],
+.qimen-tian[data-wx="tu"],
+.qimen-di[data-wx="tu"] { color: #8a5a2b; }
+
+.qimen-stems {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.12rem;
+}
+
+.qimen-tian {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04rem;
+}
+
+.qimen-di {
+  font-size: 1.12rem;
+  font-weight: 500;
+  letter-spacing: 0.04rem;
+}
+
+.qimen-center {
+  background: #f7f4ec;
+}
+
+.qimen-center .qimen-stems {
+  margin-top: 0;
+}
+
+.qimen-center .qimen-di {
+  font-size: 1.28rem;
+  font-weight: 600;
+}
+
+@media (max-width: 420px) {
+  .qimen-board {
+    grid-template-columns: 26px 100px 100px 100px 26px;
+    grid-template-rows: 26px 114px 114px 114px 26px;
+  }
+}
+
 .palace.empty {
   cursor: default;
   opacity: 0.3;

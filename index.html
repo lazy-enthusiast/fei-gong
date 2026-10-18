@@ -98,6 +98,11 @@
     <div id="chuleiList"></div>
   </div>
 
+  <div class="chain-section" id="qimenSection" style="display:none;">
+    <div class="chain-title" id="qimenTitle">奇 門 局</div>
+    <div class="qimen-wrap" id="qimenWrap"></div>
+  </div>
+
   <div class="footer-actions" id="footerActions">
     <div class="footer-btn-row">
       <button class="btn-footer" id="screenshotBtn" type="button">📷 生 成 長 圖</button>
@@ -160,6 +165,11 @@
         <div class="chain-title">觸 類</div>
         <div id="caseChuleiList"></div>
       </div>
+
+      <div class="chain-section" id="caseQimenSection" style="display:none;">
+        <div class="chain-title" id="caseQimenTitle">奇 門 局</div>
+        <div class="qimen-wrap" id="caseQimenWrap"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -200,6 +210,232 @@
     { name: '坎', row: 4, col: 3 },
     { name: '乾', row: 4, col: 4 }
   ];
+
+  const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+  // 奇門顯示用（起盤規則在 Worker）
+  const PALACE_NUM = {
+    坎: 1, 坤: 2, 震: 3, 巽: 4, 中: 5, 乾: 6, 兌: 7, 艮: 8, 離: 9
+  };
+  const PALACE_NUM_CN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  const PALACE_NAME_BY_NUM = {
+    1: '坎', 2: '坤', 3: '震', 4: '巽', 5: '中', 6: '乾', 7: '兌', 8: '艮', 9: '離'
+  };
+
+  function getHourZhiIndex(hour) {
+    return Math.floor(((hour + 1) % 24) / 2);
+  }
+
+  function getHourGanZhi(dayGanIdx, hour) {
+    const zhiIdx = getHourZhiIndex(hour);
+    const startGan = [0, 2, 4, 6, 8, 0, 2, 4, 6, 8][dayGanIdx];
+    const ganIdx = (startGan + zhiIdx) % 10;
+    return {
+      gan: TIAN_GAN[ganIdx],
+      zhi: DI_ZHI[zhiIdx],
+      ganIdx,
+      zhiIdx,
+      label: TIAN_GAN[ganIdx] + DI_ZHI[zhiIdx]
+    };
+  }
+
+  async function fetchQimenPan(dunLabel, hourGZ) {
+    if (!dunLabel || !hourGZ) return null;
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'qimen',
+        dunLabel,
+        hourGZ: {
+          gan: hourGZ.gan,
+          zhi: hourGZ.zhi,
+          ganIdx: hourGZ.ganIdx,
+          zhiIdx: hourGZ.zhiIdx,
+          label: hourGZ.label
+        }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || '奇門起盤失敗');
+    return data;
+  }
+
+  function qimenDoorLabel(door) {
+    if (!door) return '';
+    return door.endsWith('門') ? door : door + '門';
+  }
+
+  // 神／星／門／干五行：金橙黃、木綠、水藍、火紅、土啡
+  const QIMEN_WUXING = {
+    值符: 'tu', 騰蛇: 'huo', 太陰: 'jin', 六合: 'mu',
+    白虎: 'jin', 玄武: 'shui', 勾陳: 'tu', 朱雀: 'huo',
+    九地: 'tu', 九天: 'jin',
+    天蓬: 'shui', 天芮: 'tu', 天沖: 'mu', 天輔: 'mu',
+    天心: 'jin', 天柱: 'jin', 天任: 'tu', 天英: 'huo',
+    休: 'shui', 生: 'tu', 傷: 'mu', 杜: 'mu',
+    景: 'huo', 死: 'tu', 驚: 'jin', 開: 'jin',
+    休門: 'shui', 生門: 'tu', 傷門: 'mu', 杜門: 'mu',
+    景門: 'huo', 死門: 'tu', 驚門: 'jin', 開門: 'jin',
+    甲: 'mu', 乙: 'mu', 丙: 'huo', 丁: 'huo',
+    戊: 'tu', 己: 'tu', 庚: 'jin', 辛: 'jin',
+    壬: 'shui', 癸: 'shui'
+  };
+
+  function qimenWuxing(name) {
+    if (!name) return '';
+    return QIMEN_WUXING[name] || QIMEN_WUXING[name.replace(/門$/, '')] || '';
+  }
+
+  function chainLastPalace(chain) {
+    if (!Array.isArray(chain) || chain.length === 0) return '';
+    const last = chain[chain.length - 1];
+    return (last && last.palace) || '';
+  }
+
+  function renderQimenStems(tianText, diText) {
+    const row = document.createElement('div');
+    row.className = 'qimen-stems';
+    if (tianText) {
+      const tian = document.createElement('span');
+      tian.className = 'qimen-tian';
+      const tianWx = qimenWuxing(tianText);
+      if (tianWx) tian.dataset.wx = tianWx;
+      tian.textContent = tianText;
+      row.appendChild(tian);
+    }
+    if (diText) {
+      const di = document.createElement('span');
+      di.className = 'qimen-di';
+      const diWx = qimenWuxing(diText);
+      if (diWx) di.dataset.wx = diWx;
+      di.textContent = diText;
+      row.appendChild(di);
+    }
+    return row;
+  }
+
+  function renderQimenCell(c, marks) {
+    const div = document.createElement('div');
+    div.className = 'qimen-cell' + (c.empty ? ' qimen-center' : '');
+    div.dataset.palace = c.name;
+    if (marks && marks.yongshen && marks.yongshen === c.name) {
+      div.classList.add('qimen-yongshen');
+    }
+    if (marks && marks.haiwei && marks.haiwei === c.name) {
+      div.classList.add('qimen-haiwei');
+    }
+
+    if (c.empty) {
+      if (c.di) div.appendChild(renderQimenStems('', c.di));
+      return div;
+    }
+
+    const god = document.createElement('div');
+    god.className = 'qimen-god';
+    const godWx = qimenWuxing(c.god);
+    if (godWx) god.dataset.wx = godWx;
+    god.textContent = c.god || '';
+    div.appendChild(god);
+
+    const star = document.createElement('div');
+    star.className = 'qimen-star';
+    const starWx = qimenWuxing(c.star);
+    if (starWx) star.dataset.wx = starWx;
+    star.textContent = c.star || '';
+    div.appendChild(star);
+
+    const door = document.createElement('div');
+    door.className = 'qimen-door';
+    const doorWx = qimenWuxing(c.door);
+    if (doorWx) door.dataset.wx = doorWx;
+    door.textContent = qimenDoorLabel(c.door);
+    div.appendChild(door);
+
+    div.appendChild(renderQimenStems(c.tian, c.di));
+    return div;
+  }
+
+  async function renderQimenBoard(dunLabel, hourGZ, wrapEl, titleEl, xunKongList, marks) {
+    if (!wrapEl) return false;
+    wrapEl.innerHTML = '';
+    if (titleEl) titleEl.textContent = '奇 門 局';
+    if (!dunLabel || !hourGZ) return false;
+
+    let pan;
+    try {
+      pan = await fetchQimenPan(dunLabel, hourGZ);
+    } catch (e) {
+      const err = document.createElement('div');
+      err.className = 'qimen-meta';
+      err.textContent = '奇門起盤失敗：' + e.message;
+      wrapEl.appendChild(err);
+      return true;
+    }
+    if (!pan || !pan.cells || !pan.meta) return false;
+
+    const fuGong = PALACE_NAME_BY_NUM[pan.meta.fuLinPalace] || '';
+    const shiGong = PALACE_NAME_BY_NUM[pan.meta.doorLinPalace] || '';
+    const shiGongNum = PALACE_NUM_CN[pan.meta.doorLinPalace] || '';
+    const fuGongNum = PALACE_NUM_CN[pan.meta.fuLinPalace] || '';
+    const meta = document.createElement('div');
+    meta.className = 'qimen-meta';
+    meta.innerHTML =
+      `${pan.meta.dunLabel} · 時家轉盤·置閏 · 時柱${pan.meta.hourLabel}<br>` +
+      `值符 ${pan.meta.xunLabel} ${pan.meta.zhiFu}落${fuGong}${fuGongNum}宮　` +
+      `值使 ${pan.meta.zhiShi}門落${shiGong}${shiGongNum}宮`;
+    wrapEl.appendChild(meta);
+
+    const board = document.createElement('div');
+    board.className = 'qimen-board';
+
+    ZHI_LAYOUT.forEach(item => {
+      const zhi = document.createElement('div');
+      zhi.className = 'zhi';
+      zhi.dataset.zhi = item.zhi;
+      zhi.textContent = item.zhi;
+      zhi.style.gridRow = item.row;
+      zhi.style.gridColumn = item.col;
+      board.appendChild(zhi);
+    });
+
+    const highlight = marks || {};
+    PALACE_LAYOUT.forEach(item => {
+      const num = PALACE_NUM[item.name];
+      const cell = renderQimenCell(pan.cells[num], highlight);
+      cell.style.gridRow = item.row;
+      cell.style.gridColumn = item.col;
+      board.appendChild(cell);
+    });
+
+    wrapEl.appendChild(board);
+    updateXunKongDisplay(board, xunKongList !== undefined ? xunKongList : currentXunKong);
+    return true;
+  }
+
+  async function showQimenBoard(dunLabel, hourGZ, sectionEl, wrapEl, titleEl, xunKongList, marks) {
+    if (!sectionEl || !wrapEl) return;
+    const ok = await renderQimenBoard(dunLabel, hourGZ, wrapEl, titleEl, xunKongList, marks);
+    if (ok) {
+      sectionEl.style.display = 'block';
+    } else {
+      sectionEl.style.display = 'none';
+    }
+  }
+
+  function liveQimenMarks() {
+    return {
+      yongshen: lastYongshen || '',
+      haiwei: chainLastPalace(lastZhengtui)
+    };
+  }
+
+  function hideQimenBoard(sectionEl, wrapEl, titleEl) {
+    if (sectionEl) sectionEl.style.display = 'none';
+    if (wrapEl) wrapEl.innerHTML = '';
+    if (titleEl) titleEl.textContent = '奇 門 局';
+  }
 
   const TRIGRAMS = {
     1: { name: '乾', lines: [1,1,1] },
@@ -260,9 +496,6 @@
     }
     return merged.join('\n');
   }
-
-  const TIAN_GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-  const DI_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 
   function getDayGanZhi(date) {
     const base = new Date(Date.UTC(1900, 0, 1));
@@ -401,6 +634,7 @@
   let currentXunKong = [];
   let lastTrueSolarTime = '';
   let lastDun = '';
+  let lastHourGZ = null;
   let lastYongshen = '';
   let lastZhengtui = null;
   let lastPangtong = null;
@@ -490,6 +724,7 @@
       const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
       lastTrueSolarTime = `${tstHH}:${tstMM}`;
       lastDun = dunLabel;
+      lastHourGZ = getHourGanZhi(dayGZ.ganIdx, tst.time.getHours());
 
       const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
       infoReadout.innerHTML =
@@ -501,6 +736,18 @@
       infoSummaryText.textContent = `${formatDateDisplay(y, mo, d)} · ${formatTimeDisplay(hh, mm)} · ${cityName} · ${dunLabel}`;
 
       updateXunKongDisplay();
+      const liveQimen = document.getElementById('qimenSection');
+      if (liveQimen && liveQimen.style.display !== 'none') {
+        await showQimenBoard(
+          lastDun,
+          lastHourGZ,
+          liveQimen,
+          document.getElementById('qimenWrap'),
+          document.getElementById('qimenTitle'),
+          currentXunKong,
+          liveQimenMarks()
+        );
+      }
     } catch (e) {
       infoReadout.textContent = '（' + e.message + '）';
     }
@@ -604,6 +851,11 @@
     document.getElementById('chainSection').style.display = 'none';
     document.getElementById('pangtongSection').style.display = 'none';
     document.getElementById('chuleiSection').style.display = 'none';
+    hideQimenBoard(
+      document.getElementById('qimenSection'),
+      document.getElementById('qimenWrap'),
+      document.getElementById('qimenTitle')
+    );
     clearChainMemory();
   }
 
@@ -625,6 +877,9 @@
   const pangtongList = document.getElementById('pangtongList');
   const chuleiSection = document.getElementById('chuleiSection');
   const chuleiList = document.getElementById('chuleiList');
+  const qimenSection = document.getElementById('qimenSection');
+  const qimenWrap = document.getElementById('qimenWrap');
+  const qimenTitle = document.getElementById('qimenTitle');
 
   let currentPalaces = null;
 
@@ -667,6 +922,7 @@
       pangtongList.innerHTML = '';
       chuleiSection.style.display = 'none';
       chuleiList.innerHTML = '';
+      hideQimenBoard(qimenSection, qimenWrap, qimenTitle);
       clearChainMemory();
     } catch (e) {
       errorMsg.textContent = '連線失敗：' + e.message;
@@ -878,6 +1134,18 @@
       lastZhengtui = zhengtuiData.chain;
       lastPangtong = pangtongData.chain;
       lastChulei = pangtongData.chulei || { found: false, items: [] };
+      await showQimenBoard(
+        lastDun,
+        lastHourGZ,
+        qimenSection,
+        qimenWrap,
+        qimenTitle,
+        currentXunKong,
+        {
+          yongshen: startPalace,
+          haiwei: chainLastPalace(zhengtuiData.chain)
+        }
+      );
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
     }
@@ -1041,6 +1309,9 @@
   const casePangtongList = document.getElementById('casePangtongList');
   const caseChuleiSection = document.getElementById('caseChuleiSection');
   const caseChuleiList = document.getElementById('caseChuleiList');
+  const caseQimenSection = document.getElementById('caseQimenSection');
+  const caseQimenWrap = document.getElementById('caseQimenWrap');
+  const caseQimenTitle = document.getElementById('caseQimenTitle');
 
   let showingCases = false;
   let caseSearchTimer = null;
@@ -1174,7 +1445,7 @@
     caseSuggest.hidden = false;
   }
 
-  async function fillCaseChains(startPalace, palaces) {
+  async function fillCaseChains(startPalace, palaces, dunLabel, hourGZ, xunKongList) {
     clearPalaceNumbers(caseBaguaWrap);
     clearPalaceLetters(caseBaguaWrap);
     clearPalaceAsterisks(caseBaguaWrap);
@@ -1218,6 +1489,43 @@
       caseChuleiList.appendChild(div);
     }
     caseChuleiSection.style.display = 'block';
+    await showQimenBoard(
+      dunLabel,
+      hourGZ,
+      caseQimenSection,
+      caseQimenWrap,
+      caseQimenTitle,
+      xunKongList,
+      {
+        yongshen: startPalace,
+        haiwei: chainLastPalace(zhengtuiData.chain)
+      }
+    );
+  }
+
+  function hourGZFromCaseItem(item) {
+    const dateLabel = formatCaseDateLabel(item.date);
+    if (!dateLabel) return null;
+    const m = String(item.date).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    let y, mo, d;
+    if (m) {
+      y = Number(m[1]); mo = Number(m[2]); d = Number(m[3]);
+    } else {
+      const parsed = item.date instanceof Date ? item.date : new Date(item.date);
+      if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 1905) return null;
+      y = parsed.getFullYear(); mo = parsed.getMonth() + 1; d = parsed.getDate();
+    }
+    const timeSrc = item.trueSolarTime || item.time || '';
+    const tm = String(timeSrc).match(/(\d{1,2}):(\d{2})/);
+    if (!tm) return null;
+    const hour = Number(tm[1]);
+    const minute = Number(tm[2]);
+    let effective = new Date(y, mo - 1, d, hour, minute, 0);
+    if (hour === 23) {
+      effective = new Date(effective.getTime() + 3600000);
+    }
+    const dayGZ = getDayGanZhi(effective);
+    return getHourGanZhi(dayGZ.ganIdx, hour);
   }
 
   async function openCaseDetail(item) {
@@ -1227,6 +1535,7 @@
     caseChainSection.style.display = 'none';
     casePangtongSection.style.display = 'none';
     caseChuleiSection.style.display = 'none';
+    hideQimenBoard(caseQimenSection, caseQimenWrap, caseQimenTitle);
     caseChainList.innerHTML = '';
     casePangtongList.innerHTML = '';
     caseChuleiList.innerHTML = '';
@@ -1294,7 +1603,22 @@
           mark.textContent = '用';
           sel.appendChild(mark);
         }
-        await fillCaseChains(startPalace, casePalaces);
+        await fillCaseChains(
+          startPalace,
+          casePalaces,
+          item.dunLabel,
+          hourGZFromCaseItem(item),
+          xunKongFromCaseDate(item.date)
+        );
+      } else if (item.dunLabel) {
+        await showQimenBoard(
+          item.dunLabel,
+          hourGZFromCaseItem(item),
+          caseQimenSection,
+          caseQimenWrap,
+          caseQimenTitle,
+          xunKongFromCaseDate(item.date)
+        );
       }
 
       caseSearchStatus.textContent = '';
