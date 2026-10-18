@@ -86,9 +86,9 @@
   </div>
 
   <div class="footer-actions" id="footerActions">
-    <button class="btn-screenshot" id="screenshotBtn">📷 生 成 長 圖</button>
-    <div style="margin-top:0.6rem;">
-      <button class="btn-screenshot" id="saveHistoryBtn" type="button">存入紀錄</button>
+    <div class="footer-btn-row">
+      <button class="btn-footer" id="screenshotBtn" type="button">生 成 長 圖</button>
+      <button class="btn-footer" id="saveHistoryBtn" type="button">存 入 紀 錄</button>
     </div>
     <div class="save-history-msg" id="saveHistoryMsg"></div>
   </div>
@@ -809,7 +809,7 @@
       }
 
       saveHistoryBtn.disabled = true;
-      saveHistoryBtn.textContent = '儲存中…';
+      saveHistoryBtn.textContent = '儲 存 中…';
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -843,7 +843,7 @@
         if (saveHistoryMsg) saveHistoryMsg.textContent = '連線失敗：' + e.message;
       }
       saveHistoryBtn.disabled = false;
-      saveHistoryBtn.textContent = '存入紀錄';
+      saveHistoryBtn.textContent = '存 入 紀 錄';
     });
   }
 
@@ -851,7 +851,7 @@
   if (screenshotBtn) {
     screenshotBtn.addEventListener('click', async () => {
       screenshotBtn.disabled = true;
-      screenshotBtn.textContent = '生成中…';
+      screenshotBtn.textContent = '生 成 中…';
 
       const footerActions = document.getElementById('footerActions');
       footerActions.style.display = 'none';
@@ -869,14 +869,14 @@
 
         footerActions.style.display = '';
         screenshotBtn.disabled = false;
-        screenshotBtn.textContent = '📷 生 成 長 圖';
+        screenshotBtn.textContent = '生 成 長 圖';
 
         showScreenshotPreview(dataUrl);
       } catch (e) {
         footerActions.style.display = '';
         alert('生成失敗：' + e.message);
         screenshotBtn.disabled = false;
-        screenshotBtn.textContent = '📷 生 成 長 圖';
+        screenshotBtn.textContent = '生 成 長 圖';
       }
     });
   }
