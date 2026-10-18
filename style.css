@@ -649,18 +649,19 @@ body {
   overflow: hidden;
 }
 
-.qimen-cell.qimen-yongshen {
+/* 坐方宮＝用神宮；向方宮＝正推鏈終點 */
+.qimen-cell.qimen-zuofang {
   border-color: #8a6d3b;
   background: #f5efe0;
   box-shadow: 0 0 0 2px #8a6d3b44;
 }
 
-.qimen-cell.qimen-haiwei {
+.qimen-cell.qimen-xiangfang {
   border-color: #a04a3a;
   box-shadow: 0 0 0 2px #a04a3a33;
 }
 
-.qimen-cell.qimen-yongshen.qimen-haiwei {
+.qimen-cell.qimen-zuofang.qimen-xiangfang {
   border-color: #8a6d3b;
   background: #f5efe0;
   box-shadow:

@@ -320,11 +320,11 @@
     const div = document.createElement('div');
     div.className = 'qimen-cell' + (c.empty ? ' qimen-center' : '');
     div.dataset.palace = c.name;
-    if (marks && marks.yongshen && marks.yongshen === c.name) {
-      div.classList.add('qimen-yongshen');
+    if (marks && marks.zuofang && marks.zuofang === c.name) {
+      div.classList.add('qimen-zuofang');
     }
-    if (marks && marks.haiwei && marks.haiwei === c.name) {
-      div.classList.add('qimen-haiwei');
+    if (marks && marks.xiangfang && marks.xiangfang === c.name) {
+      div.classList.add('qimen-xiangfang');
     }
 
     if (c.empty) {
@@ -361,7 +361,14 @@
     if (!wrapEl) return false;
     wrapEl.innerHTML = '';
     if (titleEl) titleEl.textContent = '奇 門 局';
-    if (!dunLabel || !hourGZ) return false;
+    if (!dunLabel) return false;
+    if (!hourGZ) {
+      const err = document.createElement('div');
+      err.className = 'qimen-meta';
+      err.textContent = '奇門起盤失敗：無法解析時柱';
+      wrapEl.appendChild(err);
+      return true;
+    }
 
     let pan;
     try {
@@ -429,8 +436,8 @@
 
   function liveQimenMarks() {
     return {
-      yongshen: lastYongshen || '',
-      haiwei: chainLastPalace(lastZhengtui)
+      zuofang: lastYongshen || '',
+      xiangfang: chainLastPalace(lastZhengtui)
     };
   }
 
@@ -1170,8 +1177,8 @@
         qimenTitle,
         currentXunKong,
         {
-          yongshen: startPalace,
-          haiwei: chainLastPalace(zhengtuiData.chain)
+          zuofang: startPalace,
+          xiangfang: chainLastPalace(zhengtuiData.chain)
         }
       );
     } catch (e) {
@@ -1415,16 +1422,17 @@
     return { raw: chars, sixLines, movingLineIndexes };
   }
 
-  function xunKongFromCaseDate(value) {
-    const label = formatCaseDateLabel(value);
-    if (!label) return [];
-    const m = String(label).match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
-    if (!m) return [];
-    const day = Number(m[1]);
-    const month = MONTH_ABBR.indexOf(m[2]) + 1;
-    const year = Number(m[3]);
-    if (!month || [year, day].some(n => Number.isNaN(n))) return [];
-    return getXunKong(getDayGanZhi(new Date(year, month - 1, day)));
+  function xunKongFromCaseDate(value, timeValue) {
+    const ymd = parseCaseYMD(value);
+    if (!ymd) return [];
+    const hm = parseCaseHourMinute(timeValue || '');
+    const hour = hm ? hm.hour : 12;
+    const minute = hm ? hm.minute : 0;
+    let effective = new Date(ymd.y, ymd.mo - 1, ymd.d, hour, minute, 0);
+    if (hour === 23) {
+      effective = new Date(effective.getTime() + 3600000);
+    }
+    return getXunKong(getDayGanZhi(effective));
   }
 
   function highlightQuestion(text, query) {
@@ -1525,35 +1533,64 @@
       caseQimenTitle,
       xunKongList,
       {
-        yongshen: startPalace,
-        haiwei: chainLastPalace(zhengtuiData.chain)
+        zuofang: startPalace,
+        xiangfang: chainLastPalace(zhengtuiData.chain)
       }
     );
   }
 
-  function hourGZFromCaseItem(item) {
-    const dateLabel = formatCaseDateLabel(item.date);
-    if (!dateLabel) return null;
-    const m = String(item.date).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
-    let y, mo, d;
-    if (m) {
-      y = Number(m[1]); mo = Number(m[2]); d = Number(m[3]);
-    } else {
-      const parsed = item.date instanceof Date ? item.date : new Date(item.date);
-      if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 1905) return null;
-      y = parsed.getFullYear(); mo = parsed.getMonth() + 1; d = parsed.getDate();
+  function parseCaseYMD(value) {
+    if (value == null || value === '') return null;
+    if (value instanceof Date && !Number.isNaN(value.getTime()) && value.getFullYear() >= 1905) {
+      return { y: value.getFullYear(), mo: value.getMonth() + 1, d: value.getDate() };
     }
-    const timeSrc = item.trueSolarTime || item.time || '';
-    const tm = String(timeSrc).match(/(\d{1,2}):(\d{2})/);
-    if (!tm) return null;
-    const hour = Number(tm[1]);
-    const minute = Number(tm[2]);
-    let effective = new Date(y, mo - 1, d, hour, minute, 0);
-    if (hour === 23) {
+    const s = String(value).trim();
+    let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return { y: Number(m[1]), mo: Number(m[2]), d: Number(m[3]) };
+    m = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+    if (m) {
+      const mo = MONTH_ABBR.indexOf(m[2]) + 1;
+      if (mo) return { y: Number(m[3]), mo, d: Number(m[1]) };
+    }
+    const label = formatCaseDateLabel(value);
+    m = String(label).match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+    if (m) {
+      const mo = MONTH_ABBR.indexOf(m[2]) + 1;
+      if (mo) return { y: Number(m[3]), mo, d: Number(m[1]) };
+    }
+    const parsed = new Date(s);
+    if (!Number.isNaN(parsed.getTime()) && parsed.getFullYear() >= 1905) {
+      return { y: parsed.getFullYear(), mo: parsed.getMonth() + 1, d: parsed.getDate() };
+    }
+    return null;
+  }
+
+  function parseCaseHourMinute(value) {
+    if (value == null || value === '') return null;
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return { hour: value.getHours(), minute: value.getMinutes() };
+    }
+    const s = String(value).trim();
+    const m = s.match(/(\d{1,2}):(\d{2})/);
+    if (m) return { hour: Number(m[1]), minute: Number(m[2]) };
+    const parsed = new Date(s);
+    if (!Number.isNaN(parsed.getTime())) {
+      return { hour: parsed.getHours(), minute: parsed.getMinutes() };
+    }
+    return null;
+  }
+
+  function hourGZFromCaseItem(item) {
+    const ymd = parseCaseYMD(item && item.date);
+    if (!ymd) return null;
+    const hm = parseCaseHourMinute((item && (item.trueSolarTime || item.time)) || '');
+    if (!hm) return null;
+    let effective = new Date(ymd.y, ymd.mo - 1, ymd.d, hm.hour, hm.minute, 0);
+    if (hm.hour === 23) {
       effective = new Date(effective.getTime() + 3600000);
     }
     const dayGZ = getDayGanZhi(effective);
-    return getHourGanZhi(dayGZ.ganIdx, hour);
+    return getHourGanZhi(dayGZ.ganIdx, hm.hour);
   }
 
   async function openCaseDetail(item) {
@@ -1615,10 +1652,12 @@
 
       casePalaces = data.palaces;
       const startPalace = item.startPalace;
+      const caseHourGZ = hourGZFromCaseItem(item);
+      const caseXunKong = xunKongFromCaseDate(item.date, item.trueSolarTime || item.time);
       renderBagua(casePalaces, {
         wrap: caseBaguaWrap,
         interactive: false,
-        xunKong: xunKongFromCaseDate(item.date)
+        xunKong: caseXunKong
       });
       caseBaguaWrap.classList.add('case-bagua-locked');
 
@@ -1635,17 +1674,18 @@
           startPalace,
           casePalaces,
           item.dunLabel,
-          hourGZFromCaseItem(item),
-          xunKongFromCaseDate(item.date)
+          caseHourGZ,
+          caseXunKong
         );
       } else if (item.dunLabel) {
         await showQimenBoard(
           item.dunLabel,
-          hourGZFromCaseItem(item),
+          caseHourGZ,
           caseQimenSection,
           caseQimenWrap,
           caseQimenTitle,
-          xunKongFromCaseDate(item.date)
+          caseXunKong,
+          { zuofang: '', xiangfang: '' }
         );
       }
 
