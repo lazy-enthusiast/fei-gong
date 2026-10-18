@@ -19,11 +19,17 @@
     <div class="info-body">
       <div class="info-row">
         <label>日期</label>
-        <input type="date" id="dateInput">
+        <div class="datetime-field">
+          <input type="text" id="dateDisplay" class="datetime-display" readonly tabindex="-1" aria-hidden="true">
+          <input type="date" id="dateInput" class="datetime-native" aria-label="日期">
+        </div>
       </div>
       <div class="info-row">
         <label>時間</label>
-        <input type="time" id="timeInput">
+        <div class="datetime-field">
+          <input type="text" id="timeDisplay" class="datetime-display" readonly tabindex="-1" aria-hidden="true">
+          <input type="time" id="timeInput" class="datetime-native" aria-label="時間">
+        </div>
       </div>
       <div class="info-row">
         <label>城市</label>
@@ -302,10 +308,29 @@
   const infoSummary = document.getElementById('infoSummary');
   const infoSummaryText = document.getElementById('infoSummaryText');
   const dateInput = document.getElementById('dateInput');
+  const dateDisplay = document.getElementById('dateDisplay');
   const timeInput = document.getElementById('timeInput');
+  const timeDisplay = document.getElementById('timeDisplay');
   const cityInput = document.getElementById('cityInput');
   const infoReadout = document.getElementById('infoReadout');
   const infoDun = document.getElementById('infoDun');
+
+  const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function formatDateDisplay(y, mo, d) {
+    return `${d}-${MONTH_ABBR[mo - 1]}-${y}`;
+  }
+
+  function formatTimeDisplay(hh, mm) {
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  }
+
+  function syncDateTimeDisplays() {
+    const [y, mo, d] = dateInput.value.split('-').map(Number);
+    const [hh, mm] = timeInput.value.split(':').map(Number);
+    if (y && mo && d) dateDisplay.value = formatDateDisplay(y, mo, d);
+    if (!Number.isNaN(hh) && !Number.isNaN(mm)) timeDisplay.value = formatTimeDisplay(hh, mm);
+  }
 
   let currentLon = 114.17;
   let currentLat = 22.32;
@@ -337,6 +362,7 @@
     const mm = String(now.getMinutes()).padStart(2, '0');
     dateInput.value = `${y}-${m}-${d}`;
     timeInput.value = `${hh}:${mm}`;
+    syncDateTimeDisplays();
   }
   initDateTime();
 
@@ -407,7 +433,8 @@
         `真太陽時：<span class="highlight">${tstHH}:${tstMM}</span>　校正：${corrStr}`;
       infoDun.textContent = dunLabel;
 
-      infoSummaryText.textContent = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · ${cityName} · ${dunLabel}`;
+      syncDateTimeDisplays();
+      infoSummaryText.textContent = `${formatDateDisplay(y, mo, d)} · ${formatTimeDisplay(hh, mm)} · ${cityName} · ${dunLabel}`;
 
       updateXunKongDisplay();
     } catch (e) {
@@ -417,6 +444,8 @@
 
   dateInput.addEventListener('change', updateInfo);
   timeInput.addEventListener('change', updateInfo);
+  dateInput.addEventListener('input', syncDateTimeDisplays);
+  timeInput.addEventListener('input', syncDateTimeDisplays);
   cityInput.addEventListener('change', updateInfo);
 
   const inputArea = document.getElementById('inputArea');
