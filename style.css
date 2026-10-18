@@ -142,6 +142,10 @@ body {
   padding-bottom: 1.2rem;
 }
 
+.case-footer-actions {
+  margin-top: 1.1rem;
+}
+
 .case-back-btn {
   display: inline-block;
   background: transparent;
@@ -271,25 +275,33 @@ body {
   position: relative;
   flex: 1;
   min-width: 0;
+  z-index: 1;
 }
 
 .datetime-field .datetime-display {
   width: 100%;
   flex: none;
   pointer-events: none;
+  position: relative;
+  z-index: 0;
 }
 
+/* Edge/Chromium：opacity:0 的 date/time 常無法開 picker；用近透明＋可點擊層 */
 .datetime-field .datetime-native {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
+  opacity: 0.011;
   cursor: pointer;
   flex: none;
   padding: 0;
   border: none;
   background: transparent;
+  color: transparent;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .datetime-field:focus-within .datetime-display {
@@ -588,6 +600,163 @@ body {
   line-height: 1;
   pointer-events: none;
   letter-spacing: 0;
+}
+
+/* ===== 奇門轉盤 ===== */
+.qimen-wrap {
+  margin: 0.35rem auto 0.15rem;
+}
+
+.qimen-meta {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #8a8578;
+  letter-spacing: 0.04rem;
+  margin-bottom: 0.45rem;
+  line-height: 1.4;
+}
+
+.qimen-board {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  /* 彈性格線：避免 Edge 字體度量把固定 px 軌道撐破 */
+  grid-template-columns: 1.6rem repeat(3, minmax(0, 1fr)) 1.6rem;
+  grid-template-rows: 1.6rem repeat(3, minmax(6.2rem, auto)) 1.6rem;
+  gap: 4px;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.qimen-board .zhi {
+  font-size: 0.95rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.qimen-cell {
+  position: relative;
+  background: #fff;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  padding: 0.28rem 0.12rem 0.22rem;
+  user-select: none;
+  line-height: 1.12;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 坐方宮＝用神宮；向方宮＝正推鏈終點 */
+.qimen-cell.qimen-zuofang {
+  border-color: #8a6d3b;
+  background: #f5efe0;
+  box-shadow: 0 0 0 2px #8a6d3b44;
+}
+
+.qimen-cell.qimen-xiangfang {
+  border-color: #a04a3a;
+  box-shadow: 0 0 0 2px #a04a3a33;
+}
+
+.qimen-cell.qimen-zuofang.qimen-xiangfang {
+  border-color: #8a6d3b;
+  background: #f5efe0;
+  box-shadow:
+    0 0 0 2px #8a6d3b55,
+    inset 0 0 0 1.5px #a04a3a88;
+}
+
+.qimen-god,
+.qimen-star,
+.qimen-door {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.04rem;
+  min-height: 1em;
+}
+
+/* 五行色：金橙黃／木綠／水藍／火紅／土啡 */
+.qimen-god[data-wx="jin"],
+.qimen-star[data-wx="jin"],
+.qimen-door[data-wx="jin"],
+.qimen-tian[data-wx="jin"],
+.qimen-di[data-wx="jin"] { color: #d4a017; }
+
+.qimen-god[data-wx="mu"],
+.qimen-star[data-wx="mu"],
+.qimen-door[data-wx="mu"],
+.qimen-tian[data-wx="mu"],
+.qimen-di[data-wx="mu"] { color: #2f7d4a; }
+
+.qimen-god[data-wx="shui"],
+.qimen-star[data-wx="shui"],
+.qimen-door[data-wx="shui"],
+.qimen-tian[data-wx="shui"],
+.qimen-di[data-wx="shui"] { color: #2f6fad; }
+
+.qimen-god[data-wx="huo"],
+.qimen-star[data-wx="huo"],
+.qimen-door[data-wx="huo"],
+.qimen-tian[data-wx="huo"],
+.qimen-di[data-wx="huo"] { color: #c43b2e; }
+
+.qimen-god[data-wx="tu"],
+.qimen-star[data-wx="tu"],
+.qimen-door[data-wx="tu"],
+.qimen-tian[data-wx="tu"],
+.qimen-di[data-wx="tu"] { color: #8a5a2b; }
+
+.qimen-stems {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.12rem;
+}
+
+.qimen-tian {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.04rem;
+}
+
+.qimen-di {
+  font-size: 1.02rem;
+  font-weight: 500;
+  letter-spacing: 0.04rem;
+}
+
+.qimen-center {
+  background: #f7f4ec;
+}
+
+.qimen-center .qimen-stems {
+  margin-top: 0;
+}
+
+.qimen-center .qimen-di {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+@media (max-width: 420px) {
+  .qimen-board {
+    grid-template-columns: 1.4rem repeat(3, minmax(0, 1fr)) 1.4rem;
+    grid-template-rows: 1.4rem repeat(3, minmax(5.6rem, auto)) 1.4rem;
+  }
+
+  .qimen-god,
+  .qimen-star,
+  .qimen-door { font-size: 1.02rem; }
+  .qimen-tian { font-size: 1.12rem; }
+  .qimen-di { font-size: 0.95rem; }
 }
 
 .palace.empty {
