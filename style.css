@@ -271,25 +271,33 @@ body {
   position: relative;
   flex: 1;
   min-width: 0;
+  z-index: 1;
 }
 
 .datetime-field .datetime-display {
   width: 100%;
   flex: none;
   pointer-events: none;
+  position: relative;
+  z-index: 0;
 }
 
+/* Edge/Chromium：opacity:0 的 date/time 常無法開 picker；用近透明＋可點擊層 */
 .datetime-field .datetime-native {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
+  opacity: 0.011;
   cursor: pointer;
   flex: none;
   padding: 0;
   border: none;
   background: transparent;
+  color: transparent;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .datetime-field:focus-within .datetime-display {
@@ -605,16 +613,22 @@ body {
 }
 
 .qimen-board {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: 28px 112px 112px 112px 28px;
-  grid-template-rows: 28px 126px 126px 126px 28px;
-  gap: 5px;
+  /* 彈性格線：避免 Edge 字體度量把固定 px 軌道撐破 */
+  grid-template-columns: 1.6rem repeat(3, minmax(0, 1fr)) 1.6rem;
+  grid-template-rows: 1.6rem repeat(3, minmax(6.2rem, auto)) 1.6rem;
+  gap: 4px;
   justify-content: center;
   margin: 0 auto;
 }
 
 .qimen-board .zhi {
-  font-size: 1rem;
+  font-size: 0.95rem;
+  min-width: 0;
+  min-height: 0;
 }
 
 .qimen-cell {
@@ -626,10 +640,13 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.16rem;
-  padding: 0.32rem 0.18rem 0.28rem;
+  gap: 0.12rem;
+  padding: 0.28rem 0.12rem 0.22rem;
   user-select: none;
-  line-height: 1.15;
+  line-height: 1.12;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .qimen-cell.qimen-yongshen {
@@ -659,9 +676,9 @@ body {
   min-height: 1em;
 }
 
-.qimen-god { font-size: 1.08rem; }
-.qimen-star { font-size: 1.22rem; letter-spacing: 0.02rem; }
-.qimen-door { font-size: 1.15rem; }
+.qimen-god { font-size: 0.98rem; }
+.qimen-star { font-size: 1.1rem; letter-spacing: 0.02rem; }
+.qimen-door { font-size: 1.05rem; }
 
 /* 五行色：金橙黃／木綠／水藍／火紅／土啡 */
 .qimen-god[data-wx="jin"],
@@ -703,13 +720,13 @@ body {
 }
 
 .qimen-tian {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
 }
 
 .qimen-di {
-  font-size: 1.12rem;
+  font-size: 1.02rem;
   font-weight: 500;
   letter-spacing: 0.04rem;
 }
@@ -723,15 +740,21 @@ body {
 }
 
 .qimen-center .qimen-di {
-  font-size: 1.28rem;
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
 @media (max-width: 420px) {
   .qimen-board {
-    grid-template-columns: 26px 100px 100px 100px 26px;
-    grid-template-rows: 26px 114px 114px 114px 26px;
+    grid-template-columns: 1.4rem repeat(3, minmax(0, 1fr)) 1.4rem;
+    grid-template-rows: 1.4rem repeat(3, minmax(5.6rem, auto)) 1.4rem;
   }
+
+  .qimen-god { font-size: 0.92rem; }
+  .qimen-star { font-size: 1.02rem; }
+  .qimen-door { font-size: 0.98rem; }
+  .qimen-tian { font-size: 1.12rem; }
+  .qimen-di { font-size: 0.95rem; }
 }
 
 .palace.empty {
