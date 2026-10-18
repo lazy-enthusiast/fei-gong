@@ -108,14 +108,16 @@
   </div>
 
   <div id="viewCases" class="view-cases" hidden>
-    <div class="question-row">
-      <input type="text" id="caseSearchInput" placeholder="搜尋問事關鍵詞" autocomplete="off">
+    <div class="case-search-wrap">
+      <div class="question-row case-search-row">
+        <input type="text" id="caseSearchInput" placeholder="搜尋問事關鍵詞" autocomplete="off">
+      </div>
+      <div class="case-suggest" id="caseSuggest" hidden></div>
     </div>
     <div class="case-search-status" id="caseSearchStatus"></div>
-    <div class="case-results" id="caseResults"></div>
 
     <div id="caseDetail" class="case-detail" hidden>
-      <button type="button" class="case-back-btn" id="caseBackBtn">← 返回列表</button>
+      <button type="button" class="case-back-btn" id="caseBackBtn">← 重新搜尋</button>
       <div class="case-meta" id="caseMeta"></div>
 
       <div class="top-section case-hex-section">
@@ -1021,8 +1023,8 @@
   const viewCast = document.getElementById('viewCast');
   const viewCases = document.getElementById('viewCases');
   const caseSearchInput = document.getElementById('caseSearchInput');
+  const caseSuggest = document.getElementById('caseSuggest');
   const caseSearchStatus = document.getElementById('caseSearchStatus');
-  const caseResults = document.getElementById('caseResults');
   const caseDetail = document.getElementById('caseDetail');
   const caseBackBtn = document.getElementById('caseBackBtn');
   const caseMeta = document.getElementById('caseMeta');
@@ -1045,6 +1047,7 @@
   let caseSearchSeq = 0;
   let caseItemsCache = [];
   let casePalaces = null;
+  let lastCaseQuery = '';
 
   function setViewMode(cases) {
     showingCases = cases;
@@ -1056,7 +1059,7 @@
     if (cases) {
       caseSearchInput.focus();
     } else {
-      showCaseList();
+      resetCaseView();
     }
   }
 
@@ -1066,17 +1069,6 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
-  }
-
-  function formatCaseTimestamp(value) {
-    if (!value) return '';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value);
-    const day = d.getDate();
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${day}-${months[d.getMonth()]}-${d.getFullYear()} ${hh}:${mm}`;
   }
 
   function formatCaseDateLabel(dateStr) {
@@ -1105,23 +1097,50 @@
     return getXunKong(getDayGanZhi(new Date(y, mo - 1, d)));
   }
 
-  function showCaseList() {
-    caseDetail.hidden = true;
-    caseResults.hidden = false;
+  function highlightQuestion(text, query) {
+    const src = String(text == null || text === '' ? '（無問事）' : text);
+    const q = String(query || '').trim();
+    if (!q) return escapeHtml(src);
+    const lower = src.toLowerCase();
+    const qLower = q.toLowerCase();
+    let out = '';
+    let i = 0;
+    while (i < src.length) {
+      const idx = lower.indexOf(qLower, i);
+      if (idx === -1) {
+        out += escapeHtml(src.slice(i));
+        break;
+      }
+      out += escapeHtml(src.slice(i, idx));
+      out += '<u>' + escapeHtml(src.slice(idx, idx + q.length)) + '</u>';
+      i = idx + q.length;
+    }
+    return out;
   }
 
-  function renderCaseListItem(item, index) {
-    const q = item.question || '（無問事）';
-    const meta = [
-      formatCaseDateLabel(item.date) || formatCaseTimestamp(item.timestamp),
-      item.time || '',
-      item.benName || '',
-      item.startPalace ? `用神${item.startPalace}` : ''
-    ].filter(Boolean).join(' · ');
-    return `<button type="button" class="case-list-item" data-case-index="${index}">
-      <div class="case-list-title">${escapeHtml(q)}</div>
-      <div class="case-list-meta">${escapeHtml(meta)}</div>
-    </button>`;
+  function hideSuggest() {
+    caseSuggest.hidden = true;
+    caseSuggest.innerHTML = '';
+  }
+
+  function resetCaseView() {
+    caseDetail.hidden = true;
+    hideSuggest();
+    caseSearchStatus.textContent = '';
+    caseItemsCache = [];
+    lastCaseQuery = '';
+  }
+
+  function showSuggest(items, query) {
+    caseDetail.hidden = true;
+    if (!items.length) {
+      hideSuggest();
+      return;
+    }
+    caseSuggest.innerHTML = items.map((item, index) =>
+      `<button type="button" class="case-suggest-item" data-case-index="${index}">${highlightQuestion(item.question, query)}</button>`
+    ).join('');
+    caseSuggest.hidden = false;
   }
 
   async function fillCaseChains(startPalace, palaces) {
@@ -1171,7 +1190,7 @@
   }
 
   async function openCaseDetail(item) {
-    caseResults.hidden = true;
+    hideSuggest();
     caseDetail.hidden = false;
     caseSearchStatus.textContent = '載入排盤…';
     caseChainSection.style.display = 'none';
@@ -1181,14 +1200,16 @@
     casePangtongList.innerHTML = '';
     caseChuleiList.innerHTML = '';
 
-    const metaBits = [
-      item.question ? `問事：${item.question}` : '',
-      [formatCaseDateLabel(item.date), item.time, item.city].filter(Boolean).join(' · '),
-      item.trueSolarTime ? `真太陽時 ${item.trueSolarTime}` : '',
-      item.dunLabel || '',
-      item.startPalace ? `用神宮 ${item.startPalace}` : ''
-    ].filter(Boolean);
-    caseMeta.innerHTML = metaBits.map(t => `<div>${escapeHtml(t)}</div>`).join('');
+    const question = item.question || '（無問事）';
+    const metaLine = [
+      formatCaseDateLabel(item.date) || item.date || '',
+      item.time || '',
+      item.city || '',
+      item.dunLabel || ''
+    ].filter(Boolean).join(' · ');
+    caseMeta.innerHTML =
+      `<div class="case-meta-question">${escapeHtml(question)}</div>` +
+      (metaLine ? `<div class="case-meta-line">${escapeHtml(metaLine)}</div>` : '');
 
     try {
       const parsed = parseRawSixLines(item.sixLines);
@@ -1251,10 +1272,11 @@
 
   async function searchCases(query) {
     const seq = ++caseSearchSeq;
+    lastCaseQuery = query;
     caseSearchStatus.textContent = '搜尋中…';
     caseItemsCache = [];
-    caseResults.innerHTML = '';
-    showCaseList();
+    hideSuggest();
+    caseDetail.hidden = true;
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -1272,8 +1294,8 @@
         caseSearchStatus.textContent = '沒有符合的卦例';
         return;
       }
-      caseSearchStatus.textContent = `找到 ${caseItemsCache.length} 筆，點選查看排盤`;
-      caseResults.innerHTML = caseItemsCache.map(renderCaseListItem).join('');
+      caseSearchStatus.textContent = '';
+      showSuggest(caseItemsCache, query);
     } catch (e) {
       if (seq !== caseSearchSeq) return;
       caseSearchStatus.textContent = '連線失敗：' + e.message;
@@ -1286,16 +1308,18 @@
 
   if (caseBackBtn) {
     caseBackBtn.addEventListener('click', () => {
-      showCaseList();
-      caseSearchStatus.textContent = caseItemsCache.length
-        ? `找到 ${caseItemsCache.length} 筆，點選查看排盤`
-        : '';
+      caseDetail.hidden = true;
+      caseSearchStatus.textContent = '';
+      if (caseItemsCache.length && lastCaseQuery) {
+        showSuggest(caseItemsCache, lastCaseQuery);
+      }
+      caseSearchInput.focus();
     });
   }
 
-  if (caseResults) {
-    caseResults.addEventListener('click', (e) => {
-      const btn = e.target.closest('.case-list-item');
+  if (caseSuggest) {
+    caseSuggest.addEventListener('click', (e) => {
+      const btn = e.target.closest('.case-suggest-item');
       if (!btn) return;
       const idx = parseInt(btn.dataset.caseIndex, 10);
       const item = caseItemsCache[idx];
@@ -1309,15 +1333,25 @@
       if (caseSearchTimer) clearTimeout(caseSearchTimer);
       if (!query) {
         caseSearchSeq += 1;
-        caseSearchStatus.textContent = '';
-        caseResults.innerHTML = '';
-        caseItemsCache = [];
-        showCaseList();
+        resetCaseView();
         return;
       }
       caseSearchTimer = setTimeout(() => searchCases(query), 350);
     });
+
+    caseSearchInput.addEventListener('focus', () => {
+      if (!caseDetail.hidden) return;
+      if (caseItemsCache.length && lastCaseQuery && caseSearchInput.value.trim() === lastCaseQuery) {
+        showSuggest(caseItemsCache, lastCaseQuery);
+      }
+    });
   }
+
+  document.addEventListener('click', (e) => {
+    if (!showingCases) return;
+    if (e.target.closest('.case-search-wrap')) return;
+    if (!caseSuggest.hidden) hideSuggest();
+  });
 </script>
 </body>
 </html>
