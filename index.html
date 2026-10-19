@@ -510,16 +510,9 @@
   }
 
   function renderQimenGejuSixteen(name, poem) {
-    const sixteen = packQimenGejuSixteen(name, poem);
     const wrap = document.createElement('div');
     wrap.className = 'qimen-modal-geju';
-    if (!sixteen) return wrap;
-    for (let i = 0; i < sixteen.length; i += 4) {
-      const line = document.createElement('div');
-      line.className = 'qimen-modal-geju-line';
-      line.textContent = sixteen.slice(i, i + 4);
-      wrap.appendChild(line);
-    }
+    wrap.textContent = packQimenGejuSixteen(name, poem);
     return wrap;
   }
 
@@ -564,18 +557,12 @@
     }
     if (msgEl) msgEl.textContent = '';
     fillQimenModalBoard(bodyEl, cellInfo, '', '');
-    const loadingLine = document.createElement('div');
-    loadingLine.className = 'qimen-modal-geju-line';
-    loadingLine.textContent = '載入中…';
     const gejuBox = bodyEl.querySelector('.qimen-modal-geju');
-    if (gejuBox) {
-      gejuBox.innerHTML = '';
-      gejuBox.appendChild(loadingLine);
-    }
+    if (gejuBox) gejuBox.textContent = '載入中…';
     modal.hidden = false;
 
     if (!cellInfo.tian || !cellInfo.di) {
-      if (gejuBox) gejuBox.innerHTML = '';
+      if (gejuBox) gejuBox.textContent = '';
       if (msgEl) msgEl.textContent = '此宮天／地盤干不全';
       return;
     }
