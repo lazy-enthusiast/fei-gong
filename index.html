@@ -203,17 +203,16 @@
   </div>
 </div>
 
-<div id="gejuModal" class="note-modal" hidden>
-  <div class="note-modal-backdrop" id="gejuBackdrop"></div>
-  <div class="note-modal-panel geju-modal-panel" role="dialog" aria-labelledby="gejuModalTitle">
-    <div class="note-modal-title" id="gejuModalTitle">奇 門 格 局</div>
-    <div class="geju-modal-meta" id="gejuModalMeta"></div>
-    <div class="geju-modal-name" id="gejuModalName"></div>
-    <div class="geju-modal-poem" id="gejuModalPoem"></div>
+<div id="qimenModal" class="note-modal" hidden>
+  <div class="note-modal-backdrop" id="qimenModalBackdrop"></div>
+  <div class="note-modal-panel qimen-modal-panel" role="dialog" aria-labelledby="qimenModalTitle">
+    <div class="note-modal-title" id="qimenModalTitle">奇 門</div>
+    <div class="qimen-modal-meta" id="qimenModalMeta"></div>
+    <div class="qimen-modal-body" id="qimenModalBody"></div>
     <div class="note-modal-actions">
-      <button type="button" class="btn-footer note-modal-save" id="gejuCloseBtn">關 閉</button>
+      <button type="button" class="btn-footer note-modal-save" id="qimenModalCloseBtn">關 閉</button>
     </div>
-    <div class="save-history-msg" id="gejuModalMsg"></div>
+    <div class="save-history-msg" id="qimenModalMsg"></div>
   </div>
 </div>
 
@@ -365,6 +364,9 @@
     div.dataset.palace = c.name;
     if (c.tian) div.dataset.tian = c.tian;
     if (c.di) div.dataset.di = c.di;
+    if (c.god) div.dataset.god = c.god;
+    if (c.star) div.dataset.star = c.star;
+    if (c.door) div.dataset.door = c.door;
     let role = '';
     if (marks && marks.zuofang && marks.zuofang === c.name) {
       div.classList.add('qimen-zuofang');
@@ -375,9 +377,9 @@
       role = role ? 'both' : 'xiangfang';
     }
     if (role) {
-      div.classList.add('qimen-geju-hot');
-      div.dataset.gejuRole = role;
-      div.title = '連按三下查看格局';
+      div.classList.add('qimen-modal-hot');
+      div.dataset.qimenRole = role;
+      div.title = '連按三下查看奇門';
     }
 
     if (c.empty) {
@@ -474,119 +476,175 @@
 
     wrapEl.appendChild(board);
     updateXunKongDisplay(board, xunKongList !== undefined ? xunKongList : currentXunKong);
-    bindQimenGejuHotspots(board);
+    bindQimenModalHotspots(board);
     return true;
   }
 
-  function closeGejuModal() {
-    const modal = document.getElementById('gejuModal');
+  function closeQimenModal() {
+    const modal = document.getElementById('qimenModal');
     if (modal) modal.hidden = true;
-    const msg = document.getElementById('gejuModalMsg');
+    const msg = document.getElementById('qimenModalMsg');
     if (msg) msg.textContent = '';
+    const body = document.getElementById('qimenModalBody');
+    if (body) body.innerHTML = '';
   }
 
-  function gejuRoleLabel(role) {
+  function qimenHotRoleLabel(role) {
     if (role === 'zuofang') return '坐方宮';
     if (role === 'xiangfang') return '向方宮';
     if (role === 'both') return '坐方／向方';
     return '';
   }
 
-  async function openGejuModal(tian, di, role, palace) {
-    const modal = document.getElementById('gejuModal');
-    const metaEl = document.getElementById('gejuModalMeta');
-    const nameEl = document.getElementById('gejuModalName');
-    const poemEl = document.getElementById('gejuModalPoem');
-    const msgEl = document.getElementById('gejuModalMsg');
-    if (!modal || !nameEl || !poemEl) return;
-    if (!tian || !di) {
-      if (msgEl) msgEl.textContent = '此宮天／地盤干不全';
-      if (metaEl) metaEl.textContent = '';
-      nameEl.textContent = '';
-      poemEl.textContent = '';
-      modal.hidden = false;
-      return;
+  function makeQimenWxLine(className, text, wxSource) {
+    const el = document.createElement('div');
+    el.className = className;
+    const wx = qimenWuxing(wxSource || text);
+    if (wx) el.dataset.wx = wx;
+    el.textContent = text || '';
+    return el;
+  }
+
+  function packQimenGejuSixteen(name, poem) {
+    return (String(name || '') + String(poem || '')).replace(/\s+/g, '').slice(0, 16);
+  }
+
+  function renderQimenGejuSixteen(name, poem) {
+    const sixteen = packQimenGejuSixteen(name, poem);
+    const wrap = document.createElement('div');
+    wrap.className = 'qimen-modal-geju';
+    if (!sixteen) return wrap;
+    for (let i = 0; i < sixteen.length; i += 4) {
+      const line = document.createElement('div');
+      line.className = 'qimen-modal-geju-line';
+      line.textContent = sixteen.slice(i, i + 4);
+      wrap.appendChild(line);
     }
+    return wrap;
+  }
+
+  function fillQimenModalBoard(bodyEl, cellInfo, gejuName, gejuPoem) {
+    if (!bodyEl) return;
+    bodyEl.innerHTML = '';
+    bodyEl.appendChild(makeQimenWxLine('qimen-god', cellInfo.god || '', cellInfo.god));
+    bodyEl.appendChild(makeQimenWxLine('qimen-star', cellInfo.star || '', cellInfo.star));
+    bodyEl.appendChild(makeQimenWxLine(
+      'qimen-door',
+      qimenDoorLabel(cellInfo.door || ''),
+      cellInfo.door
+    ));
+    const stems = renderQimenStems(cellInfo.tian || '', cellInfo.di || '');
+    stems.classList.add('qimen-modal-stems');
+    bodyEl.appendChild(stems);
+    bodyEl.appendChild(renderQimenGejuSixteen(gejuName, gejuPoem));
+  }
+
+  async function openQimenModal(cell) {
+    const modal = document.getElementById('qimenModal');
+    const metaEl = document.getElementById('qimenModalMeta');
+    const bodyEl = document.getElementById('qimenModalBody');
+    const msgEl = document.getElementById('qimenModalMsg');
+    if (!modal || !bodyEl || !cell) return;
+
+    const cellInfo = {
+      tian: cell.dataset.tian || '',
+      di: cell.dataset.di || '',
+      god: cell.dataset.god || '',
+      star: cell.dataset.star || '',
+      door: cell.dataset.door || '',
+      role: cell.dataset.qimenRole || '',
+      palace: cell.dataset.palace || ''
+    };
+
     if (metaEl) {
       metaEl.textContent = [
-        gejuRoleLabel(role),
-        palace ? palace + '宮' : '',
-        '天' + tian + '＋地' + di
+        qimenHotRoleLabel(cellInfo.role),
+        cellInfo.palace ? cellInfo.palace + '宮' : ''
       ].filter(Boolean).join(' · ');
     }
-    nameEl.textContent = '載入中…';
-    poemEl.textContent = '';
     if (msgEl) msgEl.textContent = '';
+    fillQimenModalBoard(bodyEl, cellInfo, '', '');
+    const loadingLine = document.createElement('div');
+    loadingLine.className = 'qimen-modal-geju-line';
+    loadingLine.textContent = '載入中…';
+    const gejuBox = bodyEl.querySelector('.qimen-modal-geju');
+    if (gejuBox) {
+      gejuBox.innerHTML = '';
+      gejuBox.appendChild(loadingLine);
+    }
     modal.hidden = false;
+
+    if (!cellInfo.tian || !cellInfo.di) {
+      if (gejuBox) gejuBox.innerHTML = '';
+      if (msgEl) msgEl.textContent = '此宮天／地盤干不全';
+      return;
+    }
+
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'qimenGeju', tian, di })
+        body: JSON.stringify({
+          action: 'qimenGeju',
+          tian: cellInfo.tian,
+          di: cellInfo.di
+        })
       });
       const data = await res.json();
       if (!res.ok || data.error) {
-        nameEl.textContent = '';
-        poemEl.textContent = '';
+        fillQimenModalBoard(bodyEl, cellInfo, '', '');
         if (msgEl) msgEl.textContent = data.error || '查詢失敗';
         return;
       }
-      nameEl.textContent = data.name || '';
-      poemEl.textContent = data.poem || '';
+      fillQimenModalBoard(bodyEl, cellInfo, data.name || '', data.poem || '');
     } catch (e) {
-      nameEl.textContent = '';
-      poemEl.textContent = '';
+      fillQimenModalBoard(bodyEl, cellInfo, '', '');
       if (msgEl) msgEl.textContent = '連線失敗：' + e.message;
     }
   }
 
   // 手機瀏覽器常固定 click.detail=1，改自訂連點計數（同宮、短時間內三下）
-  let gejuTapState = { el: null, count: 0, timer: null, lastTouch: 0 };
-  const GEJU_TAP_MS = 550;
+  let qimenModalTapState = { el: null, count: 0, timer: null, lastTouch: 0 };
+  const QIMEN_MODAL_TAP_MS = 550;
 
-  function registerGejuHotTap(cell) {
+  function registerQimenModalTap(cell) {
     if (!cell) return;
-    if (gejuTapState.el !== cell) {
-      gejuTapState.el = cell;
-      gejuTapState.count = 1;
+    if (qimenModalTapState.el !== cell) {
+      qimenModalTapState.el = cell;
+      qimenModalTapState.count = 1;
     } else {
-      gejuTapState.count += 1;
+      qimenModalTapState.count += 1;
     }
-    if (gejuTapState.timer) clearTimeout(gejuTapState.timer);
-    if (gejuTapState.count >= 3) {
-      const tian = cell.dataset.tian || '';
-      const di = cell.dataset.di || '';
-      const role = cell.dataset.gejuRole || '';
-      const palace = cell.dataset.palace || '';
-      gejuTapState.el = null;
-      gejuTapState.count = 0;
-      gejuTapState.timer = null;
-      openGejuModal(tian, di, role, palace);
+    if (qimenModalTapState.timer) clearTimeout(qimenModalTapState.timer);
+    if (qimenModalTapState.count >= 3) {
+      qimenModalTapState.el = null;
+      qimenModalTapState.count = 0;
+      qimenModalTapState.timer = null;
+      openQimenModal(cell);
       return;
     }
-    gejuTapState.timer = setTimeout(() => {
-      gejuTapState.el = null;
-      gejuTapState.count = 0;
-      gejuTapState.timer = null;
-    }, GEJU_TAP_MS);
+    qimenModalTapState.timer = setTimeout(() => {
+      qimenModalTapState.el = null;
+      qimenModalTapState.count = 0;
+      qimenModalTapState.timer = null;
+    }, QIMEN_MODAL_TAP_MS);
   }
 
-  function bindQimenGejuHotspots(board) {
+  function bindQimenModalHotspots(board) {
     if (!board) return;
-    board.querySelectorAll('.qimen-geju-hot').forEach((cell) => {
+    board.querySelectorAll('.qimen-modal-hot').forEach((cell) => {
       cell.addEventListener('touchend', (e) => {
         if (e.changedTouches && e.changedTouches.length !== 1) return;
-        gejuTapState.lastTouch = Date.now();
-        registerGejuHotTap(cell);
+        qimenModalTapState.lastTouch = Date.now();
+        registerQimenModalTap(cell);
         e.preventDefault();
       }, { passive: false });
       cell.addEventListener('click', (e) => {
-        // touchend 已處理時略過隨後的 click，避免連點被算兩次
-        if (Date.now() - gejuTapState.lastTouch < GEJU_TAP_MS) {
+        if (Date.now() - qimenModalTapState.lastTouch < QIMEN_MODAL_TAP_MS) {
           e.preventDefault();
           return;
         }
-        registerGejuHotTap(cell);
+        registerQimenModalTap(cell);
       });
     });
   }
@@ -2057,13 +2115,13 @@
     });
   }
 
-  const gejuCloseBtn = document.getElementById('gejuCloseBtn');
-  if (gejuCloseBtn) {
-    gejuCloseBtn.addEventListener('click', () => closeGejuModal());
+  const qimenModalCloseBtn = document.getElementById('qimenModalCloseBtn');
+  if (qimenModalCloseBtn) {
+    qimenModalCloseBtn.addEventListener('click', () => closeQimenModal());
   }
-  const gejuBackdrop = document.getElementById('gejuBackdrop');
-  if (gejuBackdrop) {
-    gejuBackdrop.addEventListener('click', () => closeGejuModal());
+  const qimenModalBackdrop = document.getElementById('qimenModalBackdrop');
+  if (qimenModalBackdrop) {
+    qimenModalBackdrop.addEventListener('click', () => closeQimenModal());
   }
 
   document.addEventListener('click', (e) => {
