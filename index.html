@@ -1728,10 +1728,6 @@
         const sel = caseBaguaWrap.querySelector(`.palace[data-palace="${startPalace}"]`);
         if (sel) {
           sel.classList.add('selected', 'yongshen');
-          const mark = document.createElement('div');
-          mark.className = 'palace-yongshen';
-          mark.textContent = '用';
-          sel.appendChild(mark);
         }
         await fillCaseChains(
           startPalace,
