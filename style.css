@@ -593,19 +593,6 @@ body {
   background: #f5efe0;
 }
 
-.palace-yongshen {
-  position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.65rem;
-  color: #8a6d3b;
-  font-weight: 700;
-  line-height: 1;
-  pointer-events: none;
-  letter-spacing: 0;
-}
-
 /* ===== 奇門轉盤 ===== */
 .qimen-wrap {
   margin: 0.35rem auto 0.15rem;
