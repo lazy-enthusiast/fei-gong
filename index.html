@@ -540,18 +540,53 @@
     }
   }
 
+  // 手機瀏覽器常固定 click.detail=1，改自訂連點計數（同宮、短時間內三下）
+  let gejuTapState = { el: null, count: 0, timer: null, lastTouch: 0 };
+  const GEJU_TAP_MS = 550;
+
+  function registerGejuHotTap(cell) {
+    if (!cell) return;
+    if (gejuTapState.el !== cell) {
+      gejuTapState.el = cell;
+      gejuTapState.count = 1;
+    } else {
+      gejuTapState.count += 1;
+    }
+    if (gejuTapState.timer) clearTimeout(gejuTapState.timer);
+    if (gejuTapState.count >= 3) {
+      const tian = cell.dataset.tian || '';
+      const di = cell.dataset.di || '';
+      const role = cell.dataset.gejuRole || '';
+      const palace = cell.dataset.palace || '';
+      gejuTapState.el = null;
+      gejuTapState.count = 0;
+      gejuTapState.timer = null;
+      openGejuModal(tian, di, role, palace);
+      return;
+    }
+    gejuTapState.timer = setTimeout(() => {
+      gejuTapState.el = null;
+      gejuTapState.count = 0;
+      gejuTapState.timer = null;
+    }, GEJU_TAP_MS);
+  }
+
   function bindQimenGejuHotspots(board) {
     if (!board) return;
     board.querySelectorAll('.qimen-geju-hot').forEach((cell) => {
-      cell.addEventListener('click', (e) => {
-        if (e.detail !== 3) return;
+      cell.addEventListener('touchend', (e) => {
+        if (e.changedTouches && e.changedTouches.length !== 1) return;
+        gejuTapState.lastTouch = Date.now();
+        registerGejuHotTap(cell);
         e.preventDefault();
-        openGejuModal(
-          cell.dataset.tian || '',
-          cell.dataset.di || '',
-          cell.dataset.gejuRole || '',
-          cell.dataset.palace || ''
-        );
+      }, { passive: false });
+      cell.addEventListener('click', (e) => {
+        // touchend 已處理時略過隨後的 click，避免連點被算兩次
+        if (Date.now() - gejuTapState.lastTouch < GEJU_TAP_MS) {
+          e.preventDefault();
+          return;
+        }
+        registerGejuHotTap(cell);
       });
     });
   }
