@@ -146,6 +146,10 @@ body {
   margin-top: 1.1rem;
 }
 
+.case-footer-btn-stack {
+  flex-direction: column;
+}
+
 .case-back-btn {
   display: inline-block;
   background: transparent;
@@ -970,4 +974,81 @@ body {
   display: block;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   border-radius: 4px;
+}
+
+/* 解卦筆記 modal */
+.note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.note-modal[hidden] {
+  display: none;
+}
+
+.note-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(42, 42, 42, 0.35);
+}
+
+.note-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(28rem, 100%);
+  background: #faf8f3;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  padding: 1rem 1rem 0.85rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+.note-modal-title {
+  text-align: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.25rem;
+  color: #2a2a2a;
+  margin-bottom: 0.7rem;
+}
+
+.note-modal-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 12rem;
+  resize: vertical;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #2a2a2a;
+}
+
+.note-modal-input:focus {
+  outline: none;
+  border-color: #8a6d3b;
+}
+
+.note-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.note-modal-save {
+  background: #8a6d3b;
+  color: #faf8f3;
+  border-color: #8a6d3b;
+}
+
+.note-modal-save:active {
+  background: #6e5630;
 }

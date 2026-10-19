@@ -174,11 +174,26 @@
       </div>
 
       <div class="footer-actions case-footer-actions" id="caseFooterActions">
-        <div class="footer-btn-row">
+        <div class="footer-btn-row case-footer-btn-stack">
           <button class="btn-footer" id="caseScreenshotBtn" type="button">📷 生 成 長 圖</button>
+          <button class="btn-footer" id="caseNoteBtn" type="button">✏️ 加 入 筆 記</button>
         </div>
+        <div class="save-history-msg" id="caseNoteMsg"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="caseNoteModal" class="note-modal" hidden>
+  <div class="note-modal-backdrop" id="caseNoteBackdrop"></div>
+  <div class="note-modal-panel" role="dialog" aria-labelledby="caseNoteModalTitle">
+    <div class="note-modal-title" id="caseNoteModalTitle">解 卦 筆 記</div>
+    <textarea id="caseNoteInput" class="note-modal-input" rows="10" placeholder="純文字筆記…" autocomplete="off"></textarea>
+    <div class="note-modal-actions">
+      <button type="button" class="btn-footer" id="caseNoteCancelBtn">取 消</button>
+      <button type="button" class="btn-footer note-modal-save" id="caseNoteSaveBtn">儲 存</button>
+    </div>
+    <div class="save-history-msg" id="caseNoteModalMsg"></div>
   </div>
 </div>
 
@@ -1368,6 +1383,7 @@
   let caseItemsCache = [];
   let casePalaces = null;
   let lastCaseQuery = '';
+  let currentCaseItem = null;
 
   function setViewMode(cases) {
     showingCases = cases;
@@ -1481,6 +1497,35 @@
     caseSearchStatus.textContent = '';
     caseItemsCache = [];
     lastCaseQuery = '';
+    currentCaseItem = null;
+    closeCaseNoteModal();
+  }
+
+  function closeCaseNoteModal() {
+    const modal = document.getElementById('caseNoteModal');
+    if (modal) modal.hidden = true;
+    const modalMsg = document.getElementById('caseNoteModalMsg');
+    if (modalMsg) modalMsg.textContent = '';
+  }
+
+  function openCaseNoteModal() {
+    const modal = document.getElementById('caseNoteModal');
+    const input = document.getElementById('caseNoteInput');
+    const modalMsg = document.getElementById('caseNoteModalMsg');
+    const footerMsg = document.getElementById('caseNoteMsg');
+    if (footerMsg) footerMsg.textContent = '';
+    if (modalMsg) modalMsg.textContent = '';
+    if (!currentCaseItem || !currentCaseItem.sheetRow) {
+      if (footerMsg) footerMsg.textContent = '無法對應 Sheet 列，請重新搜尋卦例';
+      return;
+    }
+    if (input) input.value = currentCaseItem.note == null ? '' : String(currentCaseItem.note);
+    if (modal) modal.hidden = false;
+    if (input) {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
   }
 
   function showSuggest(items, query) {
@@ -1609,6 +1654,10 @@
 
   async function openCaseDetail(item) {
     hideSuggest();
+    currentCaseItem = item;
+    closeCaseNoteModal();
+    const noteMsg = document.getElementById('caseNoteMsg');
+    if (noteMsg) noteMsg.textContent = '';
     caseDetail.hidden = false;
     caseSearchStatus.textContent = '載入排盤…';
     caseChainSection.style.display = 'none';
@@ -1748,7 +1797,11 @@
   if (caseBackBtn) {
     caseBackBtn.addEventListener('click', () => {
       caseDetail.hidden = true;
+      currentCaseItem = null;
+      closeCaseNoteModal();
       caseSearchStatus.textContent = '';
+      const noteMsg = document.getElementById('caseNoteMsg');
+      if (noteMsg) noteMsg.textContent = '';
       if (caseItemsCache.length && lastCaseQuery) {
         showSuggest(caseItemsCache, lastCaseQuery);
       }
@@ -1770,6 +1823,66 @@
         alert('生成失敗：' + e.message);
       } finally {
         if (footer) footer.style.display = '';
+      }
+    });
+  }
+
+  const caseNoteBtn = document.getElementById('caseNoteBtn');
+  if (caseNoteBtn) {
+    caseNoteBtn.addEventListener('click', () => openCaseNoteModal());
+  }
+
+  const caseNoteCancelBtn = document.getElementById('caseNoteCancelBtn');
+  if (caseNoteCancelBtn) {
+    caseNoteCancelBtn.addEventListener('click', () => closeCaseNoteModal());
+  }
+
+  const caseNoteBackdrop = document.getElementById('caseNoteBackdrop');
+  if (caseNoteBackdrop) {
+    caseNoteBackdrop.addEventListener('click', () => closeCaseNoteModal());
+  }
+
+  const caseNoteSaveBtn = document.getElementById('caseNoteSaveBtn');
+  if (caseNoteSaveBtn) {
+    caseNoteSaveBtn.addEventListener('click', async () => {
+      const input = document.getElementById('caseNoteInput');
+      const modalMsg = document.getElementById('caseNoteModalMsg');
+      const footerMsg = document.getElementById('caseNoteMsg');
+      if (!currentCaseItem || !currentCaseItem.sheetRow) {
+        if (modalMsg) modalMsg.textContent = '無法對應 Sheet 列';
+        return;
+      }
+      const note = input ? input.value : '';
+      caseNoteSaveBtn.disabled = true;
+      caseNoteSaveBtn.textContent = '儲 存 中…';
+      if (modalMsg) modalMsg.textContent = '';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'saveNote',
+            sheetRow: currentCaseItem.sheetRow,
+            note
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          if (modalMsg) modalMsg.textContent = data.error || '儲存失敗';
+          return;
+        }
+        currentCaseItem.note = data.note == null ? note : String(data.note);
+        const cached = caseItemsCache.find(
+          (it) => it && it.sheetRow === currentCaseItem.sheetRow
+        );
+        if (cached) cached.note = currentCaseItem.note;
+        closeCaseNoteModal();
+        if (footerMsg) footerMsg.textContent = '筆記已儲存';
+      } catch (e) {
+        if (modalMsg) modalMsg.textContent = '連線失敗：' + e.message;
+      } finally {
+        caseNoteSaveBtn.disabled = false;
+        caseNoteSaveBtn.textContent = '儲 存';
       }
     });
   }
