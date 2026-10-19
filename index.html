@@ -206,8 +206,7 @@
 <div id="qimenModal" class="note-modal" hidden>
   <div class="note-modal-backdrop" id="qimenModalBackdrop"></div>
   <div class="note-modal-panel qimen-modal-panel" role="dialog" aria-labelledby="qimenModalTitle">
-    <div class="note-modal-title" id="qimenModalTitle">奇 門</div>
-    <div class="qimen-modal-meta" id="qimenModalMeta"></div>
+    <div class="note-modal-title qimen-modal-title" id="qimenModalTitle"></div>
     <div class="qimen-modal-body" id="qimenModalBody"></div>
     <div class="note-modal-actions">
       <button type="button" class="btn-footer note-modal-save" id="qimenModalCloseBtn">關 閉</button>
@@ -322,7 +321,10 @@
     景門: 'huo', 死門: 'tu', 驚門: 'jin', 開門: 'jin',
     甲: 'mu', 乙: 'mu', 丙: 'huo', 丁: 'huo',
     戊: 'tu', 己: 'tu', 庚: 'jin', 辛: 'jin',
-    壬: 'shui', 癸: 'shui'
+    壬: 'shui', 癸: 'shui',
+    // 九宮卦名五行（與盤面色一致）
+    坎: 'shui', 坤: 'tu', 震: 'mu', 巽: 'mu',
+    中: 'tu', 乾: 'jin', 兌: 'jin', 艮: 'tu', 離: 'huo'
   };
 
   function qimenWuxing(name) {
@@ -487,13 +489,25 @@
     if (msg) msg.textContent = '';
     const body = document.getElementById('qimenModalBody');
     if (body) body.innerHTML = '';
+    const titleEl = document.getElementById('qimenModalTitle');
+    if (titleEl) titleEl.textContent = '';
   }
 
-  function qimenHotRoleLabel(role) {
-    if (role === 'zuofang') return '坐方宮';
-    if (role === 'xiangfang') return '向方宮';
-    if (role === 'both') return '坐方／向方';
-    return '';
+  function setQimenModalTitle(role, palace) {
+    const titleEl = document.getElementById('qimenModalTitle');
+    if (!titleEl) return;
+    let prefix = '坐方宮';
+    if (role === 'xiangfang') prefix = '向方宮';
+    else if (role === 'both') prefix = '坐方／向方宮';
+    titleEl.textContent = '';
+    titleEl.appendChild(document.createTextNode(prefix + '．'));
+    const span = document.createElement('span');
+    span.className = 'qimen-modal-palace';
+    const wx = qimenWuxing(palace);
+    if (wx) span.dataset.wx = wx;
+    span.textContent = palace || '';
+    titleEl.appendChild(span);
+    titleEl.appendChild(document.createTextNode('宮'));
   }
 
   function makeQimenWxLine(className, text, wxSource) {
@@ -534,7 +548,6 @@
 
   async function openQimenModal(cell) {
     const modal = document.getElementById('qimenModal');
-    const metaEl = document.getElementById('qimenModalMeta');
     const bodyEl = document.getElementById('qimenModalBody');
     const msgEl = document.getElementById('qimenModalMsg');
     if (!modal || !bodyEl || !cell) return;
@@ -549,12 +562,7 @@
       palace: cell.dataset.palace || ''
     };
 
-    if (metaEl) {
-      metaEl.textContent = [
-        qimenHotRoleLabel(cellInfo.role),
-        cellInfo.palace ? cellInfo.palace + '宮' : ''
-      ].filter(Boolean).join(' · ');
-    }
+    setQimenModalTitle(cellInfo.role, cellInfo.palace);
     if (msgEl) msgEl.textContent = '';
     fillQimenModalBoard(bodyEl, cellInfo, '', '');
     const gejuBox = bodyEl.querySelector('.qimen-modal-geju');
