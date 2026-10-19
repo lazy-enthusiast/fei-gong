@@ -1,0 +1,17 @@
+{
+  "name": "飛宮易卦",
+  "short_name": "飛宮易卦",
+  "description": "飛宮易卦占卜工具",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#faf8f3",
+  "theme_color": "#faf8f3",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
