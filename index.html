@@ -322,6 +322,10 @@
     甲: 'mu', 乙: 'mu', 丙: 'huo', 丁: 'huo',
     戊: 'tu', 己: 'tu', 庚: 'jin', 辛: 'jin',
     壬: 'shui', 癸: 'shui',
+    // 地支五行（四柱著色用）
+    子: 'shui', 丑: 'tu', 寅: 'mu', 卯: 'mu',
+    辰: 'tu', 巳: 'huo', 午: 'huo', 未: 'tu',
+    申: 'jin', 酉: 'jin', 戌: 'tu', 亥: 'shui',
     // 九宮卦名五行（與盤面色一致）
     坎: 'shui', 坤: 'tu', 震: 'mu', 巽: 'mu',
     中: 'tu', 乾: 'jin', 兌: 'jin', 艮: 'tu', 離: 'huo'
@@ -446,7 +450,8 @@
     const meta = document.createElement('div');
     meta.className = 'qimen-meta';
     meta.appendChild(document.createTextNode(`${pan.meta.dunLabel} · 時家轉盤·置閏 · 四柱`));
-    if (siZhu && siZhu.year && siZhu.month && siZhu.day && siZhu.hour) {
+    const hasSiZhu = siZhu && (siZhu.year || siZhu.month || siZhu.day || siZhu.hour);
+    if (hasSiZhu) {
       meta.appendChild(renderSiZhuSpans(siZhu));
     } else if (pan.meta.hourLabel) {
       meta.appendChild(document.createTextNode(pan.meta.hourLabel));
@@ -536,7 +541,8 @@
     for (let i = 0; i < packed.length; i += 4) {
       parts.push(packed.slice(i, i + 4));
     }
-    return parts.join(' ');
+    // 窄空格分組，單行仍可辨 4+4+4+4
+    return parts.join('\u2006');
   }
 
   function renderQimenGejuSixteen(name, poem) {
@@ -576,14 +582,19 @@
     const wrap = document.createElement('span');
     wrap.className = 'qimen-sizhu';
     if (!siZhu) return wrap;
-    const pillars = [siZhu.year, siZhu.month, siZhu.day, siZhu.hour];
-    const dayBold = LIU_JIA_DAYS.has(siZhu.day);
+    const pillars = [
+      String(siZhu.year || '').slice(0, 2),
+      String(siZhu.month || '').slice(0, 2),
+      String(siZhu.day || '').slice(0, 2),
+      String(siZhu.hour || '').slice(0, 2)
+    ];
+    const dayGZ = pillars[2];
+    const dayBold = LIU_JIA_DAYS.has(dayGZ);
     pillars.forEach((gz, pi) => {
-      const text = String(gz || '');
-      for (let i = 0; i < text.length; i++) {
+      for (let i = 0; i < gz.length; i++) {
         const span = document.createElement('span');
         span.className = 'qimen-sizhu-char';
-        const ch = text.charAt(i);
+        const ch = gz.charAt(i);
         const wx = qimenWuxing(ch);
         if (wx) span.dataset.wx = wx;
         if (pi === 2 && dayBold) span.classList.add('qimen-sizhu-liujia');

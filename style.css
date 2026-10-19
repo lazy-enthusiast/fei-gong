@@ -609,14 +609,21 @@ body {
 
 .qimen-sizhu {
   display: inline;
-  letter-spacing: 0.02rem;
+  letter-spacing: 0;
 }
 
-.qimen-sizhu-char {
-  letter-spacing: 0.04rem;
+.qimen-meta .qimen-sizhu-char {
+  letter-spacing: 0.03rem;
 }
 
-.qimen-sizhu-liujia {
+/* 蓋過 .qimen-meta 灰色繼承；六甲日柱加粗 */
+.qimen-meta .qimen-sizhu-char[data-wx="jin"] { color: #d4a017; }
+.qimen-meta .qimen-sizhu-char[data-wx="mu"] { color: #2f7d4a; }
+.qimen-meta .qimen-sizhu-char[data-wx="shui"] { color: #2f6fad; }
+.qimen-meta .qimen-sizhu-char[data-wx="huo"] { color: #c43b2e; }
+.qimen-meta .qimen-sizhu-char[data-wx="tu"] { color: #8a5a2b; }
+
+.qimen-meta .qimen-sizhu-liujia {
   font-weight: 700;
 }
 
