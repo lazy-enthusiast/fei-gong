@@ -607,6 +607,26 @@ body {
   line-height: 1.4;
 }
 
+.qimen-sizhu {
+  display: inline;
+  letter-spacing: 0;
+}
+
+.qimen-meta .qimen-sizhu-char {
+  letter-spacing: 0.03rem;
+}
+
+/* 蓋過 .qimen-meta 灰色繼承；六甲日柱加粗 */
+.qimen-meta .qimen-sizhu-char[data-wx="jin"] { color: #d4a017; }
+.qimen-meta .qimen-sizhu-char[data-wx="mu"] { color: #2f7d4a; }
+.qimen-meta .qimen-sizhu-char[data-wx="shui"] { color: #2f6fad; }
+.qimen-meta .qimen-sizhu-char[data-wx="huo"] { color: #c43b2e; }
+.qimen-meta .qimen-sizhu-char[data-wx="tu"] { color: #8a5a2b; }
+
+.qimen-meta .qimen-sizhu-liujia {
+  font-weight: 700;
+}
+
 .qimen-board {
   width: 100%;
   max-width: 100%;
@@ -678,31 +698,41 @@ body {
 .qimen-star[data-wx="jin"],
 .qimen-door[data-wx="jin"],
 .qimen-tian[data-wx="jin"],
-.qimen-di[data-wx="jin"] { color: #d4a017; }
+.qimen-di[data-wx="jin"],
+.qimen-modal-palace[data-wx="jin"],
+.qimen-sizhu-char[data-wx="jin"] { color: #d4a017; }
 
 .qimen-god[data-wx="mu"],
 .qimen-star[data-wx="mu"],
 .qimen-door[data-wx="mu"],
 .qimen-tian[data-wx="mu"],
-.qimen-di[data-wx="mu"] { color: #2f7d4a; }
+.qimen-di[data-wx="mu"],
+.qimen-modal-palace[data-wx="mu"],
+.qimen-sizhu-char[data-wx="mu"] { color: #2f7d4a; }
 
 .qimen-god[data-wx="shui"],
 .qimen-star[data-wx="shui"],
 .qimen-door[data-wx="shui"],
 .qimen-tian[data-wx="shui"],
-.qimen-di[data-wx="shui"] { color: #2f6fad; }
+.qimen-di[data-wx="shui"],
+.qimen-modal-palace[data-wx="shui"],
+.qimen-sizhu-char[data-wx="shui"] { color: #2f6fad; }
 
 .qimen-god[data-wx="huo"],
 .qimen-star[data-wx="huo"],
 .qimen-door[data-wx="huo"],
 .qimen-tian[data-wx="huo"],
-.qimen-di[data-wx="huo"] { color: #c43b2e; }
+.qimen-di[data-wx="huo"],
+.qimen-modal-palace[data-wx="huo"],
+.qimen-sizhu-char[data-wx="huo"] { color: #c43b2e; }
 
 .qimen-god[data-wx="tu"],
 .qimen-star[data-wx="tu"],
 .qimen-door[data-wx="tu"],
 .qimen-tian[data-wx="tu"],
-.qimen-di[data-wx="tu"] { color: #8a5a2b; }
+.qimen-di[data-wx="tu"],
+.qimen-modal-palace[data-wx="tu"],
+.qimen-sizhu-char[data-wx="tu"] { color: #8a5a2b; }
 
 .qimen-stems {
   display: flex;
@@ -1038,4 +1068,55 @@ body {
 
 .note-modal-save:active {
   background: #6e5630;
+}
+
+.qimen-modal-hot {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.qimen-modal-panel {
+  text-align: left;
+}
+
+.qimen-modal-panel .qimen-modal-title {
+  text-align: center;
+  letter-spacing: 0.12rem;
+}
+
+.qimen-modal-palace {
+  font-weight: 700;
+}
+
+.qimen-modal-body {
+  background: #fff;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  padding: 0.75rem 0.85rem;
+}
+
+.qimen-modal-body .qimen-god,
+.qimen-modal-body .qimen-star,
+.qimen-modal-body .qimen-door {
+  text-align: left;
+  line-height: 1.45;
+}
+
+.qimen-modal-body .qimen-stems,
+.qimen-modal-body .qimen-modal-stems {
+  justify-content: flex-start;
+  margin-top: 0.25rem;
+  margin-bottom: 0.15rem;
+}
+
+.qimen-modal-geju {
+  margin-top: 0.45rem;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.06rem;
+  color: #2a2a2a;
 }
