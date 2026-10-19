@@ -607,6 +607,19 @@ body {
   line-height: 1.4;
 }
 
+.qimen-sizhu {
+  display: inline;
+  letter-spacing: 0.02rem;
+}
+
+.qimen-sizhu-char {
+  letter-spacing: 0.04rem;
+}
+
+.qimen-sizhu-liujia {
+  font-weight: 700;
+}
+
 .qimen-board {
   width: 100%;
   max-width: 100%;
@@ -679,35 +692,40 @@ body {
 .qimen-door[data-wx="jin"],
 .qimen-tian[data-wx="jin"],
 .qimen-di[data-wx="jin"],
-.qimen-modal-palace[data-wx="jin"] { color: #d4a017; }
+.qimen-modal-palace[data-wx="jin"],
+.qimen-sizhu-char[data-wx="jin"] { color: #d4a017; }
 
 .qimen-god[data-wx="mu"],
 .qimen-star[data-wx="mu"],
 .qimen-door[data-wx="mu"],
 .qimen-tian[data-wx="mu"],
 .qimen-di[data-wx="mu"],
-.qimen-modal-palace[data-wx="mu"] { color: #2f7d4a; }
+.qimen-modal-palace[data-wx="mu"],
+.qimen-sizhu-char[data-wx="mu"] { color: #2f7d4a; }
 
 .qimen-god[data-wx="shui"],
 .qimen-star[data-wx="shui"],
 .qimen-door[data-wx="shui"],
 .qimen-tian[data-wx="shui"],
 .qimen-di[data-wx="shui"],
-.qimen-modal-palace[data-wx="shui"] { color: #2f6fad; }
+.qimen-modal-palace[data-wx="shui"],
+.qimen-sizhu-char[data-wx="shui"] { color: #2f6fad; }
 
 .qimen-god[data-wx="huo"],
 .qimen-star[data-wx="huo"],
 .qimen-door[data-wx="huo"],
 .qimen-tian[data-wx="huo"],
 .qimen-di[data-wx="huo"],
-.qimen-modal-palace[data-wx="huo"] { color: #c43b2e; }
+.qimen-modal-palace[data-wx="huo"],
+.qimen-sizhu-char[data-wx="huo"] { color: #c43b2e; }
 
 .qimen-god[data-wx="tu"],
 .qimen-star[data-wx="tu"],
 .qimen-door[data-wx="tu"],
 .qimen-tian[data-wx="tu"],
 .qimen-di[data-wx="tu"],
-.qimen-modal-palace[data-wx="tu"] { color: #8a5a2b; }
+.qimen-modal-palace[data-wx="tu"],
+.qimen-sizhu-char[data-wx="tu"] { color: #8a5a2b; }
 
 .qimen-stems {
   display: flex;
@@ -1090,8 +1108,8 @@ body {
   margin-top: 0.45rem;
   text-align: left;
   white-space: nowrap;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   line-height: 1.5;
-  letter-spacing: 0.08rem;
+  letter-spacing: 0.06rem;
   color: #2a2a2a;
 }

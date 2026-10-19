@@ -414,7 +414,7 @@
     return div;
   }
 
-  async function renderQimenBoard(dunLabel, hourGZ, wrapEl, titleEl, xunKongList, marks) {
+  async function renderQimenBoard(dunLabel, hourGZ, wrapEl, titleEl, xunKongList, marks, siZhu) {
     if (!wrapEl) return false;
     wrapEl.innerHTML = '';
     if (titleEl) titleEl.textContent = '奇 門 局';
@@ -445,10 +445,17 @@
     const fuGongNum = PALACE_NUM_CN[pan.meta.fuLinPalace] || '';
     const meta = document.createElement('div');
     meta.className = 'qimen-meta';
-    meta.innerHTML =
-      `${pan.meta.dunLabel} · 時家轉盤·置閏 · 時柱${pan.meta.hourLabel}<br>` +
+    meta.appendChild(document.createTextNode(`${pan.meta.dunLabel} · 時家轉盤·置閏 · 四柱`));
+    if (siZhu && siZhu.year && siZhu.month && siZhu.day && siZhu.hour) {
+      meta.appendChild(renderSiZhuSpans(siZhu));
+    } else if (pan.meta.hourLabel) {
+      meta.appendChild(document.createTextNode(pan.meta.hourLabel));
+    }
+    meta.appendChild(document.createElement('br'));
+    meta.appendChild(document.createTextNode(
       `值符 ${pan.meta.xunLabel} ${pan.meta.zhiFu}落${fuGong}${fuGongNum}宮　` +
-      `值使 ${pan.meta.zhiShi}門落${shiGong}${shiGongNum}宮`;
+      `值使 ${pan.meta.zhiShi}門落${shiGong}${shiGongNum}宮`
+    ));
     wrapEl.appendChild(meta);
 
     const board = document.createElement('div');
@@ -523,10 +530,67 @@
     return (String(name || '') + String(poem || '')).replace(/\s+/g, '').slice(0, 16);
   }
 
+  function formatQimenGejuLine(name, poem) {
+    const packed = packQimenGejuSixteen(name, poem);
+    const parts = [];
+    for (let i = 0; i < packed.length; i += 4) {
+      parts.push(packed.slice(i, i + 4));
+    }
+    return parts.join(' ');
+  }
+
   function renderQimenGejuSixteen(name, poem) {
     const wrap = document.createElement('div');
     wrap.className = 'qimen-modal-geju';
-    wrap.textContent = packQimenGejuSixteen(name, poem);
+    wrap.textContent = formatQimenGejuLine(name, poem);
+    return wrap;
+  }
+
+  const LIU_JIA_DAYS = new Set(['甲子', '甲戌', '甲申', '甲午', '甲辰', '甲寅']);
+
+  function lunarMonthGanZhi(lunar) {
+    if (!lunar) return '';
+    if (typeof lunar.getMonthInGanZhiExact === 'function') {
+      return lunar.getMonthInGanZhiExact() || '';
+    }
+    if (typeof lunar.getMonthInGanZhi === 'function') {
+      return lunar.getMonthInGanZhi() || '';
+    }
+    return '';
+  }
+
+  function buildSiZhu(effectiveDate, hour) {
+    if (!effectiveDate) return null;
+    const dayGZ = getDayGanZhi(effectiveDate);
+    const hourGZ = getHourGanZhi(dayGZ.ganIdx, hour);
+    const lunar = Lunar.fromDate(effectiveDate);
+    return {
+      year: lunar.getYearInGanZhiByLiChun() || '',
+      month: lunarMonthGanZhi(lunar),
+      day: dayGZ.gan + dayGZ.zhi,
+      hour: hourGZ.label || (hourGZ.gan + hourGZ.zhi)
+    };
+  }
+
+  function renderSiZhuSpans(siZhu) {
+    const wrap = document.createElement('span');
+    wrap.className = 'qimen-sizhu';
+    if (!siZhu) return wrap;
+    const pillars = [siZhu.year, siZhu.month, siZhu.day, siZhu.hour];
+    const dayBold = LIU_JIA_DAYS.has(siZhu.day);
+    pillars.forEach((gz, pi) => {
+      const text = String(gz || '');
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement('span');
+        span.className = 'qimen-sizhu-char';
+        const ch = text.charAt(i);
+        const wx = qimenWuxing(ch);
+        if (wx) span.dataset.wx = wx;
+        if (pi === 2 && dayBold) span.classList.add('qimen-sizhu-liujia');
+        span.textContent = ch;
+        wrap.appendChild(span);
+      }
+    });
     return wrap;
   }
 
@@ -644,9 +708,11 @@
     });
   }
 
-  async function showQimenBoard(dunLabel, hourGZ, sectionEl, wrapEl, titleEl, xunKongList, marks) {
+  async function showQimenBoard(dunLabel, hourGZ, sectionEl, wrapEl, titleEl, xunKongList, marks, siZhu) {
     if (!sectionEl || !wrapEl) return;
-    const ok = await renderQimenBoard(dunLabel, hourGZ, wrapEl, titleEl, xunKongList, marks);
+    const ok = await renderQimenBoard(
+      dunLabel, hourGZ, wrapEl, titleEl, xunKongList, marks, siZhu
+    );
     if (ok) {
       sectionEl.style.display = 'block';
     } else {
@@ -890,6 +956,7 @@
   let lastTrueSolarTime = '';
   let lastDun = '';
   let lastHourGZ = null;
+  let lastSiZhu = null;
   let lastYongshen = '';
   let lastZhengtui = null;
   let lastPangtong = null;
@@ -980,6 +1047,12 @@
       lastTrueSolarTime = `${tstHH}:${tstMM}`;
       lastDun = dunLabel;
       lastHourGZ = getHourGanZhi(dayGZ.ganIdx, tst.time.getHours());
+      lastSiZhu = {
+        year: yearGanZhi,
+        month: lunarMonthGanZhi(lunar),
+        day: dayGZ.gan + dayGZ.zhi,
+        hour: lastHourGZ.label
+      };
 
       const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
       infoReadout.innerHTML =
@@ -1000,7 +1073,8 @@
           document.getElementById('qimenWrap'),
           document.getElementById('qimenTitle'),
           currentXunKong,
-          liveQimenMarks()
+          liveQimenMarks(),
+          lastSiZhu
         );
       }
     } catch (e) {
@@ -1399,7 +1473,8 @@
         {
           zuofang: startPalace,
           xiangfang: chainLastPalace(zhengtuiData.chain)
-        }
+        },
+        lastSiZhu
       );
     } catch (e) {
       errorMsg.textContent = '飛宮鏈失敗：' + e.message;
@@ -1737,7 +1812,7 @@
     caseSuggest.hidden = false;
   }
 
-  async function fillCaseChains(startPalace, palaces, dunLabel, hourGZ, xunKongList) {
+  async function fillCaseChains(startPalace, palaces, dunLabel, hourGZ, xunKongList, siZhu) {
     clearPalaceNumbers(caseBaguaWrap);
     clearPalaceLetters(caseBaguaWrap);
     clearPalaceAsterisks(caseBaguaWrap);
@@ -1791,7 +1866,8 @@
       {
         zuofang: startPalace,
         xiangfang: chainLastPalace(zhengtuiData.chain)
-      }
+      },
+      siZhu
     );
   }
 
@@ -1836,7 +1912,7 @@
     return null;
   }
 
-  function hourGZFromCaseItem(item) {
+  function caseEffectiveDate(item) {
     const ymd = parseCaseYMD(item && item.date);
     if (!ymd) return null;
     const hm = parseCaseHourMinute((item && (item.trueSolarTime || item.time)) || '');
@@ -1845,8 +1921,20 @@
     if (hm.hour === 23) {
       effective = new Date(effective.getTime() + 3600000);
     }
-    const dayGZ = getDayGanZhi(effective);
-    return getHourGanZhi(dayGZ.ganIdx, hm.hour);
+    return { effective, hour: hm.hour };
+  }
+
+  function hourGZFromCaseItem(item) {
+    const ctx = caseEffectiveDate(item);
+    if (!ctx) return null;
+    const dayGZ = getDayGanZhi(ctx.effective);
+    return getHourGanZhi(dayGZ.ganIdx, ctx.hour);
+  }
+
+  function siZhuFromCaseItem(item) {
+    const ctx = caseEffectiveDate(item);
+    if (!ctx) return null;
+    return buildSiZhu(ctx.effective, ctx.hour);
   }
 
   async function openCaseDetail(item) {
@@ -1913,6 +2001,7 @@
       casePalaces = data.palaces;
       const startPalace = item.startPalace;
       const caseHourGZ = hourGZFromCaseItem(item);
+      const caseSiZhu = siZhuFromCaseItem(item);
       const caseXunKong = xunKongFromCaseDate(item.date, item.trueSolarTime || item.time);
       renderBagua(casePalaces, {
         wrap: caseBaguaWrap,
@@ -1931,7 +2020,8 @@
           casePalaces,
           item.dunLabel,
           caseHourGZ,
-          caseXunKong
+          caseXunKong,
+          caseSiZhu
         );
       } else if (item.dunLabel) {
         await showQimenBoard(
@@ -1941,7 +2031,8 @@
           caseQimenWrap,
           caseQimenTitle,
           caseXunKong,
-          { zuofang: '', xiangfang: '' }
+          { zuofang: '', xiangfang: '' },
+          caseSiZhu
         );
       }
 
