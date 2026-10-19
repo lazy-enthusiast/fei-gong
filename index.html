@@ -203,6 +203,20 @@
   </div>
 </div>
 
+<div id="gejuModal" class="note-modal" hidden>
+  <div class="note-modal-backdrop" id="gejuBackdrop"></div>
+  <div class="note-modal-panel geju-modal-panel" role="dialog" aria-labelledby="gejuModalTitle">
+    <div class="note-modal-title" id="gejuModalTitle">奇 門 格 局</div>
+    <div class="geju-modal-meta" id="gejuModalMeta"></div>
+    <div class="geju-modal-name" id="gejuModalName"></div>
+    <div class="geju-modal-poem" id="gejuModalPoem"></div>
+    <div class="note-modal-actions">
+      <button type="button" class="btn-footer note-modal-save" id="gejuCloseBtn">關 閉</button>
+    </div>
+    <div class="save-history-msg" id="gejuModalMsg"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
 
 <script>
@@ -349,11 +363,21 @@
     const div = document.createElement('div');
     div.className = 'qimen-cell' + (c.empty ? ' qimen-center' : '');
     div.dataset.palace = c.name;
+    if (c.tian) div.dataset.tian = c.tian;
+    if (c.di) div.dataset.di = c.di;
+    let role = '';
     if (marks && marks.zuofang && marks.zuofang === c.name) {
       div.classList.add('qimen-zuofang');
+      role = 'zuofang';
     }
     if (marks && marks.xiangfang && marks.xiangfang === c.name) {
       div.classList.add('qimen-xiangfang');
+      role = role ? 'both' : 'xiangfang';
+    }
+    if (role) {
+      div.classList.add('qimen-geju-hot');
+      div.dataset.gejuRole = role;
+      div.title = '連按三下查看格局';
     }
 
     if (c.empty) {
@@ -450,7 +474,86 @@
 
     wrapEl.appendChild(board);
     updateXunKongDisplay(board, xunKongList !== undefined ? xunKongList : currentXunKong);
+    bindQimenGejuHotspots(board);
     return true;
+  }
+
+  function closeGejuModal() {
+    const modal = document.getElementById('gejuModal');
+    if (modal) modal.hidden = true;
+    const msg = document.getElementById('gejuModalMsg');
+    if (msg) msg.textContent = '';
+  }
+
+  function gejuRoleLabel(role) {
+    if (role === 'zuofang') return '坐方宮';
+    if (role === 'xiangfang') return '向方宮';
+    if (role === 'both') return '坐方／向方';
+    return '';
+  }
+
+  async function openGejuModal(tian, di, role, palace) {
+    const modal = document.getElementById('gejuModal');
+    const metaEl = document.getElementById('gejuModalMeta');
+    const nameEl = document.getElementById('gejuModalName');
+    const poemEl = document.getElementById('gejuModalPoem');
+    const msgEl = document.getElementById('gejuModalMsg');
+    if (!modal || !nameEl || !poemEl) return;
+    if (!tian || !di) {
+      if (msgEl) msgEl.textContent = '此宮天／地盤干不全';
+      if (metaEl) metaEl.textContent = '';
+      nameEl.textContent = '';
+      poemEl.textContent = '';
+      modal.hidden = false;
+      return;
+    }
+    if (metaEl) {
+      metaEl.textContent = [
+        gejuRoleLabel(role),
+        palace ? palace + '宮' : '',
+        '天' + tian + '＋地' + di
+      ].filter(Boolean).join(' · ');
+    }
+    nameEl.textContent = '載入中…';
+    poemEl.textContent = '';
+    if (msgEl) msgEl.textContent = '';
+    modal.hidden = false;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'qimenGeju', tian, di })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        nameEl.textContent = '';
+        poemEl.textContent = '';
+        if (msgEl) msgEl.textContent = data.error || '查詢失敗';
+        return;
+      }
+      nameEl.textContent = data.name || '';
+      poemEl.textContent = data.poem || '';
+    } catch (e) {
+      nameEl.textContent = '';
+      poemEl.textContent = '';
+      if (msgEl) msgEl.textContent = '連線失敗：' + e.message;
+    }
+  }
+
+  function bindQimenGejuHotspots(board) {
+    if (!board) return;
+    board.querySelectorAll('.qimen-geju-hot').forEach((cell) => {
+      cell.addEventListener('click', (e) => {
+        if (e.detail !== 3) return;
+        e.preventDefault();
+        openGejuModal(
+          cell.dataset.tian || '',
+          cell.dataset.di || '',
+          cell.dataset.gejuRole || '',
+          cell.dataset.palace || ''
+        );
+      });
+    });
   }
 
   async function showQimenBoard(dunLabel, hourGZ, sectionEl, wrapEl, titleEl, xunKongList, marks) {
@@ -1917,6 +2020,15 @@
         showSuggest(caseItemsCache, lastCaseQuery);
       }
     });
+  }
+
+  const gejuCloseBtn = document.getElementById('gejuCloseBtn');
+  if (gejuCloseBtn) {
+    gejuCloseBtn.addEventListener('click', () => closeGejuModal());
+  }
+  const gejuBackdrop = document.getElementById('gejuBackdrop');
+  if (gejuBackdrop) {
+    gejuBackdrop.addEventListener('click', () => closeGejuModal());
   }
 
   document.addEventListener('click', (e) => {

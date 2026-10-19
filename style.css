@@ -1039,3 +1039,39 @@ body {
 .note-modal-save:active {
   background: #6e5630;
 }
+
+.qimen-geju-hot {
+  cursor: pointer;
+}
+
+.geju-modal-panel {
+  text-align: center;
+}
+
+.geju-modal-meta {
+  font-size: 0.78rem;
+  color: #8a6d3b;
+  letter-spacing: 0.06rem;
+  margin-bottom: 0.55rem;
+}
+
+.geju-modal-name {
+  font-size: 1.15rem;
+  letter-spacing: 0.2rem;
+  color: #2a2a2a;
+  margin-bottom: 0.7rem;
+  min-height: 1.4rem;
+}
+
+.geju-modal-poem {
+  white-space: pre-line;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  letter-spacing: 0.12rem;
+  color: #2a2a2a;
+  background: #fff;
+  border: 1px solid #d4cfc0;
+  border-radius: 4px;
+  padding: 0.85rem 0.75rem;
+  min-height: 5rem;
+}
