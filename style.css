@@ -146,10 +146,6 @@ body {
   margin-top: 1.1rem;
 }
 
-.case-footer-btn-stack {
-  flex-direction: column;
-}
-
 .case-back-btn {
   display: inline-block;
   background: transparent;
