@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#faf8f3">
+  <meta name="theme-color" content="#faf8f3" id="themeColor">
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('feigong-theme');
+        if (theme === 'dark' || theme === 'light') {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="飛宮易卦">
   <title>飛宮易卦</title>
@@ -20,7 +30,7 @@
       <span></span><span></span><span></span>
     </button>
     <h1 id="appTitle">飛宮易卦</h1>
-    <div class="header-spacer" aria-hidden="true"></div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="切換深色外觀">月</button>
   </header>
 
   <div id="viewCast">
@@ -1634,6 +1644,27 @@
 
   // ===== 卦例頁：選單切換 + 問事關鍵詞搜尋 + 完整排盤 =====
   const menuBtn = document.getElementById('menuBtn');
+  const themeBtn = document.getElementById('themeBtn');
+  const themeColor = document.getElementById('themeColor');
+
+  function applyTheme(theme) {
+    const dark = theme === 'dark';
+    if (dark) document.documentElement.dataset.theme = 'dark';
+    else delete document.documentElement.dataset.theme;
+    if (themeColor) themeColor.setAttribute('content', dark ? '#1a1814' : '#faf8f3');
+    if (themeBtn) {
+      themeBtn.textContent = dark ? '日' : '月';
+      themeBtn.setAttribute('aria-label', dark ? '切換淺色外觀' : '切換深色外觀');
+    }
+    try { localStorage.setItem('feigong-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  }
+
+  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
+  }
   const appTitle = document.getElementById('appTitle');
   const viewCast = document.getElementById('viewCast');
   const viewCases = document.getElementById('viewCases');
