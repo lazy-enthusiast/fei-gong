@@ -30,7 +30,7 @@
       <span></span><span></span><span></span>
     </button>
     <h1 id="appTitle">飛宮易卦</h1>
-    <button class="theme-btn" id="themeBtn" type="button" aria-label="切換深色外觀">月</button>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="切換深色外觀">🌗</button>
   </header>
 
   <div id="viewCast">
@@ -1653,7 +1653,7 @@
     else delete document.documentElement.dataset.theme;
     if (themeColor) themeColor.setAttribute('content', dark ? '#1a1814' : '#faf8f3');
     if (themeBtn) {
-      themeBtn.textContent = dark ? '日' : '月';
+      themeBtn.textContent = '🌗';
       themeBtn.setAttribute('aria-label', dark ? '切換淺色外觀' : '切換深色外觀');
     }
     try { localStorage.setItem('feigong-theme', dark ? 'dark' : 'light'); } catch (e) {}
