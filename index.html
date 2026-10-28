@@ -74,13 +74,13 @@
     <div class="hex-result">
       <div class="hex-box">
         <div class="hex-box-title">本卦</div>
-        <div class="hex-box-lines" id="benLines"></div>
-        <div class="hex-box-name" id="benName">—</div>
+        <div class="hex-box-lines" id="benLines" data-chart="ben-lines"></div>
+        <div class="hex-box-name" id="benName" data-chart="ben-name">—</div>
       </div>
       <div class="hex-box">
         <div class="hex-box-title">變卦</div>
-        <div class="hex-box-lines" id="chgLines"></div>
-        <div class="hex-box-name" id="chgName">—</div>
+        <div class="hex-box-lines" id="chgLines" data-chart="chg-lines"></div>
+        <div class="hex-box-name" id="chgName" data-chart="chg-name">—</div>
       </div>
     </div>
   </div>
@@ -88,35 +88,35 @@
   <button class="btn" id="castBtn">起 卦</button>
   <div class="error-msg" id="errorMsg"></div>
 
-  <div class="chain-section" id="sixiangSection">
+  <div class="chain-section" id="sixiangSection" data-chart="sixiang">
     <div class="chain-title">四 象 八 情</div>
     <div class="chain-item">
-      <div class="sixiang-text" id="sixiangText"></div>
+      <div class="sixiang-text" id="sixiangText" data-chart="sixiang-text"></div>
     </div>
   </div>
 
-  <div class="nine-grid-section" id="nineGridSection">
-    <div class="bagua-wrap" id="baguaWrap"></div>
+  <div class="nine-grid-section" id="nineGridSection" data-chart="bagua-section">
+    <div class="bagua-wrap" id="baguaWrap" data-chart="bagua"></div>
   </div>
 
-  <div class="chain-section" id="chainSection">
+  <div class="chain-section" id="chainSection" data-chart="zhengtui">
     <div class="chain-title">正 推</div>
-    <div id="chainList"></div>
+    <div id="chainList" data-chart="zhengtui-list"></div>
   </div>
 
-  <div class="chain-section" id="pangtongSection">
+  <div class="chain-section" id="pangtongSection" data-chart="pangtong">
     <div class="chain-title">旁 通</div>
-    <div id="pangtongList"></div>
+    <div id="pangtongList" data-chart="pangtong-list"></div>
   </div>
 
-  <div class="chain-section" id="chuleiSection">
+  <div class="chain-section" id="chuleiSection" data-chart="chulei">
     <div class="chain-title">觸 類</div>
-    <div id="chuleiList"></div>
+    <div id="chuleiList" data-chart="chulei-list"></div>
   </div>
 
-  <div class="chain-section" id="qimenSection" style="display:none;">
-    <div class="chain-title" id="qimenTitle">奇 門 局</div>
-    <div class="qimen-wrap" id="qimenWrap"></div>
+  <div class="chain-section" id="qimenSection" data-chart="qimen" style="display:none;">
+    <div class="chain-title" id="qimenTitle" data-chart="qimen-title">奇 門 局</div>
+    <div class="qimen-wrap" id="qimenWrap" data-chart="qimen-wrap"></div>
   </div>
 
   <div class="footer-actions" id="footerActions">
@@ -146,46 +146,46 @@
           <div class="hex-result case-hex-result">
             <div class="hex-box">
               <div class="hex-box-title">本卦</div>
-              <div class="hex-box-lines" id="caseBenLines"></div>
-              <div class="hex-box-name" id="caseBenName">—</div>
+              <div class="hex-box-lines" id="caseBenLines" data-chart="ben-lines"></div>
+              <div class="hex-box-name" id="caseBenName" data-chart="ben-name">—</div>
             </div>
             <div class="hex-box">
               <div class="hex-box-title">變卦</div>
-              <div class="hex-box-lines" id="caseChgLines"></div>
-              <div class="hex-box-name" id="caseChgName">—</div>
+              <div class="hex-box-lines" id="caseChgLines" data-chart="chg-lines"></div>
+              <div class="hex-box-name" id="caseChgName" data-chart="chg-name">—</div>
             </div>
           </div>
         </div>
 
-        <div class="chain-section" id="caseSixiangSection" style="display:none;">
+        <div class="chain-section" id="caseSixiangSection" data-chart="sixiang" style="display:none;">
           <div class="chain-title">四 象 八 情</div>
           <div class="chain-item">
-            <div class="sixiang-text" id="caseSixiangText"></div>
+            <div class="sixiang-text" id="caseSixiangText" data-chart="sixiang-text"></div>
           </div>
         </div>
 
-        <div class="nine-grid-section" id="caseNineGridSection" style="display:block;">
-          <div class="bagua-wrap" id="caseBaguaWrap"></div>
+        <div class="nine-grid-section" id="caseNineGridSection" data-chart="bagua-section" style="display:block;">
+          <div class="bagua-wrap" id="caseBaguaWrap" data-chart="bagua"></div>
         </div>
 
-        <div class="chain-section" id="caseChainSection" style="display:none;">
+        <div class="chain-section" id="caseChainSection" data-chart="zhengtui" style="display:none;">
           <div class="chain-title">正 推</div>
-          <div id="caseChainList"></div>
+          <div id="caseChainList" data-chart="zhengtui-list"></div>
         </div>
 
-        <div class="chain-section" id="casePangtongSection" style="display:none;">
+        <div class="chain-section" id="casePangtongSection" data-chart="pangtong" style="display:none;">
           <div class="chain-title">旁 通</div>
-          <div id="casePangtongList"></div>
+          <div id="casePangtongList" data-chart="pangtong-list"></div>
         </div>
 
-        <div class="chain-section" id="caseChuleiSection" style="display:none;">
+        <div class="chain-section" id="caseChuleiSection" data-chart="chulei" style="display:none;">
           <div class="chain-title">觸 類</div>
-          <div id="caseChuleiList"></div>
+          <div id="caseChuleiList" data-chart="chulei-list"></div>
         </div>
 
-        <div class="chain-section" id="caseQimenSection" style="display:none;">
-          <div class="chain-title" id="caseQimenTitle">奇 門 局</div>
-          <div class="qimen-wrap" id="caseQimenWrap"></div>
+        <div class="chain-section" id="caseQimenSection" data-chart="qimen" style="display:none;">
+          <div class="chain-title" id="caseQimenTitle" data-chart="qimen-title">奇 門 局</div>
+          <div class="qimen-wrap" id="caseQimenWrap" data-chart="qimen-wrap"></div>
         </div>
       </div>
 
@@ -291,8 +291,23 @@
     };
   }
 
-  async function fetchQimenPan(dunLabel, hourGZ) {
+  function qimenCellByName(pan, name) {
+    const cells = pan && pan.cells;
+    if (!cells || !name) return null;
+    const keys = Object.keys(cells);
+    for (let i = 0; i < keys.length; i++) {
+      const cell = cells[keys[i]];
+      if (cell && cell.name === name) return cell;
+    }
+    return null;
+  }
+
+  // 奇門只在這裡向 Worker 要盤。盤上已有坐方／向方格局就直接用；
+  // 舊 Worker 沒有格局欄時，才補一次 qimenGeju（心法表不在頁面）。
+  async function qimenReading(dunLabel, hourGZ, marks) {
     if (!dunLabel || !hourGZ) return null;
+    const zuofang = (marks && marks.zuofang) || '';
+    const xiangfang = (marks && marks.xiangfang) || '';
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -305,12 +320,45 @@
           ganIdx: hourGZ.ganIdx,
           zhiIdx: hourGZ.zhiIdx,
           label: hourGZ.label
-        }
+        },
+        zuofang,
+        xiangfang
       })
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || '奇門起盤失敗');
+    await fillMissingQimenGeju(data, zuofang, xiangfang);
     return data;
+  }
+
+  async function fillMissingQimenGeju(pan, zuofang, xiangfang) {
+    const names = [];
+    if (zuofang) names.push(zuofang);
+    if (xiangfang && xiangfang !== zuofang) names.push(xiangfang);
+    if (!names.length || !pan || !pan.cells) return;
+    for (let i = 0; i < names.length; i++) {
+      const cell = qimenCellByName(pan, names[i]);
+      if (!cell || (cell.geju && typeof cell.geju === 'object')) continue;
+      if (!cell.tian || !cell.di) {
+        cell.geju = { name: '', poem: '', error: '此宮天／地盤干不全' };
+        continue;
+      }
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'qimenGeju', tian: cell.tian, di: cell.di })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          cell.geju = { name: '', poem: '', error: (data && data.error) || '查詢失敗' };
+        } else {
+          cell.geju = { name: data.name || '', poem: data.poem || '' };
+        }
+      } catch (e) {
+        cell.geju = { name: '', poem: '', error: '連線失敗：' + e.message };
+      }
+    }
   }
 
   function qimenDoorLabel(door) {
@@ -397,6 +445,12 @@
       div.dataset.qimenRole = role;
       div.title = '連按三下查看奇門';
     }
+    if (c.geju && typeof c.geju === 'object') {
+      div.dataset.gejuEmbedded = '1';
+      if (c.geju.name) div.dataset.gejuName = c.geju.name;
+      if (c.geju.poem) div.dataset.gejuPoem = c.geju.poem;
+      if (c.geju.error) div.dataset.gejuError = c.geju.error;
+    }
 
     if (c.empty) {
       if (c.di) div.appendChild(renderQimenStems('', c.di));
@@ -443,7 +497,7 @@
 
     let pan;
     try {
-      pan = await fetchQimenPan(dunLabel, hourGZ);
+      pan = await qimenReading(dunLabel, hourGZ, marks || {});
     } catch (e) {
       const err = document.createElement('div');
       err.className = 'qimen-meta';
@@ -575,16 +629,80 @@
     return '';
   }
 
-  function buildSiZhu(effectiveDate, hour) {
-    if (!effectiveDate) return null;
+  // 夜子時與四柱只在這裡。時鐘（已換算經度）或卦例紀錄都走 readTime。
+  // 23 點：時辰仍用當下鐘點（子時），日柱、農曆、旬空用次日。
+  function settleClock(clock) {
+    const hour = clock.getHours();
+    const effectiveDate = hour === 23
+      ? new Date(clock.getTime() + 3600000)
+      : new Date(clock.getTime());
     const dayGZ = getDayGanZhi(effectiveDate);
     const hourGZ = getHourGanZhi(dayGZ.ganIdx, hour);
     const lunar = Lunar.fromDate(effectiveDate);
+    const year = lunar.getYearInGanZhiByLiChun() || '';
+    const month = lunarMonthGanZhi(lunar);
+    const day = dayGZ.gan + dayGZ.zhi;
     return {
-      year: lunar.getYearInGanZhiByLiChun() || '',
-      month: lunarMonthGanZhi(lunar),
-      day: dayGZ.gan + dayGZ.zhi,
-      hour: hourGZ.label || (hourGZ.gan + hourGZ.zhi)
+      effectiveDate,
+      hour,
+      dayGZ,
+      hourGZ,
+      xunKong: getXunKong(dayGZ),
+      lunar,
+      yearGanZhi: year,
+      lunarMonthNum: Math.abs(lunar.getMonth()),
+      lunarDayNum: lunar.getDay(),
+      shiChen: getShiChen(hour),
+      siZhu: {
+        year,
+        month,
+        day,
+        hour: hourGZ.label || (hourGZ.gan + hourGZ.zhi)
+      }
+    };
+  }
+
+  function readTime(input) {
+    if (input && input.record) {
+      const rec = input.record;
+      const ymd = parseCaseYMD(rec.date);
+      const hm = parseCaseHourMinute((rec.trueSolarTime || rec.time) || '');
+      const dunLabel = rec.dunLabel || '';
+      if (!ymd) return { xunKong: [], hourGZ: null, siZhu: null, dunLabel };
+      const hour = hm ? hm.hour : 12;
+      const minute = hm ? hm.minute : 0;
+      const settled = settleClock(new Date(ymd.y, ymd.mo - 1, ymd.d, hour, minute, 0));
+      return {
+        xunKong: settled.xunKong,
+        hourGZ: hm ? settled.hourGZ : null,
+        siZhu: hm ? settled.siZhu : null,
+        dunLabel
+      };
+    }
+
+    const stdTime = new Date(input.y, input.mo - 1, input.d, input.hh, input.mm, 0);
+    const tst = calcTrueSolarTime(stdTime, input.lon);
+    const settled = settleClock(tst.time);
+    const shiChenNum = getShiChenNum(settled.shiChen);
+    const yearZhi = settled.yearGanZhi.charAt(1);
+    const yearZhiNum = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 }[yearZhi];
+    const sum = yearZhiNum + settled.lunarMonthNum + settled.lunarDayNum + shiChenNum;
+    let remainder = sum % 9;
+    if (remainder === 0) remainder = 9;
+    const dunType = getDunType(tst.time);
+    const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
+    return {
+      tst,
+      trueSolarLabel: String(tst.time.getHours()).padStart(2, '0') + ':' + String(tst.time.getMinutes()).padStart(2, '0'),
+      correctionMin: tst.correctionMin,
+      yearGanZhi: settled.yearGanZhi,
+      lunarMonthNum: settled.lunarMonthNum,
+      lunarDayNum: settled.lunarDayNum,
+      shiChen: settled.shiChen,
+      dunLabel,
+      hourGZ: settled.hourGZ,
+      siZhu: settled.siZhu,
+      xunKong: settled.xunKong
     };
   }
 
@@ -631,7 +749,7 @@
     bodyEl.appendChild(renderQimenGejuSixteen(gejuName, gejuPoem));
   }
 
-  async function openQimenModal(cell) {
+  function openQimenModal(cell) {
     const modal = document.getElementById('qimenModal');
     const bodyEl = document.getElementById('qimenModalBody');
     const msgEl = document.getElementById('qimenModalMsg');
@@ -649,38 +767,35 @@
 
     setQimenModalTitle(cellInfo.role, cellInfo.palace);
     if (msgEl) msgEl.textContent = '';
-    fillQimenModalBoard(bodyEl, cellInfo, '', '');
-    const gejuBox = bodyEl.querySelector('.qimen-modal-geju');
-    if (gejuBox) gejuBox.textContent = '載入中…';
-    modal.hidden = false;
 
     if (!cellInfo.tian || !cellInfo.di) {
-      if (gejuBox) gejuBox.textContent = '';
+      fillQimenModalBoard(bodyEl, cellInfo, '', '');
       if (msgEl) msgEl.textContent = '此宮天／地盤干不全';
+      modal.hidden = false;
       return;
     }
 
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'qimenGeju',
-          tian: cellInfo.tian,
-          di: cellInfo.di
-        })
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        fillQimenModalBoard(bodyEl, cellInfo, '', '');
-        if (msgEl) msgEl.textContent = data.error || '查詢失敗';
-        return;
-      }
-      fillQimenModalBoard(bodyEl, cellInfo, data.name || '', data.poem || '');
-    } catch (e) {
+    if (cell.dataset.gejuError) {
       fillQimenModalBoard(bodyEl, cellInfo, '', '');
-      if (msgEl) msgEl.textContent = '連線失敗：' + e.message;
+      if (msgEl) msgEl.textContent = cell.dataset.gejuError;
+      modal.hidden = false;
+      return;
     }
+
+    if (cell.dataset.gejuEmbedded === '1') {
+      fillQimenModalBoard(
+        bodyEl,
+        cellInfo,
+        cell.dataset.gejuName || '',
+        cell.dataset.gejuPoem || ''
+      );
+      modal.hidden = false;
+      return;
+    }
+
+    fillQimenModalBoard(bodyEl, cellInfo, '', '');
+    if (msgEl) msgEl.textContent = '查詢失敗';
+    modal.hidden = false;
   }
 
   // 手機瀏覽器常固定 click.detail=1，改自訂連點計數（同宮、短時間內三下）
@@ -739,13 +854,6 @@
     } else {
       sectionEl.style.display = 'none';
     }
-  }
-
-  function liveQimenMarks() {
-    return {
-      zuofang: lastYongshen || '',
-      xiangfang: chainLastPalace(lastZhengtui)
-    };
   }
 
   function hideQimenBoard(sectionEl, wrapEl, titleEl) {
@@ -978,17 +1086,7 @@
   let lastDun = '';
   let lastHourGZ = null;
   let lastSiZhu = null;
-  let lastYongshen = '';
-  let lastZhengtui = null;
-  let lastPangtong = null;
-  let lastChulei = null;
-
-  function clearChainMemory() {
-    lastYongshen = '';
-    lastZhengtui = null;
-    lastPangtong = null;
-    lastChulei = null;
-  }
+  const chartStore = new WeakMap();
 
   infoSummary.addEventListener('click', () => {
     infoPanel.classList.toggle('expanded');
@@ -1032,71 +1130,27 @@
 
       const [y, mo, d] = dateInput.value.split('-').map(Number);
       const [hh, mm] = timeInput.value.split(':').map(Number);
-      const stdTime = new Date(y, mo - 1, d, hh, mm, 0);
+      const clock = readTime({ y, mo, d, hh, mm, lon: currentLon });
+      currentXunKong = clock.xunKong;
+      lastTrueSolarTime = clock.trueSolarLabel;
+      lastDun = clock.dunLabel;
+      lastHourGZ = clock.hourGZ;
+      lastSiZhu = clock.siZhu;
 
-      const tst = calcTrueSolarTime(stdTime, currentLon);
-      const tstHH = String(tst.time.getHours()).padStart(2, '0');
-      const tstMM = String(tst.time.getMinutes()).padStart(2, '0');
-
-      // 夜子時（23:00–23:59）：換日
-      // 時辰仍用真太陽時（23 → 子時），但日柱、農曆用次日
-      let effectiveDate = new Date(tst.time);
-      if (tst.time.getHours() === 23) {
-        effectiveDate = new Date(tst.time.getTime() + 3600000);
-      }
-
-      const shiChen = getShiChen(tst.time.getHours());
-      const shiChenNum = getShiChenNum(shiChen);
-
-      const dayGZ = getDayGanZhi(effectiveDate);
-      currentXunKong = getXunKong(dayGZ);
-
-      const lunar = Lunar.fromDate(effectiveDate);
-      const lunarMonthNum = Math.abs(lunar.getMonth());
-      const lunarDayNum = lunar.getDay();
-
-      const yearGanZhi = lunar.getYearInGanZhiByLiChun();
-      const yearZhi = yearGanZhi.charAt(1);
-      const yearZhiNum = { '子':1,'丑':2,'寅':3,'卯':4,'辰':5,'巳':6,'午':7,'未':8,'申':9,'酉':10,'戌':11,'亥':12 }[yearZhi];
-
-      const sum = yearZhiNum + lunarMonthNum + lunarDayNum + shiChenNum;
-      let remainder = sum % 9;
-      if (remainder === 0) remainder = 9;
-
-      const dunType = getDunType(tst.time);
-      const dunLabel = (dunType === 'yang' ? '陽遁' : '陰遁') + remainder + '局';
-      lastTrueSolarTime = `${tstHH}:${tstMM}`;
-      lastDun = dunLabel;
-      lastHourGZ = getHourGanZhi(dayGZ.ganIdx, tst.time.getHours());
-      lastSiZhu = {
-        year: yearGanZhi,
-        month: lunarMonthGanZhi(lunar),
-        day: dayGZ.gan + dayGZ.zhi,
-        hour: lastHourGZ.label
-      };
-
-      const corrStr = (tst.correctionMin >= 0 ? '+' : '') + tst.correctionMin.toFixed(1) + '分';
+      const corrStr = (clock.correctionMin >= 0 ? '+' : '') + clock.correctionMin.toFixed(1) + '分';
       infoReadout.innerHTML =
-        `${yearGanZhi}年${lunarMonthNum}月${lunarDayNum}日${shiChen}時<br>` +
-        `真太陽時：<span class="highlight">${tstHH}:${tstMM}</span>　校正：${corrStr}`;
-      infoDun.textContent = dunLabel;
+        `${clock.yearGanZhi}年${clock.lunarMonthNum}月${clock.lunarDayNum}日${clock.shiChen}時<br>` +
+        `真太陽時：<span class="highlight">${clock.trueSolarLabel}</span>　校正：${corrStr}`;
+      infoDun.textContent = clock.dunLabel;
 
       syncDateTimeDisplays();
-      infoSummaryText.textContent = `${formatDateDisplay(y, mo, d)} · ${formatTimeDisplay(hh, mm)} · ${cityName} · ${dunLabel}`;
+      infoSummaryText.textContent = `${formatDateDisplay(y, mo, d)} · ${formatTimeDisplay(hh, mm)} · ${cityName} · ${clock.dunLabel}`;
 
       updateXunKongDisplay();
-      const liveQimen = document.getElementById('qimenSection');
+      const liveRoot = document.getElementById('viewCast');
+      const liveQimen = liveRoot && liveRoot.querySelector('[data-chart="qimen"]');
       if (liveQimen && liveQimen.style.display !== 'none') {
-        await showQimenBoard(
-          lastDun,
-          lastHourGZ,
-          liveQimen,
-          document.getElementById('qimenWrap'),
-          document.getElementById('qimenTitle'),
-          currentXunKong,
-          liveQimenMarks(),
-          lastSiZhu
-        );
+        await showChart(liveRoot, 'live', { refreshQimen: true });
       }
     } catch (e) {
       infoReadout.textContent = '（' + e.message + '）';
@@ -1187,26 +1241,13 @@
 
   function updateLive() {
     const { sixLines, movingLineIndexes } = getSixLinesInput();
-
-    renderSixLines(sixLines, document.getElementById('benLines'));
-    document.getElementById('benName').textContent = getHexNameFromSixLines(sixLines);
-
-    const chgLines = [...sixLines];
+    const chgLines = sixLines.slice();
     movingLineIndexes.forEach(i => { chgLines[i] = chgLines[i] === 1 ? 0 : 1; });
-    renderSixLines(chgLines, document.getElementById('chgLines'));
-    document.getElementById('chgName').textContent = getHexNameFromSixLines(chgLines);
-
-    document.getElementById('sixiangSection').style.display = 'none';
-    document.getElementById('nineGridSection').style.display = 'none';
-    document.getElementById('chainSection').style.display = 'none';
-    document.getElementById('pangtongSection').style.display = 'none';
-    document.getElementById('chuleiSection').style.display = 'none';
-    hideQimenBoard(
-      document.getElementById('qimenSection'),
-      document.getElementById('qimenWrap'),
-      document.getElementById('qimenTitle')
-    );
-    clearChainMemory();
+    showChart(document.getElementById('viewCast'), 'live', {
+      benLines: sixLines,
+      chgLines,
+      clearBoard: true
+    });
   }
 
   document.querySelectorAll('#inputArea select').forEach(sel => {
@@ -1217,21 +1258,6 @@
 
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
-  const sixiangSection = document.getElementById('sixiangSection');
-  const sixiangText = document.getElementById('sixiangText');
-  const nineGridSection = document.getElementById('nineGridSection');
-  const baguaWrap = document.getElementById('baguaWrap');
-  const chainSection = document.getElementById('chainSection');
-  const chainList = document.getElementById('chainList');
-  const pangtongSection = document.getElementById('pangtongSection');
-  const pangtongList = document.getElementById('pangtongList');
-  const chuleiSection = document.getElementById('chuleiSection');
-  const chuleiList = document.getElementById('chuleiList');
-  const qimenSection = document.getElementById('qimenSection');
-  const qimenWrap = document.getElementById('qimenWrap');
-  const qimenTitle = document.getElementById('qimenTitle');
-
-  let currentPalaces = null;
 
   castBtn.addEventListener('click', async () => {
     errorMsg.textContent = '';
@@ -1255,36 +1281,23 @@
         return;
       }
 
-      if (data.sixiang) {
-        sixiangText.textContent = data.sixiang.text;
-        sixiangSection.style.display = 'block';
-      } else {
-        sixiangSection.style.display = 'none';
-      }
-
-      currentPalaces = data.palaces;
-      renderBagua(data.palaces);
-      nineGridSection.style.display = 'block';
-
-      chainSection.style.display = 'none';
-      chainList.innerHTML = '';
-      pangtongSection.style.display = 'none';
-      pangtongList.innerHTML = '';
-      chuleiSection.style.display = 'none';
-      chuleiList.innerHTML = '';
-      hideQimenBoard(qimenSection, qimenWrap, qimenTitle);
-      clearChainMemory();
+      await showChart(document.getElementById('viewCast'), 'live', {
+        sixiang: data.sixiang || null,
+        palaces: data.palaces
+      });
     } catch (e) {
       errorMsg.textContent = '連線失敗：' + e.message;
     }
     castBtn.disabled = false;
   });
 
-  function renderBagua(palaces, options = {}) {
-    const wrap = options.wrap || baguaWrap;
-    const interactive = options.interactive !== false;
-    const xunKong = options.xunKong !== undefined ? options.xunKong : currentXunKong;
-    const onSelect = options.onSelect || ((name) => runFlyingChain(name));
+  function renderBagua(palaces, options) {
+    const wrap = options && options.wrap;
+    if (!wrap) return;
+    const interactive = !!(options && options.interactive);
+    const xunKong = options && options.xunKong !== undefined ? options.xunKong : currentXunKong;
+    const onSelect = options && options.onSelect;
+    const selected = (options && options.selected) || '';
 
     wrap.innerHTML = '';
 
@@ -1323,7 +1336,11 @@
       renderTrigramLines(p.lines, linesDiv);
       div.appendChild(linesDiv);
 
-      if (interactive) {
+      if (selected && item.name === selected) {
+        div.classList.add('selected', 'yongshen');
+      }
+
+      if (interactive && onSelect) {
         div.addEventListener('click', () => {
           wrap.querySelectorAll('.palace.selected').forEach(el => el.classList.remove('selected'));
           div.classList.add('selected');
@@ -1338,7 +1355,7 @@
   }
 
   function updateXunKongDisplay(root, xunKongList) {
-    const scope = root || baguaWrap || document;
+    const scope = root || document.querySelector('#viewCast [data-chart="bagua"]') || document;
     const list = xunKongList !== undefined ? xunKongList : currentXunKong;
     scope.querySelectorAll('.zhi').forEach(el => {
       el.classList.remove('xunkong');
@@ -1351,7 +1368,8 @@
   }
 
   function markPalaceNumber(palaceName, number, root) {
-    const scope = root || baguaWrap;
+    if (!root) return;
+    const scope = root;
     const el = scope.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
     const old = el.querySelector('.palace-number');
@@ -1365,12 +1383,14 @@
   }
 
   function clearPalaceNumbers(root) {
-    const scope = root || baguaWrap;
+    if (!root) return;
+    const scope = root;
     scope.querySelectorAll('.palace-number').forEach(el => el.remove());
   }
 
   function markPalaceLetter(palaceName, index, root) {
-    const scope = root || baguaWrap;
+    if (!root) return;
+    const scope = root;
     const el = scope.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
     const old = el.querySelector('.palace-letter');
@@ -1384,12 +1404,14 @@
   }
 
   function clearPalaceLetters(root) {
-    const scope = root || baguaWrap;
+    if (!root) return;
+    const scope = root;
     scope.querySelectorAll('.palace-letter').forEach(el => el.remove());
   }
 
   function markPalaceAsterisk(palaceName, root) {
-    const scope = root || baguaWrap;
+    if (!root) return;
+    const scope = root;
     const el = scope.querySelector(`.palace[data-palace="${palaceName}"]`);
     if (!el) return;
     const old = el.querySelector('.palace-asterisk');
@@ -1401,12 +1423,13 @@
   }
 
   function clearPalaceAsterisks(root) {
-    const scope = root || baguaWrap;
+    if (!root) return;
+    const scope = root;
     scope.querySelectorAll('.palace-asterisk').forEach(el => el.remove());
   }
 
   async function runChain(startPalace, mode, palaces) {
-    const source = palaces || currentPalaces;
+    const source = palaces;
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1432,73 +1455,244 @@
     `;
   }
 
-  async function runFlyingChain(startPalace) {
-    if (!currentPalaces) return;
-    clearChainMemory();
-    clearPalaceNumbers(baguaWrap);
-    clearPalaceLetters(baguaWrap);
-    clearPalaceAsterisks(baguaWrap);
+  function chartSlots(root) {
+    const q = (name) => root.querySelector('[data-chart="' + name + '"]');
+    return {
+      benLines: q('ben-lines'),
+      benName: q('ben-name'),
+      chgLines: q('chg-lines'),
+      chgName: q('chg-name'),
+      sixiang: q('sixiang'),
+      sixiangText: q('sixiang-text'),
+      baguaSection: q('bagua-section'),
+      bagua: q('bagua'),
+      zhengtui: q('zhengtui'),
+      zhengtuiList: q('zhengtui-list'),
+      pangtong: q('pangtong'),
+      pangtongList: q('pangtong-list'),
+      chulei: q('chulei'),
+      chuleiList: q('chulei-list'),
+      qimen: q('qimen'),
+      qimenTitle: q('qimen-title'),
+      qimenWrap: q('qimen-wrap')
+    };
+  }
 
-    try {
-      const zhengtuiData = await runChain(startPalace, 'zhengtui', currentPalaces);
-      chainList.innerHTML = '';
-      zhengtuiData.chain.forEach((item, idx) => {
-        const div = document.createElement('div');
-        div.className = 'chain-item';
-        div.innerHTML = makeChainItemHTML(item);
-        chainList.appendChild(div);
-        markPalaceNumber(item.palace, idx + 1, baguaWrap);
-      });
-      chainSection.style.display = 'block';
+  function chartState(root) {
+    if (!root) return null;
+    return chartStore.get(root) || null;
+  }
 
-      const pangtongData = await runChain(startPalace, 'pangtong', currentPalaces);
-      pangtongList.innerHTML = '';
-      pangtongData.chain.forEach((item, idx) => {
-        const div = document.createElement('div');
-        div.className = 'chain-item';
-        div.innerHTML = makeChainItemHTML(item);
-        pangtongList.appendChild(div);
-        markPalaceLetter(item.palace, idx + 1, baguaWrap);
-      });
-      pangtongSection.style.display = 'block';
+  function ensureChartState(root) {
+    let state = chartStore.get(root);
+    if (!state) {
+      state = { palaces: null, yongshen: '', zhengtui: null, pangtong: null, chulei: null };
+      chartStore.set(root, state);
+    }
+    return state;
+  }
 
-      chuleiList.innerHTML = '';
-      const chulei = pangtongData.chulei;
-      if (chulei && chulei.found && chulei.items.length > 0) {
-        chulei.items.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'chain-item';
-          div.innerHTML = makeChainItemHTML(item);
-          chuleiList.appendChild(div);
-          markPalaceAsterisk(item.palace, baguaWrap);
-        });
-      } else {
-        const div = document.createElement('div');
-        div.className = 'chain-item';
-        div.innerHTML = '<div class="chain-item-name" style="color:#8a8578;">無處觸類</div>';
-        chuleiList.appendChild(div);
+  function resetFlyMemory(state) {
+    state.yongshen = '';
+    state.zhengtui = null;
+    state.pangtong = null;
+    state.chulei = null;
+  }
+
+  function hideChartPieces(slots, which) {
+    const hide = (el) => { if (el) el.style.display = 'none'; };
+    if (which.sixiang) hide(slots.sixiang);
+    if (which.bagua) hide(slots.baguaSection);
+    if (which.chains) {
+      hide(slots.zhengtui);
+      hide(slots.pangtong);
+      hide(slots.chulei);
+      if (slots.zhengtuiList) slots.zhengtuiList.innerHTML = '';
+      if (slots.pangtongList) slots.pangtongList.innerHTML = '';
+      if (slots.chuleiList) slots.chuleiList.innerHTML = '';
+      if (slots.bagua) {
+        clearPalaceNumbers(slots.bagua);
+        clearPalaceLetters(slots.bagua);
+        clearPalaceAsterisks(slots.bagua);
       }
-      chuleiSection.style.display = 'block';
+    }
+    if (which.qimen) hideQimenBoard(slots.qimen, slots.qimenWrap, slots.qimenTitle);
+  }
 
-      lastYongshen = startPalace;
-      lastZhengtui = zhengtuiData.chain;
-      lastPangtong = pangtongData.chain;
-      lastChulei = pangtongData.chulei || { found: false, items: [] };
-      await showQimenBoard(
-        lastDun,
-        lastHourGZ,
-        qimenSection,
-        qimenWrap,
-        qimenTitle,
-        currentXunKong,
-        {
-          zuofang: startPalace,
-          xiangfang: chainLastPalace(zhengtuiData.chain)
-        },
-        lastSiZhu
-      );
-    } catch (e) {
-      errorMsg.textContent = '飛宮鏈失敗：' + e.message;
+  function fillChainList(listEl, chain, mark) {
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    (chain || []).forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'chain-item';
+      div.innerHTML = makeChainItemHTML(item);
+      listEl.appendChild(div);
+      if (mark) mark(item, idx);
+    });
+  }
+
+  function fillChuleiList(slots, chulei) {
+    const listEl = slots.chuleiList;
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (chulei && chulei.found && chulei.items && chulei.items.length > 0) {
+      chulei.items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'chain-item';
+        div.innerHTML = makeChainItemHTML(item);
+        listEl.appendChild(div);
+        markPalaceAsterisk(item.palace, slots.bagua);
+      });
+      return;
+    }
+    const div = document.createElement('div');
+    div.className = 'chain-item';
+    div.innerHTML = '<div class="chain-item-name" style="color:#8a8578;">無處觸類</div>';
+    listEl.appendChild(div);
+  }
+
+  async function paintChartQimen(slots, ctx) {
+    await showQimenBoard(
+      ctx.dunLabel,
+      ctx.hourGZ,
+      slots.qimen,
+      slots.qimenWrap,
+      slots.qimenTitle,
+      ctx.xunKong,
+      { zuofang: ctx.zuofang || '', xiangfang: ctx.xiangfang || '' },
+      ctx.siZhu
+    );
+  }
+
+  async function flyOnChart(root, startPalace, timeOverride) {
+    const slots = chartSlots(root);
+    const state = ensureChartState(root);
+    if (!state.palaces || !startPalace) return;
+    resetFlyMemory(state);
+    clearPalaceNumbers(slots.bagua);
+    clearPalaceLetters(slots.bagua);
+    clearPalaceAsterisks(slots.bagua);
+
+    const zhengtuiData = await runChain(startPalace, 'zhengtui', state.palaces);
+    fillChainList(slots.zhengtuiList, zhengtuiData.chain, (item, idx) => {
+      markPalaceNumber(item.palace, idx + 1, slots.bagua);
+    });
+    if (slots.zhengtui) slots.zhengtui.style.display = 'block';
+
+    const pangtongData = await runChain(startPalace, 'pangtong', state.palaces);
+    fillChainList(slots.pangtongList, pangtongData.chain, (item, idx) => {
+      markPalaceLetter(item.palace, idx + 1, slots.bagua);
+    });
+    if (slots.pangtong) slots.pangtong.style.display = 'block';
+
+    fillChuleiList(slots, pangtongData.chulei);
+    if (slots.chulei) slots.chulei.style.display = 'block';
+
+    state.yongshen = startPalace;
+    state.zhengtui = zhengtuiData.chain;
+    state.pangtong = pangtongData.chain;
+    state.chulei = pangtongData.chulei || { found: false, items: [] };
+
+    const time = timeOverride || {
+      dunLabel: lastDun,
+      hourGZ: lastHourGZ,
+      xunKong: currentXunKong,
+      siZhu: lastSiZhu
+    };
+    await paintChartQimen(slots, {
+      dunLabel: time.dunLabel,
+      hourGZ: time.hourGZ,
+      xunKong: time.xunKong,
+      siZhu: time.siZhu,
+      zuofang: startPalace,
+      xiangfang: chainLastPalace(zhengtuiData.chain)
+    });
+  }
+
+  // 起卦（live，可點用神）與卦例（locked，只讀重播）共用這一條排盤。
+  async function showChart(root, mode, spec) {
+    if (!root || !spec) return;
+    const slots = chartSlots(root);
+    const state = ensureChartState(root);
+    const locked = mode === 'locked';
+
+    if (spec.refreshQimen) {
+      await paintChartQimen(slots, {
+        dunLabel: lastDun,
+        hourGZ: lastHourGZ,
+        xunKong: currentXunKong,
+        siZhu: lastSiZhu,
+        zuofang: state.yongshen || '',
+        xiangfang: chainLastPalace(state.zhengtui)
+      });
+      return;
+    }
+
+    if (spec.benLines && slots.benLines) {
+      renderSixLines(spec.benLines, slots.benLines);
+      if (slots.benName) {
+        slots.benName.textContent = spec.benName || getHexNameFromSixLines(spec.benLines);
+      }
+    }
+    if (spec.chgLines && slots.chgLines) {
+      renderSixLines(spec.chgLines, slots.chgLines);
+      if (slots.chgName) {
+        slots.chgName.textContent = spec.chgName || getHexNameFromSixLines(spec.chgLines);
+      }
+    }
+
+    if (spec.clearBoard) {
+      hideChartPieces(slots, { sixiang: true, bagua: true, chains: true, qimen: true });
+      state.palaces = null;
+      resetFlyMemory(state);
+      return;
+    }
+
+    if ('sixiang' in spec && slots.sixiang) {
+      if (spec.sixiang) {
+        if (slots.sixiangText) slots.sixiangText.textContent = spec.sixiang.text || '';
+        slots.sixiang.style.display = 'block';
+      } else {
+        slots.sixiang.style.display = 'none';
+        if (slots.sixiangText) slots.sixiangText.textContent = '';
+      }
+    }
+
+    if (spec.palaces) {
+      hideChartPieces(slots, { chains: true, qimen: true });
+      resetFlyMemory(state);
+      state.palaces = spec.palaces;
+      const xunKong = spec.time && spec.time.xunKong !== undefined
+        ? spec.time.xunKong
+        : currentXunKong;
+      renderBagua(spec.palaces, {
+        wrap: slots.bagua,
+        interactive: !locked,
+        xunKong,
+        selected: locked ? (spec.startPalace || '') : '',
+        onSelect: locked ? null : (name) => {
+          flyOnChart(root, name).catch((e) => {
+            if (errorMsg) errorMsg.textContent = '飛宮鏈失敗：' + e.message;
+          });
+        }
+      });
+      if (slots.bagua) {
+        slots.bagua.classList.toggle('case-bagua-locked', locked);
+      }
+      if (slots.baguaSection) slots.baguaSection.style.display = 'block';
+    }
+
+    if (spec.startPalace) {
+      await flyOnChart(root, spec.startPalace, spec.time || null);
+    } else if (locked && spec.time && spec.time.dunLabel) {
+      await paintChartQimen(slots, {
+        dunLabel: spec.time.dunLabel,
+        hourGZ: spec.time.hourGZ,
+        xunKong: spec.time.xunKong,
+        siZhu: spec.time.siZhu,
+        zuofang: '',
+        xiangfang: ''
+      });
     }
   }
 
@@ -1527,11 +1721,12 @@
   if (saveHistoryBtn) {
     saveHistoryBtn.addEventListener('click', async () => {
       if (saveHistoryMsg) saveHistoryMsg.textContent = '';
-      if (!currentPalaces) {
+      const chart = chartState(document.getElementById('viewCast'));
+      if (!chart || !chart.palaces) {
         if (saveHistoryMsg) saveHistoryMsg.textContent = '請先起卦';
         return;
       }
-      if (!lastYongshen || !lastZhengtui || !lastPangtong) {
+      if (!chart.yongshen || !chart.zhengtui || !chart.pangtong) {
         if (saveHistoryMsg) saveHistoryMsg.textContent = '請先點選用神宮';
         return;
       }
@@ -1549,10 +1744,10 @@
               sixLines: getRawSixLines().join(''),
               benName: document.getElementById('benName').textContent,
               chgName: document.getElementById('chgName').textContent,
-              startPalace: lastYongshen,
-              zhengtui: formatChainForSheet(lastZhengtui),
-              pangtong: formatChainForSheet(lastPangtong),
-              chulei: formatChuleiForSheet(lastChulei),
+              startPalace: chart.yongshen,
+              zhengtui: formatChainForSheet(chart.zhengtui),
+              pangtong: formatChainForSheet(chart.pangtong),
+              chulei: formatChuleiForSheet(chart.chulei),
               date: dateInput.value,
               time: timeInput.value,
               city: cityInput.value.trim(),
@@ -1674,28 +1869,11 @@
   const caseDetail = document.getElementById('caseDetail');
   const caseBackBtn = document.getElementById('caseBackBtn');
   const caseMeta = document.getElementById('caseMeta');
-  const caseBaguaWrap = document.getElementById('caseBaguaWrap');
-  const caseBenLines = document.getElementById('caseBenLines');
-  const caseBenName = document.getElementById('caseBenName');
-  const caseChgLines = document.getElementById('caseChgLines');
-  const caseChgName = document.getElementById('caseChgName');
-  const caseSixiangSection = document.getElementById('caseSixiangSection');
-  const caseSixiangText = document.getElementById('caseSixiangText');
-  const caseChainSection = document.getElementById('caseChainSection');
-  const caseChainList = document.getElementById('caseChainList');
-  const casePangtongSection = document.getElementById('casePangtongSection');
-  const casePangtongList = document.getElementById('casePangtongList');
-  const caseChuleiSection = document.getElementById('caseChuleiSection');
-  const caseChuleiList = document.getElementById('caseChuleiList');
-  const caseQimenSection = document.getElementById('caseQimenSection');
-  const caseQimenWrap = document.getElementById('caseQimenWrap');
-  const caseQimenTitle = document.getElementById('caseQimenTitle');
 
   let showingCases = false;
   let caseSearchTimer = null;
   let caseSearchSeq = 0;
   let caseItemsCache = [];
-  let casePalaces = null;
   let lastCaseQuery = '';
   let currentCaseItem = null;
 
@@ -1764,19 +1942,6 @@
     const movingLineIndexes = [];
     chars.forEach((c, i) => { if (isMoving(c)) movingLineIndexes.push(i); });
     return { raw: chars, sixLines, movingLineIndexes };
-  }
-
-  function xunKongFromCaseDate(value, timeValue) {
-    const ymd = parseCaseYMD(value);
-    if (!ymd) return [];
-    const hm = parseCaseHourMinute(timeValue || '');
-    const hour = hm ? hm.hour : 12;
-    const minute = hm ? hm.minute : 0;
-    let effective = new Date(ymd.y, ymd.mo - 1, ymd.d, hour, minute, 0);
-    if (hour === 23) {
-      effective = new Date(effective.getTime() + 3600000);
-    }
-    return getXunKong(getDayGanZhi(effective));
   }
 
   function highlightQuestion(text, query) {
@@ -1854,65 +2019,6 @@
     caseSuggest.hidden = false;
   }
 
-  async function fillCaseChains(startPalace, palaces, dunLabel, hourGZ, xunKongList, siZhu) {
-    clearPalaceNumbers(caseBaguaWrap);
-    clearPalaceLetters(caseBaguaWrap);
-    clearPalaceAsterisks(caseBaguaWrap);
-
-    const zhengtuiData = await runChain(startPalace, 'zhengtui', palaces);
-    caseChainList.innerHTML = '';
-    zhengtuiData.chain.forEach((item, idx) => {
-      const div = document.createElement('div');
-      div.className = 'chain-item';
-      div.innerHTML = makeChainItemHTML(item);
-      caseChainList.appendChild(div);
-      markPalaceNumber(item.palace, idx + 1, caseBaguaWrap);
-    });
-    caseChainSection.style.display = 'block';
-
-    const pangtongData = await runChain(startPalace, 'pangtong', palaces);
-    casePangtongList.innerHTML = '';
-    pangtongData.chain.forEach((item, idx) => {
-      const div = document.createElement('div');
-      div.className = 'chain-item';
-      div.innerHTML = makeChainItemHTML(item);
-      casePangtongList.appendChild(div);
-      markPalaceLetter(item.palace, idx + 1, caseBaguaWrap);
-    });
-    casePangtongSection.style.display = 'block';
-
-    caseChuleiList.innerHTML = '';
-    const chulei = pangtongData.chulei;
-    if (chulei && chulei.found && chulei.items.length > 0) {
-      chulei.items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'chain-item';
-        div.innerHTML = makeChainItemHTML(item);
-        caseChuleiList.appendChild(div);
-        markPalaceAsterisk(item.palace, caseBaguaWrap);
-      });
-    } else {
-      const div = document.createElement('div');
-      div.className = 'chain-item';
-      div.innerHTML = '<div class="chain-item-name" style="color:#8a8578;">無處觸類</div>';
-      caseChuleiList.appendChild(div);
-    }
-    caseChuleiSection.style.display = 'block';
-    await showQimenBoard(
-      dunLabel,
-      hourGZ,
-      caseQimenSection,
-      caseQimenWrap,
-      caseQimenTitle,
-      xunKongList,
-      {
-        zuofang: startPalace,
-        xiangfang: chainLastPalace(zhengtuiData.chain)
-      },
-      siZhu
-    );
-  }
-
   function parseCaseYMD(value) {
     if (value == null || value === '') return null;
     if (value instanceof Date && !Number.isNaN(value.getTime()) && value.getFullYear() >= 1905) {
@@ -1954,31 +2060,6 @@
     return null;
   }
 
-  function caseEffectiveDate(item) {
-    const ymd = parseCaseYMD(item && item.date);
-    if (!ymd) return null;
-    const hm = parseCaseHourMinute((item && (item.trueSolarTime || item.time)) || '');
-    if (!hm) return null;
-    let effective = new Date(ymd.y, ymd.mo - 1, ymd.d, hm.hour, hm.minute, 0);
-    if (hm.hour === 23) {
-      effective = new Date(effective.getTime() + 3600000);
-    }
-    return { effective, hour: hm.hour };
-  }
-
-  function hourGZFromCaseItem(item) {
-    const ctx = caseEffectiveDate(item);
-    if (!ctx) return null;
-    const dayGZ = getDayGanZhi(ctx.effective);
-    return getHourGanZhi(dayGZ.ganIdx, ctx.hour);
-  }
-
-  function siZhuFromCaseItem(item) {
-    const ctx = caseEffectiveDate(item);
-    if (!ctx) return null;
-    return buildSiZhu(ctx.effective, ctx.hour);
-  }
-
   async function openCaseDetail(item) {
     hideSuggest();
     currentCaseItem = item;
@@ -1987,13 +2068,6 @@
     if (noteMsg) noteMsg.textContent = '';
     caseDetail.hidden = false;
     caseSearchStatus.textContent = '載入排盤…';
-    caseChainSection.style.display = 'none';
-    casePangtongSection.style.display = 'none';
-    caseChuleiSection.style.display = 'none';
-    hideQimenBoard(caseQimenSection, caseQimenWrap, caseQimenTitle);
-    caseChainList.innerHTML = '';
-    casePangtongList.innerHTML = '';
-    caseChuleiList.innerHTML = '';
 
     const question = item.question || '（無問事）';
     const clock = formatCaseTimeLabel(item.time);
@@ -2028,55 +2102,16 @@
 
       const benLines = data.ben ? data.ben.lines : parsed.sixLines;
       const chgLines = data.changed ? data.changed.lines : parsed.sixLines;
-      renderSixLines(benLines, caseBenLines);
-      renderSixLines(chgLines, caseChgLines);
-      caseBenName.textContent = (data.ben && data.ben.name) || item.benName || getHexNameFromSixLines(benLines);
-      caseChgName.textContent = (data.changed && data.changed.name) || item.chgName || getHexNameFromSixLines(chgLines);
-
-      if (data.sixiang) {
-        caseSixiangText.textContent = data.sixiang.text;
-        caseSixiangSection.style.display = 'block';
-      } else {
-        caseSixiangSection.style.display = 'none';
-      }
-
-      casePalaces = data.palaces;
-      const startPalace = item.startPalace;
-      const caseHourGZ = hourGZFromCaseItem(item);
-      const caseSiZhu = siZhuFromCaseItem(item);
-      const caseXunKong = xunKongFromCaseDate(item.date, item.trueSolarTime || item.time);
-      renderBagua(casePalaces, {
-        wrap: caseBaguaWrap,
-        interactive: false,
-        xunKong: caseXunKong
+      await showChart(document.getElementById('caseCaptureRoot'), 'locked', {
+        benLines,
+        chgLines,
+        benName: (data.ben && data.ben.name) || item.benName || getHexNameFromSixLines(benLines),
+        chgName: (data.changed && data.changed.name) || item.chgName || getHexNameFromSixLines(chgLines),
+        sixiang: data.sixiang || null,
+        palaces: data.palaces,
+        startPalace: item.startPalace || '',
+        time: readTime({ record: item })
       });
-      caseBaguaWrap.classList.add('case-bagua-locked');
-
-      if (startPalace) {
-        const sel = caseBaguaWrap.querySelector(`.palace[data-palace="${startPalace}"]`);
-        if (sel) {
-          sel.classList.add('selected', 'yongshen');
-        }
-        await fillCaseChains(
-          startPalace,
-          casePalaces,
-          item.dunLabel,
-          caseHourGZ,
-          caseXunKong,
-          caseSiZhu
-        );
-      } else if (item.dunLabel) {
-        await showQimenBoard(
-          item.dunLabel,
-          caseHourGZ,
-          caseQimenSection,
-          caseQimenWrap,
-          caseQimenTitle,
-          caseXunKong,
-          { zuofang: '', xiangfang: '' },
-          caseSiZhu
-        );
-      }
 
       caseSearchStatus.textContent = '';
     } catch (e) {
