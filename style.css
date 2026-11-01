@@ -565,6 +565,50 @@ html[data-theme="dark"] .palace-letter {
   opacity: 0.4;
 }
 
+.yongshen-hint-row {
+  display: none;
+  justify-content: flex-end;
+  margin-top: 0.35rem;
+  margin-bottom: 0.15rem;
+  padding-right: 0.15rem;
+}
+
+.yongshen-hint-row.is-visible {
+  display: flex;
+}
+
+.yongshen-hint-btn {
+  background: none;
+  border: none;
+  padding: 0.1rem 0.05rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.02rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.yongshen-hint-btn:active {
+  color: var(--muted);
+}
+
+.yongshen-modal-body .yongshen-modal-item {
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.06rem;
+  color: var(--ink);
+  text-align: left;
+  white-space: normal;
+}
+
+.yongshen-modal-body .yongshen-modal-item + .yongshen-modal-item {
+  margin-top: 0.55rem;
+}
+
 .error-msg {
   color: var(--danger);
   font-size: 0.75rem;
@@ -1158,6 +1202,18 @@ html[data-theme="dark"] .palace-letter {
 .qimen-modal-body .qimen-door {
   text-align: left;
   line-height: 1.45;
+}
+
+.qimen-modal-xinfa,
+.qimen-modal-star-xinfa {
+  margin: 0.2rem 0 0.35rem;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.06rem;
+  color: var(--ink);
+  white-space: normal;
 }
 
 .qimen-modal-body .qimen-stems,
