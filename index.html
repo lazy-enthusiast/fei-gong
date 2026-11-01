@@ -302,8 +302,8 @@
     return null;
   }
 
-  // 奇門只在這裡向 Worker 要盤。盤上已有坐方／向方格局就直接用；
-  // 舊 Worker 沒有格局欄時，才補一次 qimenGeju（心法表不在頁面）。
+  // 奇門只在這裡向 Worker 要盤。盤上已有坐方／向方格局、八星心法就直接用；
+  // 舊 Worker 沒有這些欄時，才補查（心法表不在頁面）。
   async function qimenReading(dunLabel, hourGZ, marks) {
     if (!dunLabel || !hourGZ) return null;
     const zuofang = (marks && marks.zuofang) || '';
@@ -328,6 +328,7 @@
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || '奇門起盤失敗');
     await fillMissingQimenGeju(data, zuofang, xiangfang);
+    await fillMissingQimenStarXinfa(data, zuofang, xiangfang);
     return data;
   }
 
@@ -357,6 +358,29 @@
         }
       } catch (e) {
         cell.geju = { name: '', poem: '', error: '連線失敗：' + e.message };
+      }
+    }
+  }
+
+  async function fillMissingQimenStarXinfa(pan, zuofang, xiangfang) {
+    const names = [];
+    if (zuofang) names.push(zuofang);
+    if (xiangfang && xiangfang !== zuofang) names.push(xiangfang);
+    if (!names.length || !pan || !pan.cells) return;
+    for (let i = 0; i < names.length; i++) {
+      const cell = qimenCellByName(pan, names[i]);
+      if (!cell || typeof cell.starXinfa === 'string') continue;
+      if (!cell.star) continue;
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'qimenStarXinfa', star: cell.star })
+        });
+        const data = await res.json();
+        if (res.ok && data && data.text) cell.starXinfa = data.text;
+      } catch (e) {
+        // 舊 Worker 或連線失敗時略過；modal 仍可顯示神星門與格局
       }
     }
   }
@@ -450,6 +474,9 @@
       if (c.geju.name) div.dataset.gejuName = c.geju.name;
       if (c.geju.poem) div.dataset.gejuPoem = c.geju.poem;
       if (c.geju.error) div.dataset.gejuError = c.geju.error;
+    }
+    if (typeof c.starXinfa === 'string' && c.starXinfa) {
+      div.dataset.starXinfa = c.starXinfa;
     }
 
     if (c.empty) {
@@ -733,11 +760,21 @@
     return wrap;
   }
 
+  function renderQimenStarXinfa(text) {
+    const el = document.createElement('div');
+    el.className = 'qimen-modal-star-xinfa';
+    el.textContent = text || '';
+    return el;
+  }
+
   function fillQimenModalBoard(bodyEl, cellInfo, gejuName, gejuPoem) {
     if (!bodyEl) return;
     bodyEl.innerHTML = '';
     bodyEl.appendChild(makeQimenWxLine('qimen-god', cellInfo.god || '', cellInfo.god));
     bodyEl.appendChild(makeQimenWxLine('qimen-star', cellInfo.star || '', cellInfo.star));
+    if (cellInfo.starXinfa) {
+      bodyEl.appendChild(renderQimenStarXinfa(cellInfo.starXinfa));
+    }
     bodyEl.appendChild(makeQimenWxLine(
       'qimen-door',
       qimenDoorLabel(cellInfo.door || ''),
@@ -760,6 +797,7 @@
       di: cell.dataset.di || '',
       god: cell.dataset.god || '',
       star: cell.dataset.star || '',
+      starXinfa: cell.dataset.starXinfa || '',
       door: cell.dataset.door || '',
       role: cell.dataset.qimenRole || '',
       palace: cell.dataset.palace || ''

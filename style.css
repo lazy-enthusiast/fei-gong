@@ -1160,6 +1160,16 @@ html[data-theme="dark"] .palace-letter {
   line-height: 1.45;
 }
 
+.qimen-modal-star-xinfa {
+  margin: 0.2rem 0 0.35rem;
+  text-align: left;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  letter-spacing: 0.02rem;
+  color: var(--ink-soft);
+  white-space: normal;
+}
+
 .qimen-modal-body .qimen-stems,
 .qimen-modal-body .qimen-modal-stems {
   justify-content: flex-start;
