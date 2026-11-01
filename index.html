@@ -328,7 +328,7 @@
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || '奇門起盤失敗');
     await fillMissingQimenGeju(data, zuofang, xiangfang);
-    await fillMissingQimenStarXinfa(data, zuofang, xiangfang);
+    await fillMissingQimenXinfa(data, zuofang, xiangfang);
     return data;
   }
 
@@ -362,25 +362,43 @@
     }
   }
 
-  async function fillMissingQimenStarXinfa(pan, zuofang, xiangfang) {
+  async function fetchQimenXinfaText(action, field, value) {
+    if (!value) return '';
+    try {
+      const body = { action };
+      body[field] = value;
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (res.ok && data && data.text) return data.text;
+    } catch (e) {
+      // 舊 Worker 或連線失敗時略過；modal 仍可顯示神星門與格局
+    }
+    return '';
+  }
+
+  async function fillMissingQimenXinfa(pan, zuofang, xiangfang) {
     const names = [];
     if (zuofang) names.push(zuofang);
     if (xiangfang && xiangfang !== zuofang) names.push(xiangfang);
     if (!names.length || !pan || !pan.cells) return;
     for (let i = 0; i < names.length; i++) {
       const cell = qimenCellByName(pan, names[i]);
-      if (!cell || typeof cell.starXinfa === 'string') continue;
-      if (!cell.star) continue;
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'qimenStarXinfa', star: cell.star })
-        });
-        const data = await res.json();
-        if (res.ok && data && data.text) cell.starXinfa = data.text;
-      } catch (e) {
-        // 舊 Worker 或連線失敗時略過；modal 仍可顯示神星門與格局
+      if (!cell) continue;
+      if (typeof cell.godXinfa !== 'string' && cell.god) {
+        const text = await fetchQimenXinfaText('qimenGodXinfa', 'god', cell.god);
+        if (text) cell.godXinfa = text;
+      }
+      if (typeof cell.starXinfa !== 'string' && cell.star) {
+        const text = await fetchQimenXinfaText('qimenStarXinfa', 'star', cell.star);
+        if (text) cell.starXinfa = text;
+      }
+      if (typeof cell.doorXinfa !== 'string' && cell.door) {
+        const text = await fetchQimenXinfaText('qimenDoorXinfa', 'door', cell.door);
+        if (text) cell.doorXinfa = text;
       }
     }
   }
@@ -475,8 +493,14 @@
       if (c.geju.poem) div.dataset.gejuPoem = c.geju.poem;
       if (c.geju.error) div.dataset.gejuError = c.geju.error;
     }
+    if (typeof c.godXinfa === 'string' && c.godXinfa) {
+      div.dataset.godXinfa = c.godXinfa;
+    }
     if (typeof c.starXinfa === 'string' && c.starXinfa) {
       div.dataset.starXinfa = c.starXinfa;
+    }
+    if (typeof c.doorXinfa === 'string' && c.doorXinfa) {
+      div.dataset.doorXinfa = c.doorXinfa;
     }
 
     if (c.empty) {
@@ -760,9 +784,9 @@
     return wrap;
   }
 
-  function renderQimenStarXinfa(text) {
+  function renderQimenXinfa(text) {
     const el = document.createElement('div');
-    el.className = 'qimen-modal-star-xinfa';
+    el.className = 'qimen-modal-xinfa';
     el.textContent = text || '';
     return el;
   }
@@ -771,15 +795,21 @@
     if (!bodyEl) return;
     bodyEl.innerHTML = '';
     bodyEl.appendChild(makeQimenWxLine('qimen-god', cellInfo.god || '', cellInfo.god));
+    if (cellInfo.godXinfa) {
+      bodyEl.appendChild(renderQimenXinfa(cellInfo.godXinfa));
+    }
     bodyEl.appendChild(makeQimenWxLine('qimen-star', cellInfo.star || '', cellInfo.star));
     if (cellInfo.starXinfa) {
-      bodyEl.appendChild(renderQimenStarXinfa(cellInfo.starXinfa));
+      bodyEl.appendChild(renderQimenXinfa(cellInfo.starXinfa));
     }
     bodyEl.appendChild(makeQimenWxLine(
       'qimen-door',
       qimenDoorLabel(cellInfo.door || ''),
       cellInfo.door
     ));
+    if (cellInfo.doorXinfa) {
+      bodyEl.appendChild(renderQimenXinfa(cellInfo.doorXinfa));
+    }
     const stems = renderQimenStems(cellInfo.tian || '', cellInfo.di || '');
     stems.classList.add('qimen-modal-stems');
     bodyEl.appendChild(stems);
@@ -796,9 +826,11 @@
       tian: cell.dataset.tian || '',
       di: cell.dataset.di || '',
       god: cell.dataset.god || '',
+      godXinfa: cell.dataset.godXinfa || '',
       star: cell.dataset.star || '',
       starXinfa: cell.dataset.starXinfa || '',
       door: cell.dataset.door || '',
+      doorXinfa: cell.dataset.doorXinfa || '',
       role: cell.dataset.qimenRole || '',
       palace: cell.dataset.palace || ''
     };
