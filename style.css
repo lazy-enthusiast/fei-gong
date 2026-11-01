@@ -1164,10 +1164,11 @@ html[data-theme="dark"] .palace-letter {
 .qimen-modal-star-xinfa {
   margin: 0.2rem 0 0.35rem;
   text-align: left;
-  font-size: 0.78rem;
-  line-height: 1.55;
-  letter-spacing: 0.02rem;
-  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.06rem;
+  color: var(--ink);
   white-space: normal;
 }
 
