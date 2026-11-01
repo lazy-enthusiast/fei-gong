@@ -87,7 +87,7 @@
 
   <button class="btn" id="castBtn">起 卦</button>
   <div class="error-msg" id="errorMsg"></div>
-  <div class="yongshen-hint-row" id="yongshenHintRow" hidden>
+  <div class="yongshen-hint-row" id="yongshenHintRow" aria-hidden="true">
     <button type="button" class="yongshen-hint-btn" id="yongshenHintBtn" title="長按查看取用神">取用神？</button>
   </div>
 
@@ -1351,7 +1351,8 @@
 
   function setYongshenHintVisible(visible) {
     if (!yongshenHintRow) return;
-    yongshenHintRow.hidden = !visible;
+    yongshenHintRow.classList.toggle('is-visible', !!visible);
+    yongshenHintRow.setAttribute('aria-hidden', visible ? 'false' : 'true');
   }
 
   castBtn.addEventListener('click', async () => {
@@ -1741,6 +1742,7 @@
       hideChartPieces(slots, { sixiang: true, bagua: true, chains: true, qimen: true });
       state.palaces = null;
       resetFlyMemory(state);
+      if (mode === 'live') setYongshenHintVisible(false);
       return;
     }
 

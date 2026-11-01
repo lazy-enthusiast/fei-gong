@@ -566,14 +566,14 @@ html[data-theme="dark"] .palace-letter {
 }
 
 .yongshen-hint-row {
-  display: flex;
+  display: none;
   justify-content: flex-end;
   margin-top: 1.1rem;
   padding-top: 0.15rem;
 }
 
-.yongshen-hint-row[hidden] {
-  display: none;
+.yongshen-hint-row.is-visible {
+  display: flex;
 }
 
 .yongshen-hint-btn {
