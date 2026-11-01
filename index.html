@@ -87,7 +87,7 @@
 
   <button class="btn" id="castBtn">起 卦</button>
   <div class="yongshen-hint-row">
-    <button type="button" class="yongshen-hint-btn" id="yongshenHintBtn" title="連按三下查看取用神">取用神？</button>
+    <button type="button" class="yongshen-hint-btn" id="yongshenHintBtn" title="長按查看取用神">取用神？</button>
   </div>
   <div class="error-msg" id="errorMsg"></div>
 
@@ -500,7 +500,7 @@
     if (role) {
       div.classList.add('qimen-modal-hot');
       div.dataset.qimenRole = role;
-      div.title = '連按三下查看奇門';
+      div.title = '長按查看奇門';
     }
     if (c.geju && typeof c.geju === 'object') {
       div.dataset.gejuEmbedded = '1';
@@ -883,49 +883,53 @@
     modal.hidden = false;
   }
 
-  // 手機瀏覽器常固定 click.detail=1，改自訂連點計數（同宮、短時間內三下）
-  let qimenModalTapState = { el: null, count: 0, timer: null, lastTouch: 0 };
-  const QIMEN_MODAL_TAP_MS = 550;
+  // 長按約 0.55 秒才開 modal（觸控／滑鼠共用）
+  const LONG_PRESS_MS = 550;
 
-  function registerQimenModalTap(cell) {
-    if (!cell) return;
-    if (qimenModalTapState.el !== cell) {
-      qimenModalTapState.el = cell;
-      qimenModalTapState.count = 1;
-    } else {
-      qimenModalTapState.count += 1;
+  function bindLongPress(el, onLongPress) {
+    if (!el || typeof onLongPress !== 'function') return;
+    let timer = null;
+    let armed = false;
+    let suppressClick = false;
+
+    function clearTimer() {
+      if (timer) clearTimeout(timer);
+      timer = null;
+      armed = false;
     }
-    if (qimenModalTapState.timer) clearTimeout(qimenModalTapState.timer);
-    if (qimenModalTapState.count >= 3) {
-      qimenModalTapState.el = null;
-      qimenModalTapState.count = 0;
-      qimenModalTapState.timer = null;
-      openQimenModal(cell);
-      return;
+
+    function startPress(e) {
+      if (e.type === 'touchstart' && e.touches && e.touches.length !== 1) return;
+      if (e.type === 'mousedown' && e.button !== 0) return;
+      clearTimer();
+      armed = true;
+      timer = setTimeout(() => {
+        timer = null;
+        if (!armed) return;
+        armed = false;
+        suppressClick = true;
+        onLongPress();
+      }, LONG_PRESS_MS);
     }
-    qimenModalTapState.timer = setTimeout(() => {
-      qimenModalTapState.el = null;
-      qimenModalTapState.count = 0;
-      qimenModalTapState.timer = null;
-    }, QIMEN_MODAL_TAP_MS);
+
+    el.addEventListener('touchstart', startPress, { passive: true });
+    el.addEventListener('mousedown', startPress);
+    el.addEventListener('touchend', clearTimer);
+    el.addEventListener('touchcancel', clearTimer);
+    el.addEventListener('mouseup', clearTimer);
+    el.addEventListener('mouseleave', clearTimer);
+    el.addEventListener('click', (e) => {
+      if (!suppressClick) return;
+      suppressClick = false;
+      e.preventDefault();
+      e.stopPropagation();
+    });
   }
 
   function bindQimenModalHotspots(board) {
     if (!board) return;
     board.querySelectorAll('.qimen-modal-hot').forEach((cell) => {
-      cell.addEventListener('touchend', (e) => {
-        if (e.changedTouches && e.changedTouches.length !== 1) return;
-        qimenModalTapState.lastTouch = Date.now();
-        registerQimenModalTap(cell);
-        e.preventDefault();
-      }, { passive: false });
-      cell.addEventListener('click', (e) => {
-        if (Date.now() - qimenModalTapState.lastTouch < QIMEN_MODAL_TAP_MS) {
-          e.preventDefault();
-          return;
-        }
-        registerQimenModalTap(cell);
-      });
+      bindLongPress(cell, () => openQimenModal(cell));
     });
   }
 
@@ -2423,39 +2427,9 @@
     }
   }
 
-  let yongshenHintTapState = { count: 0, timer: null, lastTouch: 0 };
-  const YONGSHEN_HINT_TAP_MS = 550;
-
-  function registerYongshenHintTap() {
-    yongshenHintTapState.count += 1;
-    if (yongshenHintTapState.timer) clearTimeout(yongshenHintTapState.timer);
-    if (yongshenHintTapState.count >= 3) {
-      yongshenHintTapState.count = 0;
-      yongshenHintTapState.timer = null;
-      openYongshenModal();
-      return;
-    }
-    yongshenHintTapState.timer = setTimeout(() => {
-      yongshenHintTapState.count = 0;
-      yongshenHintTapState.timer = null;
-    }, YONGSHEN_HINT_TAP_MS);
-  }
-
   const yongshenHintBtn = document.getElementById('yongshenHintBtn');
   if (yongshenHintBtn) {
-    yongshenHintBtn.addEventListener('touchend', (e) => {
-      if (e.changedTouches && e.changedTouches.length !== 1) return;
-      yongshenHintTapState.lastTouch = Date.now();
-      registerYongshenHintTap();
-      e.preventDefault();
-    }, { passive: false });
-    yongshenHintBtn.addEventListener('click', (e) => {
-      if (Date.now() - yongshenHintTapState.lastTouch < YONGSHEN_HINT_TAP_MS) {
-        e.preventDefault();
-        return;
-      }
-      registerYongshenHintTap();
-    });
+    bindLongPress(yongshenHintBtn, () => openYongshenModal());
   }
   const yongshenModalCloseBtn = document.getElementById('yongshenModalCloseBtn');
   if (yongshenModalCloseBtn) {
