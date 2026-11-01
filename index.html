@@ -86,10 +86,10 @@
   </div>
 
   <button class="btn" id="castBtn">起 卦</button>
-  <div class="yongshen-hint-row">
+  <div class="error-msg" id="errorMsg"></div>
+  <div class="yongshen-hint-row" id="yongshenHintRow" hidden>
     <button type="button" class="yongshen-hint-btn" id="yongshenHintBtn" title="長按查看取用神">取用神？</button>
   </div>
-  <div class="error-msg" id="errorMsg"></div>
 
   <div class="chain-section" id="sixiangSection" data-chart="sixiang">
     <div class="chain-title">四 象 八 情</div>
@@ -1347,6 +1347,12 @@
 
   const castBtn = document.getElementById('castBtn');
   const errorMsg = document.getElementById('errorMsg');
+  const yongshenHintRow = document.getElementById('yongshenHintRow');
+
+  function setYongshenHintVisible(visible) {
+    if (!yongshenHintRow) return;
+    yongshenHintRow.hidden = !visible;
+  }
 
   castBtn.addEventListener('click', async () => {
     errorMsg.textContent = '';
@@ -1374,6 +1380,7 @@
         sixiang: data.sixiang || null,
         palaces: data.palaces
       });
+      setYongshenHintVisible(true);
     } catch (e) {
       errorMsg.textContent = '連線失敗：' + e.message;
     }
