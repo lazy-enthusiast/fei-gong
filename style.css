@@ -327,6 +327,17 @@ html[data-theme="dark"] .palace-letter {
   outline: none;
 }
 
+.info-row .clearable-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.info-row .clearable-field > input {
+  flex: none;
+  width: 100%;
+  padding-right: 1.55rem;
+}
+
 .info-row input:focus {
   border-color: var(--accent);
 }
@@ -387,6 +398,61 @@ html[data-theme="dark"] .palace-letter {
   font-family: inherit;
   color: var(--ink);
   outline: none;
+}
+
+.question-row .clearable-field > input {
+  padding-right: 1.85rem;
+}
+
+.clearable-field {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.clearable-field > input,
+.clearable-field > textarea {
+  box-sizing: border-box;
+}
+
+.input-clear-btn {
+  position: absolute;
+  right: 0.15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.input-clear-btn:active {
+  color: var(--ink);
+  background: var(--wash);
+}
+
+.clearable-field.is-textarea .input-clear-btn {
+  top: 0.35rem;
+  transform: none;
+}
+
+.clearable-field.is-textarea > textarea {
+  padding-right: 1.85rem;
+}
+
+.case-search-row .clearable-field > input {
+  padding-right: 1.85rem;
 }
 
 .question-row input:focus {
