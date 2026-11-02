@@ -99,7 +99,7 @@
     <div class="bagua-wrap" id="baguaWrap" data-chart="bagua"></div>
   </div>
   <div class="yongshen-hint-row" id="yongshenHintRow" aria-hidden="true">
-    <button type="button" class="yongshen-hint-btn" id="yongshenHintBtn" title="長按查看取用神">取用神？</button>
+    <button type="button" class="yongshen-hint-btn" id="yongshenHintBtn">取用神？</button>
   </div>
 
   <div class="chain-section" id="chainSection" data-chart="zhengtui">
@@ -500,7 +500,6 @@
     if (role) {
       div.classList.add('qimen-modal-hot');
       div.dataset.qimenRole = role;
-      div.title = '長按查看奇門';
     }
     if (c.geju && typeof c.geju === 'object') {
       div.dataset.gejuEmbedded = '1';
